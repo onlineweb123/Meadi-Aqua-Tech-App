@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Meadi Aqua Tech | Your Cart</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg: #f8fbff; 
+            --card: #ffffff; 
+            --border: #e2e8f0; 
+            --primary: #0077b6; 
+            --accent: #00b4d8; 
+            --danger: #ef4444;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --glass: rgba(255, 255, 255, 0.8);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); }
+
+        /* Header Style */
+        header { 
+            height: 70px; display: flex; align-items: center; justify-content: center; 
+            position: fixed; top: 0; left: 0; right: 0; 
+            background: var(--glass); backdrop-filter: blur(12px);
+            z-index: 100; border-bottom: 1px solid var(--border);
+        }
+        .header-title { font-size: 18px; font-weight: 700; color: var(--primary); }
+        
+        .menu-btn { 
+            position: absolute; left: 20px; font-size: 24px; 
+            background: #f1f5f9; border: none; color: var(--text-main); 
+            cursor: pointer; width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Sidebar Style */
+        .sidebar { 
+            width: 280px; background: var(--card); position: fixed; top: 0; bottom: 0; left: -300px; 
+            padding-top: 80px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 110; 
+            box-shadow: 20px 0 50px rgba(0,0,0,0.05);
+        }
+        .sidebar.open { left: 0; }
+        .sidebar a { 
+            display: flex; align-items: center; padding: 16px 24px; text-decoration: none; 
+            color: var(--text-main); font-weight: 500; font-size: 15px; transition: 0.2s;
+        }
+        .sidebar a:hover { background: #f8fafc; color: var(--primary); padding-left: 30px; }
+
+        .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); display: none; z-index: 105; backdrop-filter: blur(4px); }
+        .overlay.show { display: block; }
+
+        /* Bottom Nav */
+        .bottom {
+            height: 75px; position: fixed; bottom: 0; left: 0; right: 0; 
+            display: flex; justify-content: space-around; align-items: center; 
+            background: var(--glass); backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border); z-index: 100; padding-bottom: env(safe-area-inset-bottom);
+        }
+        .bottom button {
+            background: none; border: none; font-size: 11px; font-weight: 600;
+            display: flex; flex-direction: column; align-items: center; color: var(--text-sub);
+            cursor: pointer;
+        }
+        .bottom button.active { color: var(--primary); }
+        .bottom .icon { font-size: 22px; margin-bottom: 4px; }
+
+        .main { padding: 90px 20px 120px 20px; max-width: 600px; margin: 0 auto; }
+
+        /* Loader */
+        .spinner-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 50px 0; }
+        .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Cart Items */
+        .cart-item {
+            background: var(--card); border-radius: 15px; padding: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 12px; border: 1px solid var(--border);
+        }
+        .item-info { display: flex; align-items: center; gap: 15px; }
+        .cart-img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; background: #f1f5f9; }
+        .item-info h4 { margin: 0; font-size: 14px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .item-info p { margin: 4px 0 0 0; color: var(--primary); font-weight: 700; font-size: 14px; }
+
+        .remove-btn { 
+            background: #fee2e2; color: var(--danger); border: none; 
+            padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 600;
+        }
+
+        .total-card {
+            background: linear-gradient(135deg, var(--primary), #023e8a);
+            color: white; border-radius: 20px; padding: 20px; margin-top: 20px; text-align: center;
+            box-shadow: 0 8px 20px rgba(0, 119, 182, 0.2);
+        }
+        .total-card h2 { margin: 0; font-size: 24px; }
+
+        .checkout-btn {
+            width: 100%; background: #25d366; color: white; border: none;
+            padding: 16px; border-radius: 18px; font-size: 16px; font-weight: 700;
+            margin-top: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: 0.3s; box-shadow: 0 5px 15px rgba(37, 211, 102, 0.2);
+        }
+        .btn-loading-spinner { display: none; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .loading .btn-text { display: none; }
+        .loading .btn-loading-spinner { display: block; }
+
+        #emptyMsg { text-align: center; padding: 60px 20px; display: none; }
+    </style>
+</head>
+<body>
+
+<header>
+    <button class="menu-btn" id="menuBtn">☰</button>
+    <div class="header-title">My Cart 🛒</div>
+</header>
+
+<div id="sidebar" class="sidebar">
+    <a href="index.html">🏠 Dashboard</a>
+    <a href="service.html">🛠 Service</a>
+    <a href="store.html">🛒 Store </a>
+    <a href="profile.html">👤 Profile</a>
+    <a href="cart.html" style="color: var(--primary); font-weight: 700;">🛒 My Cart</a>
+</div>
+<div id="overlay" class="overlay"></div>
+
+<div class="main">
+    <div id="loader" class="spinner-container">
+        <div class="spinner"></div>
+        <p style="color: var(--text-sub); font-size: 14px;">Loading your cart...</p>
+    </div>
+
+    <div id="cartList"></div>
+
+    <div id="emptyMsg">
+        <p style="font-size: 50px; margin: 0;">🛒</p>
+        <h3 style="margin: 10px 0;">Your cart is empty!</h3>
+        <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">பொருட்களை வாங்க ஸ்டோர் பகுதிக்கு செல்லவும்.</p>
+        <a href="store.html" style="display: inline-block; background: var(--primary); color: white; padding: 12px 25px; border-radius: 12px; text-decoration: none; font-weight: 600;">Go to Store</a>
+    </div>
+
+    <div id="summary" style="display:none;">
+        <div class="total-card">
+            <p style="margin-bottom: 5px; opacity: 0.8; font-size: 14px;">Total Amount</p>
+            <h2 id="totalPrice">₹0</h2>
+        </div>
+        <button class="checkout-btn" id="whatsappBtn">
+            <span class="btn-text">Order via WhatsApp ✅</span>
+            <div class="btn-loading-spinner"></div>
+        </button>
+    </div>
+</div>
+
+<div class="bottom">
+    <button onclick="location.href='index.html'"><span class="icon">🏠</span>Home</button>
+    <button onclick="location.href='service.html'"><span class="icon">⚒️</span>Service</button>
+    <button onclick="location.href='store.html'"><span class="icon">🛒</span>Store</button>
+    <button onclick="location.href='profile.html'"><span class="icon">👤</span>Profile</button>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
+        authDomain: "meadi-aqua-tech.firebaseapp.com",
+        databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
+        projectId: "meadi-aqua-tech",
+        storageBucket: "meadi-aqua-tech.firebasestorage.app",
+        messagingSenderId: "531151217708",
+        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89",
+        measurementId: "G-QW495L6JVE"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const currentUser = localStorage.getItem("aquaUser");
+
+    // Sidebar Toggle
+    const menuBtn = document.getElementById("menuBtn");
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+
+    const toggleMenu = () => {
+        sidebar.classList.toggle("open");
+        overlay.classList.toggle("show");
+    };
+
+    menuBtn.onclick = toggleMenu;
+    overlay.onclick = toggleMenu;
+
+    function fetchCart() {
+        if (!currentUser) {
+            document.getElementById("loader").innerHTML = "<p>Please login first.</p>";
+            return;
+        }
+
+        const cartRef = ref(db, 'carts/' + currentUser);
+        onValue(cartRef, (snapshot) => {
+            const data = snapshot.val();
+            const cartList = document.getElementById("cartList");
+            const emptyMsg = document.getElementById("emptyMsg");
+            const summary = document.getElementById("summary");
+            const totalPriceEl = document.getElementById("totalPrice");
+            const loader = document.getElementById("loader");
+
+            loader.style.display = "none";
+            cartList.innerHTML = "";
+            let total = 0;
+            let itemsForWhatsapp = [];
+
+            if (!data) {
+                emptyMsg.style.display = "block";
+                summary.style.display = "none";
+                return;
+            }
+
+            emptyMsg.style.display = "none";
+            summary.style.display = "block";
+
+            Object.keys(data).forEach((key) => {
+                const item = data[key];
+                total += parseInt(item.price);
+                itemsForWhatsapp.push(`• ${item.productName} - ₹${item.price}`);
+
+                cartList.innerHTML += `
+                    <div class="cart-item">
+                        <div class="item-info">
+                            <img src="${item.image || 'https://via.placeholder.com/50'}" class="cart-img">
+                            <div>
+                                <h4>${item.productName}</h4>
+                                <p>₹${item.price}</p>
+                            </div>
+                        </div>
+                        <button class="remove-btn" onclick="deleteCartItem('${key}')">Remove</button>
+                    </div>
+                `;
+            });
+
+            totalPriceEl.innerText = "₹" + total;
+
+            document.getElementById("whatsappBtn").onclick = function() {
+                const btn = this;
+                btn.classList.add('loading');
+                
+                const message = `*Meadi Aqua Tech - Order*%0A%0A${itemsForWhatsapp.join('%0A')}%0A%0A*Total Amount: ₹${total}*%0A%0A_Please confirm my order._`;
+                
+                setTimeout(() => {
+                    btn.classList.remove('loading');
+                    window.open(`https://wa.me/919344165879?text=${message}`);
+                }, 1000);
+            };
+        });
+    }
+
+    window.deleteCartItem = function(itemKey) {
+        if(confirm("Are you sure you want to remove this item?")) {
+            const itemRef = ref(db, `carts/${currentUser}/${itemKey}`);
+            remove(itemRef);
+        }
+    }
+
+    window.onload = fetchCart;
+</script>
+
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Meadi Aqua Tech | Secure Admin Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script type="module" src="admin login script.js"></script>
+
+    <style>
+        /* உங்கள் அனைத்து CSS ஸ்டைல்களும் இங்கு இருக்கும் */
+        :root { --bg: #f4f7fe; --primary: #0077b6; --white: #ffffff; --border: #e2e8f0; --text-main: #1b2559; --text-sub: #a3aed0; --danger: #ee5d50; --success: #05cd99; --warning: #ffb547; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--text-main); }
+        .overlay { position: fixed; inset: 0; background: #1e293b; display: flex; justify-content: center; align-items: center; z-index: 10000; }
+        .card { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1.5px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; }
+        button:disabled { opacity: 0.7; cursor: not-allowed; }
+        .btn-loader { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .btn-change { background: #64748b; margin-top: 10px; font-size: 12px; display: inline-block; width: 100%; }
+        .save-btn { background: var(--primary); padding: 6px 15px; border-radius: 6px; width: auto; font-size: 13px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        #titleLoader { display: none; width: 18px; height: 18px; border: 3px solid var(--border); border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: 10px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
+        .stat-card { background: var(--white); padding: 15px 10px; border-radius: 18px; text-align: center; border: 1px solid var(--border); }
+        .stat-card span { color: var(--text-sub); font-size: 11px; display: block; }
+        .expiry-table-container { background: var(--white); border-radius: 20px; padding: 15px; border: 1px solid #fed7d7; margin-bottom: 30px; }
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th { text-align: left; font-size: 11px; color: var(--text-sub); padding: 10px; border-bottom: 1px solid var(--border); }
+        td { padding: 12px 10px; font-size: 13px; border-bottom: 1px solid #f8fafc; }
+        .user-card { background: var(--white); padding: 15px; border-radius: 18px; border: 1px solid var(--border); display: flex; justify-content: space-between; margin-bottom: 10px; }
+        #mainApp, #settingsPage { display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="loginOverlay" class="overlay">
+        <div class="card">
+            <h2>🔒 Admin Login</h2>
+            <input type="text" id="loginUser" placeholder="Username">
+            <input type="password" id="loginPass" placeholder="Password">
+            <button id="loginBtn">
+                <span class="btn-loader" id="loginLdr"></span>
+                <span id="loginTxt">Login</span>
+            </button>
+            <button class="btn-change" onclick="showSettings()">Change Password?</button>
+        </div>
+    </div>
+
+    <div id="settingsPage" class="overlay">
+        <div class="card">
+            <h2>⚙️ Security Reset</h2>
+            <p style="font-size:12px; color:gray;">Security Code</p>
+            <input type="tel" id="securityPhone" placeholder="Security Code Enter">
+            <hr>
+            <input type="text" id="newUser" placeholder="New Username">
+            <input type="password" id="newPass" placeholder="New Password">
+            <button id="updateBtn">
+                <span class="btn-loader" id="updateLdr"></span>
+                <span id="updateTxt">Update Credentials</span>
+            </button>
+            <button class="btn-change" onclick="hideSettings()">Cancel</button>
+        </div>
+    </div>
+
+    <div id="mainApp">
+        <div class="header">
+            <div style="display:flex; align-items:center;">
+                <h2 style="margin:0; color:var(--primary);">Admin Panel</h2>
+                <div id="titleLoader"></div>
+            </div>
+            <button onclick="location.reload()" style="width:auto; padding:5px 15px; background:var(--danger);">Logout</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card"><span>Total Users</span><h2 id="totalUsers">0</h2></div>
+            <div class="stat-card"><span>Filter Due</span><h2 id="filterDueCount" style="color:var(--warning)">0</h2></div>
+            <div class="stat-card"><span>AMC Due</span><h2 id="amcDueCount" style="color:var(--danger)">0</h2></div>
+        </div>
+
+        <div id="urgentSection" class="expiry-table-container" style="display:none;">
+            <p style="color: var(--danger); font-weight: 800; margin-top:0;">🚨 Action Required</p>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr><th>CUSTOMER</th><th>STATUS</th><th>NEW FILTER</th><th>NEW AMC</th><th>ACTION</th></tr>
+                    </thead>
+                    <tbody id="expiryTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div style="font-weight:700; margin-bottom:15px;">👥 All Contact Members</div>
+        <div id="userList"></div>
+    </div>
+
+</body>
+</html>

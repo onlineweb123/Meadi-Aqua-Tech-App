@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Meadi Aqua Tech | Logi  Welcome</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { 
+            --bg: #f8fbff; 
+            --card: #ffffff; 
+            --border: #e2e8f0; 
+            --primary: #0077b6; 
+            --accent: #00b4d8; 
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            margin: 0; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* --- Button Spinner CSS --- */
+        .btn-auth {
+            position: relative;
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 10px 20px rgba(0, 119, 182, 0.2);
+            transition: 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-auth:disabled { background: var(--text-sub); cursor: not-allowed; }
+
+        /* பட்டனுக்குள் சுற்றும் அனிமேஷன் */
+        .btn-spinner {
+            display: none; /* ஆரம்பத்தில் மறைத்து வைக்கவும் */
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s ease-in-out infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* லோடிங் போது எழுத்தை மறைக்க */
+        .loading .btn-text { display: none; }
+        .loading .btn-spinner { display: block; }
+        /* --------------------------- */
+
+        .auth-container {
+            width: 100%;
+            max-width: 420px;
+            background: var(--card);
+            padding: 40px 30px;
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+        }
+        .logo-area { text-align: center; margin-bottom: 30px; }
+        .logo-area span { font-size: 40px; }
+        .logo-area h1 { font-size: 24px; color: var(--primary); margin: 10px 0 5px; }
+        .logo-area p { font-size: 14px; color: var(--text-sub); margin: 0; }
+        .tab-group {
+            display: flex;
+            background: #f1f5f9;
+            padding: 5px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: 0.3s;
+            color: var(--text-sub);
+        }
+        .tab.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        form { display: none; }
+        form.active { display: block; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+        }
+        .form-group input:focus { border-color: var(--primary); background: #f0f9ff; }
+        .footer-text {
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-sub);
+            margin-top: 20px;
+        }
+        .footer-text a { color: var(--primary); text-decoration: none; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+<div class="auth-container">
+    <div class="logo-area">
+        <span>💧</span>
+        <h1>Meadi Aqua Tech</h1>
+        <p>Pure water, pure life.</p>
+    </div>
+
+    <div class="tab-group">
+        <div class="tab active" id="tabLogin">Login</div>
+        <div class="tab" id="tabSignup">Create Account</div>
+    </div>
+
+    <form id="loginForm" class="active">
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="loginUser" placeholder="Enter your username" required>
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="loginPass" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn-auth" id="loginBtn">
+            <span class="btn-text">Sign In</span>
+            <div class="btn-spinner"></div>
+        </button>
+        <p class="footer-text">Forgot password? <a href="#">Reset here</a></p>
+    </form>
+
+    <form id="signupForm">
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="regName" placeholder="Ex: John Doe" required>
+        </div>
+        <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" id="regPhone" placeholder="+91 00000 00000" required>
+        </div>
+        <div class="form-group">
+            <label>City</label>
+            <select id="regCity" required>
+                <option value="" disabled selected>Select your city</option>
+                <option value="Cuddalore">Cuddalore</option>
+                <option value="Chennai">Chennai</option>
+                <option value="Madurai">Madurai</option>
+                <option value="Coimbatore">Coimbatore</option>
+                <option value="Trichy">Trichy</option>
+                <option value="Salem">Salem</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="regUser" placeholder="Choose a username" required>
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="regPass" placeholder="Create a password" required>
+        </div>
+        <button type="submit" class="btn-auth" id="signupBtn">
+            <span class="btn-text">Create Account</span>
+            <div class="btn-spinner"></div>
+        </button>
+    </form>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
+        authDomain: "meadi-aqua-tech.firebaseapp.com",
+        databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
+        projectId: "meadi-aqua-tech",
+        storageBucket: "meadi-aqua-tech.firebasestorage.app",
+        messagingSenderId: "531151217708",
+        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89",
+        measurementId: "G-QW495L6JVE"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // UI Tab Switching
+    window.switchTab = (type) => {
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const tabL = document.getElementById('tabLogin');
+        const tabS = document.getElementById('tabSignup');
+
+        if(type === 'login') {
+            tabL.classList.add('active'); tabS.classList.remove('active');
+            loginForm.classList.add('active'); signupForm.classList.remove('active');
+        } else {
+            tabS.classList.add('active'); tabL.classList.remove('active');
+            signupForm.classList.add('active'); loginForm.classList.remove('active');
+        }
+    };
+
+    document.getElementById('tabLogin').onclick = () => switchTab('login');
+    document.getElementById('tabSignup').onclick = () => switchTab('signup');
+
+    // Signup Handle
+    document.getElementById('signupForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('signupBtn');
+        btn.classList.add('loading');
+        btn.disabled = true;
+
+        const user = document.getElementById('regUser').value;
+        const name = document.getElementById('regName').value;
+        const phone = document.getElementById('regPhone').value;
+        const city = document.getElementById('regCity').value;
+        const pass = document.getElementById('regPass').value;
+
+        try {
+            const dbRef = ref(db);
+            // 1. Check Username
+            const userSnapshot = await get(child(dbRef, `users/${user}`));
+            if (userSnapshot.exists()) {
+                alert("❌ Username already taken!");
+                return;
+            }
+
+            // 2. Check Phone
+            const allUsersSnapshot = await get(child(dbRef, 'users'));
+            if (allUsersSnapshot.exists()) {
+                const users = allUsersSnapshot.val();
+                for (let u in users) {
+                    if (users[u].phone === phone) {
+                        alert("❌ Phone number already registered!");
+                        return;
+                    }
+                }
+            }
+
+            await set(ref(db, 'users/' + user), { name, phone, city, user, pass });
+            alert("Account Created! Please Login.");
+            switchTab('login');
+        } catch (error) {
+            alert("Error: " + error.message);
+        } finally {
+            btn.classList.remove('loading');
+            btn.disabled = false;
+        }
+    };
+
+    // Login Handle
+    document.getElementById('loginForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('loginBtn');
+        btn.classList.add('loading');
+        btn.disabled = true;
+
+        const user = document.getElementById('loginUser').value;
+        const pass = document.getElementById('loginPass').value;
+
+        try {
+            const snapshot = await get(child(ref(db), `users/${user}`));
+            if (snapshot.exists()) {
+                const userData = snapshot.val();
+                if (userData.pass === pass) {
+                    localStorage.setItem("isLoggedIn", "true");
+                    localStorage.setItem("aquaUser", userData.user);
+                    localStorage.setItem("aquaName", userData.name);
+                    localStorage.setItem("aquaPhone", userData.phone);
+                    localStorage.setItem("aquaCity", userData.city);
+                    
+                    alert("Welcome " + userData.name);
+                    window.location.href = 'index.html';
+                } else {
+                    alert("❌ Incorrect Password!");
+                }
+            } else {
+                alert("❌ User not found!");
+            }
+        } catch (error) {
+            alert("Check your internet connection.");
+        } finally {
+            btn.classList.remove('loading');
+            btn.disabled = false;
+        }
+    };
+</script>
+
+</body>
+</html>

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Meadi Aqua Tech | Shop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { 
+            --bg: #f8fbff; 
+            --card: #ffffff; 
+            --border: #e2e8f0; 
+            --primary: #0077b6; 
+            --accent: #00b4d8; 
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --glass: rgba(255, 255, 255, 0.8);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); }
+
+        header { 
+            height: 70px; display: flex; align-items: center; justify-content: center; 
+            position: fixed; top: 0; left: 0; right: 0; 
+            background: var(--glass); backdrop-filter: blur(12px);
+            z-index: 100; border-bottom: 1px solid var(--border);
+        }
+        .header-title { font-size: 18px; font-weight: 700; color: var(--primary); }
+
+        .menu-btn { 
+            position: absolute; left: 20px; font-size: 24px; 
+            background: #f1f5f9; border: none; color: var(--text-main); 
+            cursor: pointer; width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .sidebar { 
+            width: 280px; background: var(--card); position: fixed; top: 0; bottom: 0; left: -300px; 
+            padding-top: 80px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 110; 
+            box-shadow: 20px 0 50px rgba(0,0,0,0.05);
+        }
+        .sidebar.open { left: 0; }
+        .sidebar a { display: flex; align-items: center; padding: 16px 24px; text-decoration: none; color: var(--text-main); font-weight: 500; font-size: 15px; transition: 0.2s; }
+
+        .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); display: none; z-index: 105; backdrop-filter: blur(4px); }
+        .overlay.show { display: block; }
+
+        .main { padding: 90px 15px 110px 15px; max-width: 600px; margin: 0 auto; }
+
+        .search-box {
+            background: white; border: 1px solid var(--border); padding: 12px 20px;
+            border-radius: 15px; margin-bottom: 20px; display: flex; align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .search-box input { border: none; outline: none; width: 100%; font-family: inherit; font-size: 14px; }
+
+        .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+
+        .product-card { 
+            background: white; border-radius: 20px; padding: 12px; 
+            border: 1px solid var(--border); display: flex; flex-direction: column; 
+            transition: 0.3s;
+        }
+
+        .product-image { 
+            width: 100%; aspect-ratio: 1/1; background: #f1f5f9; 
+            border-radius: 15px; margin-bottom: 10px; display: flex; 
+            align-items: center; justify-content: center; overflow: hidden; 
+            cursor: zoom-in;
+        }
+        .product-image img { width: 100%; height: 100%; object-fit: cover; }
+
+        .product-name { font-size: 14px; font-weight: 700; margin: 5px 0; color: var(--text-main); }
+        .product-desc { font-size: 11px; color: var(--text-sub); margin-bottom: 12px; line-height: 1.4; flex-grow: 1; }
+        .product-price { font-size: 16px; font-weight: 800; color: var(--primary); margin-bottom: 8px; }
+
+        /* --- Updated Add to Cart Button with Loading --- */
+        .add-btn { 
+            width: 100%; padding: 10px; background: #f1f5f9; border: none; 
+            border-radius: 10px; font-weight: 700; color: var(--primary); 
+            cursor: pointer; transition: 0.2s;
+            display: flex; justify-content: center; align-items: center;
+            position: relative; height: 40px;
+        }
+        .add-btn:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
+
+        .btn-spinner {
+            display: none;
+            width: 16px; height: 16px;
+            border: 2px solid rgba(0, 119, 182, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading .btn-text { display: none; }
+        .loading .btn-spinner { display: block; }
+        /* ----------------------------------------------- */
+
+        .image-viewer {
+            display: none; position: fixed; z-index: 999;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            justify-content: center; align-items: center; cursor: zoom-out;
+        }
+        .image-viewer img { max-width: 90%; max-height: 80vh; border-radius: 15px; animation: zoom 0.3s ease; }
+        @keyframes zoom { from {transform: scale(0.7); opacity: 0;} to {transform: scale(1); opacity: 1;} }
+
+        .bottom {
+            height: 75px; position: fixed; bottom: 0; left: 0; right: 0; 
+            display: flex; justify-content: space-around; align-items: center; 
+            background: var(--glass); backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border); z-index: 100; padding-bottom: env(safe-area-inset-bottom);
+        }
+        .bottom button {
+            background: none; border: none; font-size: 11px; font-weight: 600;
+            display: flex; flex-direction: column; align-items: center; color: var(--text-sub);
+            cursor: pointer;
+        }
+        .bottom button.active { color: var(--primary); }
+        .bottom .icon { font-size: 22px; margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    <div class="header-title">Aqua Store</div>
+</header>
+
+<div id="sidebar" class="sidebar">
+  <a href="index.html">🏠 Dashboard</a>
+  <a href="service.html">🛠 Service</a>
+  <a href="store.html">🛒 Store </a>
+  <a href="profile.html">👤 Profile</a>
+  <a href="cart.html">🛒 My Cart</a>
+
+  
+</div>
+
+<div id="overlay" class="overlay" onclick="toggleMenu()"></div>
+
+<div class="main">
+    <div class="search-box">
+        <input type="text" id="searchInput" onkeyup="searchProduct()" placeholder="Search products...">
+    </div>
+
+      <!-- Product Open  -->
+
+    <div class="product-grid" id="productGrid">
+        <div class="product-card">
+            <div class="product-image" onclick="openViewer(this)"><img src="a.jpg"></div>
+            <span class="product-name">Dolphin Model</span>
+            <p class="product-desc">8 Liter Tank capacity. Suitable for small families. Per day 15L use.</p>
+            <span class="product-price">₹9,500</span>
+            <button class="add-btn" onclick="handleAddToCart(this, 'Dolphin Model', 9500, 'a.jpg')">
+                <span class="btn-text">Add to Cart</span>
+                <div class="btn-spinner"></div>
+            </button>
+        </div>
+        
+          <!-- Product End  -->
+                     
+             <!-- Product Open  -->
+
+        <div class="product-card">
+            <div class="product-image" onclick="openViewer(this)"><img src="b.jpg"></div>
+            <span class="product-name">Aqua 2090</span>
+            <p class="product-desc">Advanced RO + UV technology. 12 Liter Tank. High durability.</p>
+            <span class="product-price">₹18,500</span>
+            <button class="add-btn" onclick="handleAddToCart(this, 'Aqua 2090', 18500, 'b.jpg')">
+                <span class="btn-text">Add to Cart</span>
+                <div class="btn-spinner"></div>
+            </button>
+        </div>
+        
+         <!-- Product End  -->          
+                     
+        
+        <!-- Product Open  -->
+
+        <div class="product-card">
+            <div class="product-image" onclick="openViewer(this)"><img src="c.jpg"></div>
+            <span class="product-name">Grand Model</span>
+            <p class="product-desc">Transparent cabinet design. Easy maintenance and 12L storage.</p>
+            <span class="product-price">₹14,500</span>
+            <button class="add-btn" onclick="handleAddToCart(this, 'Grand Model', 14500, 'c.jpg')">
+                <span class="btn-text">Add to Cart</span>
+                <div class="btn-spinner"></div>
+            </button>
+        </div>
+        
+        <!-- Product End  -->
+        
+        
+        <!-- Product Open  -->
+
+        <div class="product-card">
+            <div class="product-image" onclick="openViewer(this)"><img src="d.jpg"></div>
+            <span class="product-name">Aqua Quee </span>
+            <p class="product-desc">Transparent cabinet design. Easy maintenance and 12L storage.</p>
+            <span class="product-price">₹9,000</span>
+            <button class="add-btn" onclick="handleAddToCart(this, 'Grand Model', 9000, 'b.jpg')">
+                <span class="btn-text">Add to Cart</span>
+                <div class="btn-spinner"></div>
+            </button>
+        </div>
+        
+        <!-- Product End  -->
+        
+        
+        
+        
+        
+        
+        
+        
+        <!-- All Product End  -->
+    </div>
+    
+    <div id="noResult" style="display:none; text-align:center; padding: 20px; color: var(--text-sub);">
+        No products found!
+    </div>
+</div>
+
+<div id="imageViewer" class="image-viewer" onclick="closeViewer()">
+    <img id="fullImage" src="">
+</div>
+
+<div class="bottom">
+    <button onclick="location.href='index.html'"><span class="icon">🏠</span>Home</button>
+    <button onclick="location.href='service.html'"><span class="icon">⚒️</span>Service</button>
+    <button onclick="location.href='store.html'" class="active"><span class="icon">🛒</span>Store</button>
+    <button onclick="location.href='profile.html'"><span class="icon">👤</span>Profile</button>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
+        authDomain: "meadi-aqua-tech.firebaseapp.com",
+        databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
+        projectId: "meadi-aqua-tech",
+        storageBucket: "meadi-aqua-tech.firebasestorage.app",
+        messagingSenderId: "531151217708",
+        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89",
+        measurementId: "G-QW495L6JVE"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Updated handleAddToCart with 'this' context
+    window.handleAddToCart = async function(btn, name, price, img) {
+        const currentUser = localStorage.getItem("aquaUser");
+        
+        if (!currentUser) {
+            alert("Please login first!");
+            return;
+        }
+
+        // பட்டனில் லோடிங் காட்ட
+        btn.classList.add('loading');
+        btn.disabled = true;
+
+        const cartRef = ref(db, 'carts/' + currentUser);
+        const newProductRef = push(cartRef);
+
+        try {
+            await set(newProductRef, {
+                productName: name,
+                price: price,
+                image: img,
+                addedAt: new Date().toISOString()
+            });
+            alert(name + " added to Cloud Cart!");
+            if(navigator.vibrate) navigator.vibrate(50);
+        } catch (error) {
+            console.error(error);
+            alert("Check your internet connection!");
+        } finally {
+            // லோடிங்கை நிறுத்தி பட்டனை பழைய நிலைக்கு மாற்ற
+            btn.classList.remove('loading');
+            btn.disabled = false;
+        }
+    };
+</script>
+
+<script>
+    function toggleMenu(){
+        document.getElementById("sidebar").classList.toggle("open");
+        document.getElementById("overlay").classList.toggle("show");
+    }
+
+    function openViewer(element) {
+        var viewer = document.getElementById("imageViewer");
+        var fullImg = document.getElementById("fullImage");
+        fullImg.src = element.querySelector("img").src;
+        viewer.style.display = "flex";
+    }
+
+    function closeViewer() {
+        document.getElementById("imageViewer").style.display = "none";
+    }
+
+    function searchProduct() {
+        let input = document.getElementById('searchInput').value.toLowerCase();
+        let cards = document.getElementsByClassName('product-card');
+        let noResult = document.getElementById('noResult');
+        let visibleCount = 0;
+
+        for (let i = 0; i < cards.length; i++) {
+            let name = cards[i].querySelector('.product-name').innerText.toLowerCase();
+            let desc = cards[i].querySelector('.product-desc').innerText.toLowerCase();
+            
+            if (name.includes(input) || desc.includes(input)) {
+                cards[i].style.display = "flex";
+                visibleCount++;
+            } else {
+                cards[i].style.display = "none";
+            }
+        }
+        noResult.style.display = visibleCount === 0 ? "block" : "none";
+    }
+</script>
+
+</body>
+</html>
