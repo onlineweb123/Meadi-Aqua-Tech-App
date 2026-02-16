@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Manager | Meadi Aqua Tech</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg: #f8fbff; 
+            --card: #ffffff; 
+            --border: #e2e8f0; 
+            --primary: #0077b6; 
+            --accent: #00b4d8; 
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --glass: rgba(255, 255, 255, 0.8);
+            --danger: #ef4444;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body { 
+            margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); color: var(--text-main); 
+        }
+
+        /* --- Header & Sidebar (Main App Style) --- */
+        header { 
+            height: 70px; display: flex; align-items: center; justify-content: center; 
+            position: fixed; top: 0; left: 0; right: 0; 
+            background: var(--glass); backdrop-filter: blur(12px);
+            z-index: 100; border-bottom: 1px solid var(--border);
+        }
+
+        .header-title { font-size: 18px; font-weight: 700; color: var(--primary); }
+
+        .menu-btn { 
+            position: absolute; left: 20px; font-size: 24px; 
+            background: #f1f5f9; border: none; color: var(--text-main); 
+            cursor: pointer; width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .sidebar { 
+            width: 280px; background: var(--card); position: fixed; top: 0; bottom: 0; left: -300px; 
+            padding-top: 80px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 110; 
+            box-shadow: 20px 0 50px rgba(0,0,0,0.05);
+        }
+        .sidebar.open { left: 0; }
+        .sidebar a { 
+            display: flex; align-items: center; padding: 16px 24px; text-decoration: none; 
+            color: var(--text-main); font-weight: 500; font-size: 15px;
+        }
+        .sidebar a:hover { background: #f8fafc; color: var(--primary); }
+
+        .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); display: none; z-index: 105; backdrop-filter: blur(4px); }
+        .overlay.show { display: block; }
+
+        /* --- Main Content --- */
+        .main-container {
+            padding: 100px 20px 100px 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .welcome-text { text-align: center; margin-bottom: 30px; }
+        .welcome-text h1 { font-size: 22px; color: var(--text-main); margin: 0; }
+        .welcome-text p { color: var(--text-sub); font-size: 14px; margin-top: 5px; }
+
+        /* Admin Grid Buttons */
+        .admin-grid { display: flex; flex-direction: column; gap: 15px; }
+
+        .admin-card {
+            background: var(--card); padding: 20px; border-radius: 20px;
+            border: 1px solid var(--border); display: flex; align-items: center;
+            text-decoration: none; transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        }
+        .admin-card:active { transform: scale(0.97); background: #f8fafc; }
+
+        .icon-box {
+            width: 50px; height: 50px; border-radius: 15px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; margin-right: 15px;
+        }
+
+        .info-box h3 { margin: 0; font-size: 16px; color: var(--text-main); }
+        .info-box p { margin: 2px 0 0 0; font-size: 12px; color: var(--text-sub); }
+
+        .bg-save { background: #e0f2fe; color: #0369a1; }
+        .bg-db { background: #dcfce7; color: #15803d; }
+        .bg-del { background: #fee2e2; color: #b91c1c; }
+
+        /* --- Bottom Navigation --- */
+        .bottom {
+            height: 75px; position: fixed; bottom: 0; left: 0; right: 0; 
+            display: flex; justify-content: space-around; align-items: center; 
+            background: var(--glass); backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border); z-index: 100; padding-bottom: env(safe-area-inset-bottom);
+        }
+        .bottom button {
+            background: none; border: none; font-size: 11px; font-weight: 600;
+            display: flex; flex-direction: column; align-items: center; color: var(--text-sub);
+            cursor: pointer;
+        }
+        .bottom button.active { color: var(--primary); }
+        .bottom .icon { font-size: 22px; margin-bottom: 4px; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <button class="menu-btn" id="menuBtn">☰</button>
+    <div class="header-title">Admin Manager</div>
+</header>
+
+<div id="sidebar" class="sidebar">
+  <div style="padding: 20px; font-weight: 800; color: var(--primary); border-bottom: 1px solid var(--border);">ADMIN PANEL</div>
+  <a href="admin_index.html">🏠 Admin Home</a>
+  <a href="save data.html">📥 Save Data</a>
+  <a href="database.html">📊 Database</a>
+  <a href="delete data.html">🗑️ Delete Data</a>
+  <hr style="border: 0; border-top: 1px solid var(--border); margin: 10px 0;">
+  <a href="index.html">📱 Back to User App</a>
+</div>
+
+<div id="overlay" class="overlay"></div>
+
+<div class="main-container">
+    <div class="welcome-text">
+        <h1>Control Dashboard</h1>
+        <p>Manage your purifier database</p>
+    </div>
+
+    <div class="admin-grid">
+        <a href="save data.html" class="admin-card">
+            <div class="icon-box bg-save">📥</div>
+            <div class="info-box">
+                <h3>Save Data</h3>
+                <p>New customer entry</p>
+            </div>
+        </a>
+
+        <a href="database.html" class="admin-card">
+            <div class="icon-box bg-db">📊</div>
+            <div class="info-box">
+                <h3>Database</h3>
+                <p>View all records</p>
+            </div>
+        </a>
+
+        <a href="delete data.html" class="admin-card">
+            <div class="icon-box bg-del">🗑️</div>
+            <div class="info-box">
+                <h3>Delete Data</h3>
+                <p>Remove accounts</p>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="bottom">
+    <button onclick="location.href='admin_index.html'" class="active"><span class="icon">⚙️</span>Admin</button>
+    <button onclick="location.href='save data.html'"><span class="icon">📥</span>Save</button>
+    <button onclick="location.href='database.html'"><span class="icon">📊</span>DB</button>
+    <button onclick="location.href='index.html'"><span class="icon">📱</span>App</button>
+</div>
+
+<script>
+    // Sidebar logic (Same as your main app)
+    const menuBtn = document.getElementById("menuBtn");
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+
+    const toggleMenu = () => {
+        sidebar.classList.toggle("open");
+        overlay.classList.toggle("show");
+    };
+
+    menuBtn.onclick = toggleMenu;
+    overlay.onclick = toggleMenu;
+</script>
+
+</body>
+</html>
