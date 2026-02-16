@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Accounts | Meadi Aqua Tech</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { 
+            --bg: #f8fbff; --card: #ffffff; --border: #e2e8f0; --primary: #0077b6; 
+            --text-main: #1e293b; --text-sub: #64748b; --success: #10b981; --danger: #ef4444;
+            --glass: rgba(255, 255, 255, 0.8);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; }
+        
+        header { 
+            height: 70px; display: flex; align-items: center; justify-content: center; 
+            background: var(--glass); backdrop-filter: blur(12px);
+            z-index: 100; border-bottom: 1px solid var(--border); position: sticky; top: 0;
+        }
+
+        .header-title { font-size: 18px; font-weight: 700; color: var(--primary); }
+
+        .menu-btn { 
+            position: absolute; left: 20px; font-size: 24px; 
+            background: #f1f5f9; border: none; color: var(--text-main); 
+            cursor: pointer; width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Sidebar Styles */
+        .sidebar { 
+            width: 280px; background: var(--card); position: fixed; top: 0; bottom: 0; left: -300px; 
+            padding-top: 80px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 110; 
+            box-shadow: 20px 0 50px rgba(0,0,0,0.05);
+        }
+        .sidebar.open { left: 0; }
+        .sidebar a { 
+            display: flex; align-items: center; padding: 16px 24px; text-decoration: none; 
+            color: var(--text-main); font-weight: 500; font-size: 15px; transition: 0.2s;
+        }
+        .sidebar a:hover { background: #f8fafc; color: var(--primary); padding-left: 30px; }
+
+        .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); display: none; z-index: 105; backdrop-filter: blur(4px); }
+        .overlay.show { display: block; }
+
+        .main { flex: 1; overflow-y: auto; padding: 20px; max-width: 500px; margin: 0 auto; width: 100%; padding-bottom: 100px; }
+
+        .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .s-card { background: white; padding: 15px; border-radius: 20px; border: 1px solid var(--border); text-align: center; }
+        .balance-card { grid-column: span 2; background: linear-gradient(135deg, var(--primary), #023e8a); color: white; border: none; }
+        .amount { font-size: 22px; font-weight: 800; margin-top: 5px; }
+
+        .add-form { background: white; padding: 20px; border-radius: 20px; border: 1px solid var(--border); margin-bottom: 25px; }
+        .input-label { font-size: 11px; font-weight: 700; color: var(--text-sub); margin-left: 5px; display: block; margin-top: 10px; }
+        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; border: 1px solid var(--border); font-family: inherit; font-size: 14px; box-sizing: border-box; }
+        
+        /* Button & Spinner Styles */
+        .btn-add { 
+            background: var(--primary); color: white; font-weight: 700; border: none; 
+            cursor: pointer; margin-top: 10px; transition: 0.3s; display: flex; 
+            justify-content: center; align-items: center; gap: 10px; height: 45px;
+        }
+        .btn-add:disabled { opacity: 0.7; cursor: not-allowed; }
+        
+        .spinner {
+            width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid white; border-radius: 50%;
+            animation: spin 0.8s linear infinite; display: none;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .date-badge { background: #e0f2fe; color: var(--primary); padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+
+        .list-container { background: white; border-radius: 20px; border: 1px solid var(--border); overflow: hidden; }
+        .list-item { padding: 15px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; position: relative; }
+        .item-info { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+        .item-title { font-weight: 700; font-size: 14px; }
+        .item-customer { font-size: 12px; color: var(--primary); font-weight: 600; }
+        .item-date { font-size: 10px; color: var(--text-sub); }
+        .amt-section { text-align: right; display: flex; align-items: center; gap: 12px; }
+        .item-amount { font-weight: 800; font-size: 15px; }
+        .inc { color: var(--success); }
+        .exp { color: var(--danger); }
+
+        .del-btn { background: #fee2e2; color: var(--danger); border: none; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+
+        
+        .bottom {
+            height: 75px; position: fixed; bottom: 0; left: 0; right: 0; 
+            display: flex; justify-content: space-around; align-items: center; 
+            background: var(--glass); backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border); z-index: 100; padding-bottom: env(safe-area-inset-bottom);
+        }
+        .bottom button {
+            background: none; border: none; font-size: 11px; font-weight: 600;
+            display: flex; flex-direction: column; align-items: center; color: var(--text-sub);
+            cursor: pointer;
+        }
+        .bottom button.active { color: var(--primary); }
+        .bottom .icon { font-size: 22px; margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <button class="menu-btn" id="menuBtn">☰</button>
+    <div class="header-title">Accounts & Expenses</div>
+</header>
+
+<div id="sidebar" class="sidebar">
+    <a href="index.html">🏠 Dashboard</a>
+    <a href="service.html">🛠 Service</a>
+    <a href="store.html">🛒 Store </a>
+    <a href="profile.html">👤 Profile</a>
+    <a href="cart.html">🛒 My Cart</a>
+    <a href="manage-data.html">🗑️ Manage Data</a>
+</div>
+<div id="overlay" class="overlay"></div>
+
+<div class="main">
+    <div class="summary-grid">
+        <div class="s-card balance-card">
+            <div style="font-size: 12px; opacity: 0.8;">Available Balance</div>
+            <div class="amount" id="totalBalance">₹ 0</div>
+        </div>
+        <div class="s-card">
+            <div style="font-size: 11px; color: var(--success);">Income (+)</div>
+            <div class="amount" id="totalIncome" style="color: var(--success);">₹ 0</div>
+        </div>
+        <div class="s-card">
+            <div style="font-size: 11px; color: var(--danger);">Expense (-)</div>
+            <div class="amount" id="totalExpense" style="color: var(--danger);">₹ 0</div>
+        </div>
+    </div>
+
+    <div class="add-form">
+        <h3 style="margin-top:0; font-size: 15px; color: var(--primary);">New Entry</h3>
+        
+        <span class="input-label">Select Date</span>
+        <input type="date" id="entryDate">
+
+        <select id="type">
+            <option value="income">Income (வரவு)</option>
+            <option value="expense">Expense (செலவு)</option>
+        </select>
+        
+        <input type="text" id="custName" placeholder="Customer Name">
+        <input type="text" id="desc" placeholder="Purpose (e.g. RO Service)">
+        <input type="number" id="amt" placeholder="Amount (₹)">
+        
+        <button class="btn-add" id="saveBtn">
+            <div class="spinner" id="saveSpinner"></div>
+            <span id="btnText">Save Record</span>
+        </button>
+    </div>
+
+    <div class="history-header">
+        <h3 style="font-size: 15px; margin: 0;">Today's History</h3>
+        <span class="date-badge" id="currentDateDisplay"></span>
+    </div>
+
+    <div class="list-container" id="transactionList">
+        <p style="text-align:center; padding: 30px; color: var(--text-sub); font-size: 13px;">No records for today.</p>
+    </div>
+</div>
+
+<div class="bottom">
+    <button onclick="location.href='index.html'" class="active"><span class="icon">🏠</span>Home</button>
+    <button onclick="location.href='service.html'"><span class="icon">⚒️</span>Service</button>
+    <button onclick="location.href='store.html'"><span class="icon">🛒</span>Store</button>
+    <button onclick="location.href='profile.html'"><span class="icon">👤</span>Profile</button>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
+        authDomain: "meadi-aqua-tech.firebaseapp.com",
+        databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
+        projectId: "meadi-aqua-tech"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const user = localStorage.getItem("aquaUser") || "Guest";
+
+    // Sidebar Toggle
+    const toggleMenu = () => {
+        document.getElementById("sidebar").classList.toggle("open");
+        document.getElementById("overlay").classList.toggle("show");
+    };
+    document.getElementById("menuBtn").onclick = toggleMenu;
+    document.getElementById("overlay").onclick = toggleMenu;
+
+    // Date setup
+    const todayObj = new Date();
+    const todayForInput = todayObj.toISOString().split('T')[0];
+    const todayFormatted = todayObj.toLocaleDateString('en-GB');
+    
+    document.getElementById("entryDate").value = todayForInput;
+    document.getElementById("currentDateDisplay").innerText = todayFormatted;
+
+    const typeSelect = document.getElementById("type");
+    const custInput = document.getElementById("custName");
+
+    typeSelect.onchange = () => {
+        custInput.style.display = typeSelect.value === 'expense' ? 'none' : 'block';
+    };
+
+    // SAVE DATA
+    document.getElementById("saveBtn").onclick = async () => {
+        const btn = document.getElementById("saveBtn");
+        const spinner = document.getElementById("saveSpinner");
+        const btnText = document.getElementById("btnText");
+
+        const inputDate = new Date(document.getElementById("entryDate").value);
+        const dateStr = inputDate.toLocaleDateString('en-GB'); 
+        
+        const type = typeSelect.value;
+        const custName = custInput.value;
+        const desc = document.getElementById("desc").value;
+        const amt = parseFloat(document.getElementById("amt").value);
+        const timeStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        
+        const fullDate = dateStr + ", " + timeStr;
+
+        if(!desc || isNaN(amt)) return alert("Please fill Description and Amount");
+        if(type === 'income' && !custName) return alert("Please enter Customer Name");
+
+        // Start Spinner
+        btn.disabled = true;
+        spinner.style.display = "block";
+        btnText.innerText = "Saving...";
+
+        try {
+            const transRef = ref(db, `users/${user}/transactions`);
+            await push(transRef, { 
+                customer: type === 'income' ? custName : '', 
+                desc: desc, 
+                amt: amt, 
+                type: type, 
+                date: fullDate, 
+                timestamp: inputDate.getTime()
+            });
+            
+            custInput.value = "";
+            document.getElementById("desc").value = "";
+            document.getElementById("amt").value = "";
+            alert("Saved Successfully!");
+        } catch (error) {
+            alert("Error saving: " + error.message);
+        } finally {
+            // Stop Spinner
+            btn.disabled = false;
+            spinner.style.display = "none";
+            btnText.innerText = "Save Record";
+        }
+    };
+
+    // LOAD DATA
+    onValue(ref(db, `users/${user}/transactions`), (snapshot) => {
+        const listDiv = document.getElementById("transactionList");
+        listDiv.innerHTML = "";
+        let totalInc = 0; let totalExp = 0;
+        let todayHasData = false;
+
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            const entries = Object.entries(data).map(([key, val]) => ({ id: key, ...val }));
+            const sorted = entries.sort((a, b) => b.timestamp - a.timestamp);
+
+            sorted.forEach(item => {
+                if(item.type === 'income') totalInc += item.amt;
+                else totalExp += item.amt;
+
+                if(item.date && item.date.includes(todayFormatted)) {
+                    todayHasData = true;
+                    listDiv.innerHTML += `
+                        <div class="list-item">
+                            <div class="item-info">
+                                ${item.customer ? `<span class="item-customer">👤 ${item.customer}</span>` : ''}
+                                <span class="item-title">${item.desc}</span>
+                                <span class="item-date">${item.date}</span>
+                            </div>
+                            <div class="amt-section">
+                                <span class="item-amount ${item.type === 'income' ? 'inc' : 'exp'}">
+                                    ${item.type === 'income' ? '+' : '-'}₹${item.amt}
+                                </span>
+                                <button class="del-btn" onclick="deleteRecord('${item.id}')">🗑️</button>
+                            </div>
+                        </div>`;
+                }
+            });
+        }
+
+        if(!todayHasData) {
+            listDiv.innerHTML = `<p style="text-align:center; padding: 30px; color: var(--text-sub); font-size: 13px;">No records found for today.</p>`;
+        }
+
+        document.getElementById("totalIncome").innerText = "₹ " + totalInc;
+        document.getElementById("totalExpense").innerText = "₹ " + totalExp;
+        document.getElementById("totalBalance").innerText = "₹ " + (totalInc - totalExp);
+    });
+
+    // DELETE FUNCTION
+    window.deleteRecord = (id) => {
+        if(confirm("Are you sure you want to delete this record?")) {
+            remove(ref(db, `users/${user}/transactions/${id}`));
+        }
+    };
+</script>
+
+</body>
+</html>
