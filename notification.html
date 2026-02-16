@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Meadi Aqua Tech | Notifications</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        if (localStorage.getItem("isLoggedIn") !== "true") {
+            window.location.href = "login.html";
+        }
+    </script>
+
+    <style>
+        :root { 
+            --bg: #f8fbff; 
+            --card: #ffffff; 
+            --border: #e2e8f0; 
+            --primary: #0077b6; 
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --glass: rgba(255, 255, 255, 0.8);
+            --danger: #ef4444;
+        }
+
+        body { 
+            margin: 0; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main); 
+        }
+
+        header { 
+            height: 70px; display: flex; align-items: center; justify-content: center; 
+            position: fixed; top: 0; left: 0; right: 0; 
+            background: var(--glass); backdrop-filter: blur(12px);
+            z-index: 100; border-bottom: 1px solid var(--border);
+        }
+
+        .header-title { font-size: 18px; font-weight: 700; color: var(--primary); }
+
+        .back-btn { 
+            position: absolute; left: 20px; font-size: 20px; 
+            background: #f1f5f9; border: none; color: var(--text-main); 
+            cursor: pointer; width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; text-decoration: none;
+        }
+
+        .main { padding: 90px 20px 100px 20px; max-width: 600px; margin: 0 auto; min-height: 80vh; }
+
+        .loader-wrapper {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding-top: 100px;
+        }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 4px solid rgba(0, 119, 182, 0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .notif-card { 
+            padding: 20px; background: var(--card); border-radius: 20px; 
+            border: 1px solid var(--border); margin-bottom: 15px;
+            display: flex; gap: 15px; align-items: flex-start;
+            animation: slideUp 0.4s ease-out;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            position: relative;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .notif-icon {
+            width: 45px; height: 45px; background: #e0f2fe;
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 20px; flex-shrink: 0;
+        }
+
+        .notif-content { flex-grow: 1; padding-right: 30px; }
+        .notif-title { font-size: 14px; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+        .notif-msg { font-size: 15px; font-weight: 500; line-height: 1.5; color: var(--text-main); margin-bottom: 8px; }
+        .notif-time { font-size: 11px; color: var(--text-sub); font-weight: 600; }
+
+        .delete-btn {
+            position: absolute; top: 15px; right: 15px;
+            background: #fff1f2; color: var(--danger);
+            border: none; width: 32px; height: 32px;
+            border-radius: 8px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; transition: 0.2s;
+        }
+        .delete-btn:hover { background: var(--danger); color: white; }
+
+        .empty-state { text-align: center; margin-top: 50px; }
+        .empty-icon { font-size: 50px; margin-bottom: 15px; display: block; opacity: 0.5; }
+
+        .bottom {
+            height: 75px; position: fixed; bottom: 0; left: 0; right: 0; 
+            display: flex; justify-content: space-around; align-items: center; 
+            background: var(--glass); backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border); z-index: 100;
+        }
+        .bottom button {
+            background: none; border: none; font-size: 11px; font-weight: 600;
+            display: flex; flex-direction: column; align-items: center; color: var(--text-sub);
+            cursor: pointer;
+        }
+        .bottom .icon { font-size: 22px; margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="index.html" class="back-btn">←</a>
+    <div class="header-title">Notifications</div>
+</header>
+
+<div class="main" id="notifContainer">
+    <div class="loader-wrapper">
+        <div class="spinner"></div>
+        <p style="color: var(--text-sub); font-size: 14px; font-weight: 600;">Checking for messages...</p>
+    </div>
+</div>
+
+<div class="bottom">
+    <button onclick="location.href='index.html'"><span class="icon">🏠</span>Home</button>
+    <button onclick="location.href='service.html'"><span class="icon">⚒️</span>Service</button>
+    <button onclick="location.href='store.html'"><span class="icon">🛒</span>Store</button>
+    <button onclick="location.href='profile.html'"><span class="icon">👤</span>Profile</button>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, get, child, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
+        authDomain: "meadi-aqua-tech.firebaseapp.com",
+        databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
+        projectId: "meadi-aqua-tech",
+        storageBucket: "meadi-aqua-tech.firebasestorage.app",
+        messagingSenderId: "531151217708",
+        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89",
+        measurementId: "G-QW495L6JVE"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    function formatMyDate(dateString) {
+        if(!dateString) return "Recently";
+        try {
+            const date = new Date(dateString);
+            if(isNaN(date)) return dateString;
+            const d = date.getDate().toString().padStart(2, '0');
+            const m = (date.getMonth() + 1).toString().padStart(2, '0');
+            const y = date.getFullYear();
+            const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            return `${d}/${m}/${y} - ${time}`;
+        } catch(e) { return dateString; }
+    }
+
+    // --- Automatic Delete Logic (30 Days) ---
+    async function checkAndAutoDelete(username, msgTimestamp) {
+        if (!msgTimestamp) return false;
+        
+        const sentDate = new Date(msgTimestamp);
+        const today = new Date();
+        
+        // மில்லி விநாடிகளை நாட்களாக மாற்றுகிறோம்
+        const diffInTime = today.getTime() - sentDate.getTime();
+        const diffInDays = diffInTime / (1000 * 3600 * 24);
+
+        if (diffInDays >= 30) {
+            try {
+                await update(ref(db, `users/${username}`), {
+                    adminMessage: null,
+                    msgTimestamp: null
+                });
+                return true; // நீக்கப்பட்டுவிட்டது
+            } catch (e) {
+                console.error("Auto-delete failed", e);
+            }
+        }
+        return false; // இன்னும் 30 நாள் ஆகவில்லை
+    }
+
+    async function fetchNotifications() {
+        const currentUsername = localStorage.getItem("aquaUser"); 
+        const container = document.getElementById("notifContainer");
+
+        if(!currentUsername) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        try {
+            const dbRef = ref(db);
+            const snapshot = await get(child(dbRef, `users/${currentUsername}`));
+            
+            if (snapshot.exists()) {
+                const userData = snapshot.val();
+                
+                if (userData.adminMessage) {
+                    // முதலில் 30 நாள் ஆகிவிட்டதா என்று சோதிக்கிறோம்
+                    const isDeleted = await checkAndAutoDelete(currentUsername, userData.msgTimestamp);
+                    
+                    if (isDeleted) {
+                        showEmptyState();
+                        return;
+                    }
+
+                    const displayDate = formatMyDate(userData.msgTimestamp);
+
+                    container.innerHTML = `
+                        <div class="notif-card">
+                            <button class="delete-btn" id="delBtn">🗑️</button>
+                            <div class="notif-icon">📢</div>
+                            <div class="notif-content">
+                                <div class="notif-title">Message from Admin</div>
+                                <div class="notif-msg">${userData.adminMessage}</div>
+                                <div class="notif-time">📅 ${displayDate}</div>
+                            </div>
+                        </div>
+                    `;
+
+                    document.getElementById('delBtn').onclick = async () => {
+                        if(confirm("நிச்சயமாக நீக்க வேண்டுமா?")) {
+                            try {
+                                await update(ref(db, `users/${currentUsername}`), {
+                                    adminMessage: null,
+                                    msgTimestamp: null
+                                });
+                                showEmptyState();
+                            } catch (err) { alert("Failed to delete."); }
+                        }
+                    };
+
+                } else {
+                    showEmptyState();
+                }
+            } else {
+                showEmptyState();
+            }
+        } catch (error) {
+            container.innerHTML = `<div style="text-align:center;"><p style="color:red;">Error loading notifications.</p></div>`;
+        }
+    }
+
+    function showEmptyState() {
+        document.getElementById("notifContainer").innerHTML = `
+            <div class="empty-state">
+                <span class="empty-icon">🔔</span>
+                <p style="font-weight: 700; color: var(--text-main); font-size: 16px;">No new notifications</p>
+                <p style="font-size: 13px; color: var(--text-sub);">அட்மினிடமிருந்து தகவல்கள் வரும்போது இங்கே காண்பிக்கப்படும்.</p>
+            </div>
+        `;
+    }
+
+    setTimeout(fetchNotifications, 800);
+</script>
+
+</body>
+</html>
