@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Meadi Aqua Tech - Invoice</title>
+  <title>Meadi Aqua Tech - A4 Invoice</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <style>
     body { font-family: 'Poppins', sans-serif; background: #f0f8ff; margin: 0; padding: 15px; }
-    .container { max-width: 650px; margin: auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+    .container { max-width: 700px; margin: auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
     h2 { text-align: center; color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 10px; }
     label { font-weight: bold; display: block; margin-top: 10px; font-size: 14px; }
     input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
@@ -19,16 +19,53 @@
     .btn-gen { background: #28a745; color: white; }
     .btn-download { background: #dc3545; color: white; display: none; margin-top: 10px; }
     
-    /* Bill Styling */
-    #billArea { width: 500px; padding: 30px; background: white; border: 1px solid #eee; margin: 20px auto; border-radius: 5px; }
-    .bill-header { text-align: center; color: #0056b3; }
-    .bill-info { font-size: 13px; margin: 15px 0; line-height: 1.6; }
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th { background: #f8f9fa; font-size: 13px; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
+    /* A4 BILL AREA STYLING */
+    #billWrapper { 
+        background: #555; padding: 20px; overflow-x: auto; 
+        display: none; border-radius: 8px; margin-top: 20px;
+    }
+    
+    #billArea { 
+        width: 794px; /* A4 Width in pixels at 96 DPI */
+        min-height: 1123px; /* A4 Height in pixels */
+        padding: 50px; 
+        background: white; 
+        margin: auto; 
+        box-sizing: border-box;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .bill-header { 
+        display: flex; justify-content: space-between; align-items: center;
+        border-bottom: 3px solid #0056b3; padding-bottom: 20px; margin-bottom: 30px;
+    }
+    .brand-name { color: #0056b3; text-align: left; }
+    .invoice-label { background: #0056b3; color: white; padding: 10px 20px; font-weight: bold; font-size: 20px; }
+
+    .bill-info-grid { 
+        display: grid; grid-template-columns: 1fr 1fr; gap: 40px; 
+        margin-bottom: 30px; font-size: 15px; 
+    }
+    .info-box b { color: #0056b3; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; flex-grow: 1; }
+    th { background: #0056b3; color: white; padding: 12px; font-size: 15px; }
+    td { border: 1px solid #eee; padding: 12px; font-size: 14px; }
     .text-right { text-align: right; }
-    .total-row { font-weight: bold; background: #eef; }
-    .footer-note { font-size: 11px; color: #666; margin-top: 20px; text-align: center; }
+    
+    .totals-section { width: 300px; margin-left: auto; margin-top: 20px; }
+    .total-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
+    .grand-total { background: #f8f9fa; border: 2px solid #0056b3; font-weight: bold; font-size: 18px; color: #0056b3; }
+
+    .footer-note { 
+        margin-top: 50px; text-align: center; border-top: 1px solid #eee; 
+        padding-top: 20px; font-size: 13px; color: #666; 
+    }
+    
+    /* UI Helper */
+    .scroll-hint { font-size: 11px; color: #fff; margin-bottom: 5px; }
   </style>
 </head>
 <body>
@@ -56,56 +93,71 @@
     <input type="number" id="itemQty" style="flex: 0.5;" placeholder="Qty">
     <input type="number" id="itemRate" style="flex: 1;" placeholder="Rate">
   </div>
-  <button class="btn-add" onclick="addItem()">➕ Add to List</button>
+  <button class="btn-add" onclick="addItem()">➕ Add Item</button>
 
   <div id="tempList" style="margin-top:10px; font-size: 13px; color: #555;"></div>
 
-  <button class="btn-gen" onclick="generateBill()">🧾 Generate Invoice</button>
+  <button class="btn-gen" onclick="generateBill()">🧾 Generate Full Size Invoice</button>
 
-  <div id="billSection" style="display:none; text-align: center;">
+  <div id="billWrapper">
+    <p class="scroll-hint">Mobile View: Scroll horizontally to see full preview</p>
     <div id="billArea">
       <div class="bill-header">
-        <h1 style="margin:0;">Meadi Aqua Tech</h1>
-        <p style="margin:5px 0;">Water Purifier Sales & Service</p>
+        <div class="brand-name">
+            <h1 style="margin:0; font-size: 35px;">MEADI AQUA TECH</h1>
+            <p style="margin:5px 0; font-weight:600;">Water Purifier Sales & Service</p>
+            <p style="margin:0; font-size: 13px;">Quality Service at Your Doorstep</p>
+        </div>
+        <div class="invoice-label">INVOICE</div>
       </div>
       
-      <div class="bill-info">
-        <div style="display: flex; justify-content: space-between;">
-            <span><b>Name:</b> <span id="bName"></span></span>
-            <span><b>Date:</b> <span id="bDate"></span></span>
+      <div class="bill-info-grid">
+        <div class="info-box">
+            <p><b>BILL TO:</b></p>
+            <p style="margin:5px 0;"><span id="bName" style="font-size: 18px; font-weight: bold;"></span></p>
+            <p style="margin:0;">📞 <span id="bPhone"></span></p>
+            <p style="margin:0;">📍 <span id="bAddress"></span></p>
         </div>
-        <div><b>Phone:</b> <span id="bPhone"></span></div>
-        <div><b>Address:</b> <span id="bAddress"></span></div>
+        <div class="info-box" style="text-align: right;">
+            <p><b>Date:</b> <span id="bDate"></span></p>
+            <p><b>Invoice No:</b> #MAT-2024</p>
+        </div>
       </div>
 
       <table>
         <thead>
           <tr>
-            <th>Description</th>
+            <th style="text-align: left;">Sl No.</th>
+            <th style="text-align: left;">Description</th>
             <th class="text-right">Qty</th>
             <th class="text-right">Rate</th>
             <th class="text-right">Total</th>
           </tr>
         </thead>
-        <tbody id="billItems"></tbody>
-        <tr>
-          <td colspan="3" class="text-right">Service Charges</td>
-          <td class="text-right" id="bService">₹0</td>
-        </tr>
-        <tr class="total-row">
-          <td colspan="3" class="text-right">Grand Total</td>
-          <td class="text-right" id="bTotal">₹0</td>
-        </tr>
+        <tbody id="billItems">
+            </tbody>
       </table>
 
+      <div class="totals-section">
+        <div class="total-row">
+            <span>Service Charge:</span>
+            <span id="bService">₹0</span>
+        </div>
+        <div class="total-row grand-total">
+            <span>Grand Total:</span>
+            <span id="bTotal">₹0</span>
+        </div>
+      </div>
+
       <div class="footer-note">
-        <p>We service all kinds of RO Water Purifiers.</p>
-        <p><b>Thank You! Visit Again!</b></p>
+        <p><b>Terms:</b> Service provided for all types of RO, UV Purifiers.</p>
+        <p>This is a computer-generated invoice.</p>
+        <p style="margin-top: 20px; font-weight: bold; font-size: 16px; color: #0056b3;">Thank You! Visit Again!</p>
       </div>
     </div>
-    
-    <button id="downloadBtn" class="btn-download">📥 Download Invoice as Image</button>
   </div>
+  
+  <button id="downloadBtn" class="btn-download">📥 Download A4 Invoice (PNG)</button>
 </div>
 
 <script>
@@ -118,7 +170,7 @@
 
     if (name && qty > 0 && rate > 0) {
       items.push({ name, qty, rate });
-      document.getElementById("tempList").innerHTML += `• ${name} (${qty} x ${rate})<br>`;
+      document.getElementById("tempList").innerHTML += `✅ ${name} (${qty} x ${rate})<br>`;
       document.getElementById("itemName").value = "";
       document.getElementById("itemQty").value = "";
       document.getElementById("itemRate").value = "";
@@ -134,36 +186,54 @@
     const service = parseFloat(document.getElementById("serviceCharge").value) || 0;
 
     if (!name || items.length === 0) {
-      alert("Please enter Customer Name and at least one Item!");
+      alert("Please enter Customer Name and Items!");
       return;
     }
 
-    document.getElementById("bName").innerText = name;
+    document.getElementById("bName").innerText = name.toUpperCase();
     document.getElementById("bPhone").innerText = phone;
     document.getElementById("bAddress").innerText = addr;
     document.getElementById("bDate").innerText = new Date().toLocaleDateString("en-IN");
-    document.getElementById("bService").innerText = `₹${service}`;
+    document.getElementById("bService").innerText = `₹${service.toFixed(2)}`;
 
     let total = service;
     let html = "";
-    items.forEach(item => {
+    items.forEach((item, index) => {
       let lineTotal = item.qty * item.rate;
       total += lineTotal;
-      html += `<tr><td>${item.name}</td><td class="text-right">${item.qty}</td><td class="text-right">₹${item.rate}</td><td class="text-right">₹${lineTotal}</td></tr>`;
+      html += `
+        <tr>
+          <td>${index + 1}</td>
+          <td><b>${item.name}</b></td>
+          <td class="text-right">${item.qty}</td>
+          <td class="text-right">₹${item.rate.toFixed(2)}</td>
+          <td class="text-right">₹${lineTotal.toFixed(2)}</td>
+        </tr>`;
     });
 
     document.getElementById("billItems").innerHTML = html;
-    document.getElementById("bTotal").innerText = `₹${total}`;
-    document.getElementById("billSection").style.display = "block";
+    document.getElementById("bTotal").innerText = `₹${total.toFixed(2)}`;
+    
+    document.getElementById("billWrapper").style.display = "block";
     document.getElementById("downloadBtn").style.display = "block";
-    window.scrollTo(0, document.body.scrollHeight);
+    
+    window.scrollTo({ top: document.getElementById("billWrapper").offsetTop, behavior: 'smooth' });
   }
 
   document.getElementById("downloadBtn").addEventListener("click", () => {
-    html2canvas(document.getElementById("billArea"), { scale: 3 }).then(canvas => {
+    const billArea = document.getElementById("billArea");
+    
+    // Using higher scale for high resolution printing
+    html2canvas(billArea, { 
+        scale: 2, 
+        logging: false, 
+        useCORS: true,
+        allowTaint: true
+    }).then(canvas => {
       const link = document.createElement("a");
-      link.download = `MeadiAquaTech_Invoice_${document.getElementById("custName").value}.png`;
-      link.href = canvas.toDataURL();
+      const safeName = document.getElementById("custName").value.replace(/\s+/g, '_');
+      link.download = `Invoice_${safeName}.png`;
+      link.href = canvas.toDataURL("image/png");
       link.click();
     });
   });
