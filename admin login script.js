@@ -88,3 +88,4 @@ document.getElementById("btnHideSettings").onclick = () => {
     document.getElementById("settingsPage").style.display = "none";
     document.getElementById("loginOverlay").style.display = "flex";
 };
+
