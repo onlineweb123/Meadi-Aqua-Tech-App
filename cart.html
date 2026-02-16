@@ -22,7 +22,6 @@
 
         body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); }
 
-        /* Header Style */
         header { 
             height: 70px; display: flex; align-items: center; justify-content: center; 
             position: fixed; top: 0; left: 0; right: 0; 
@@ -30,7 +29,7 @@
             z-index: 100; border-bottom: 1px solid var(--border);
         }
         .header-title { font-size: 18px; font-weight: 700; color: var(--primary); }
-        
+
         .menu-btn { 
             position: absolute; left: 20px; font-size: 24px; 
             background: #f1f5f9; border: none; color: var(--text-main); 
@@ -38,28 +37,24 @@
             display: flex; align-items: center; justify-content: center;
         }
 
-        /* Sidebar Style */
         .sidebar { 
             width: 280px; background: var(--card); position: fixed; top: 0; bottom: 0; left: -300px; 
             padding-top: 80px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 110; 
             box-shadow: 20px 0 50px rgba(0,0,0,0.05);
         }
         .sidebar.open { left: 0; }
-        .sidebar a { 
-            display: flex; align-items: center; padding: 16px 24px; text-decoration: none; 
-            color: var(--text-main); font-weight: 500; font-size: 15px; transition: 0.2s;
-        }
-        .sidebar a:hover { background: #f8fafc; color: var(--primary); padding-left: 30px; }
+        .sidebar a { display: flex; align-items: center; padding: 16px 24px; text-decoration: none; color: var(--text-main); font-weight: 500; font-size: 15px; }
 
         .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); display: none; z-index: 105; backdrop-filter: blur(4px); }
         .overlay.show { display: block; }
 
-        /* Bottom Nav */
+        /* --- நீங்கள் கேட்ட Bottom Navigation Style --- */
         .bottom {
             height: 75px; position: fixed; bottom: 0; left: 0; right: 0; 
             display: flex; justify-content: space-around; align-items: center; 
             background: var(--glass); backdrop-filter: blur(12px);
-            border-top: 1px solid var(--border); z-index: 100; padding-bottom: env(safe-area-inset-bottom);
+            border-top: 1px solid var(--border); z-index: 100; 
+            padding-bottom: env(safe-area-inset-bottom);
         }
         .bottom button {
             background: none; border: none; font-size: 11px; font-weight: 600;
@@ -68,48 +63,36 @@
         }
         .bottom button.active { color: var(--primary); }
         .bottom .icon { font-size: 22px; margin-bottom: 4px; }
+        /* ------------------------------------------ */
 
-        .main { padding: 90px 20px 120px 20px; max-width: 600px; margin: 0 auto; }
+        .main { padding: 90px 20px 140px 20px; max-width: 600px; margin: 0 auto; }
 
-        /* Loader */
-        .spinner-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 50px 0; }
-        .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 10px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Cart Items */
         .cart-item {
             background: var(--card); border-radius: 15px; padding: 15px;
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 12px; border: 1px solid var(--border);
         }
         .item-info { display: flex; align-items: center; gap: 15px; }
-        .cart-img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; background: #f1f5f9; }
-        .item-info h4 { margin: 0; font-size: 14px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .item-info p { margin: 4px 0 0 0; color: var(--primary); font-weight: 700; font-size: 14px; }
-
-        .remove-btn { 
-            background: #fee2e2; color: var(--danger); border: none; 
-            padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 600;
-        }
-
+        .cart-img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; }
+        
         .total-card {
             background: linear-gradient(135deg, var(--primary), #023e8a);
             color: white; border-radius: 20px; padding: 20px; margin-top: 20px; text-align: center;
-            box-shadow: 0 8px 20px rgba(0, 119, 182, 0.2);
         }
-        .total-card h2 { margin: 0; font-size: 24px; }
 
         .checkout-btn {
-            width: 100%; background: #25d366; color: white; border: none;
-            padding: 16px; border-radius: 18px; font-size: 16px; font-weight: 700;
+            width: 100%; border: none; padding: 16px; border-radius: 18px; font-size: 16px; font-weight: 700;
             margin-top: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            transition: 0.3s; box-shadow: 0 5px 15px rgba(37, 211, 102, 0.2);
+            transition: 0.3s; color: white;
         }
-        .btn-loading-spinner { display: none; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid white; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        .loading .btn-text { display: none; }
-        .loading .btn-loading-spinner { display: block; }
+        .upi-btn { background: #0077b6; box-shadow: 0 5px 15px rgba(0, 119, 182, 0.3); }
+        .wa-btn { background: #25d366; box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3); }
 
-        #emptyMsg { text-align: center; padding: 60px 20px; display: none; }
+        .remove-btn { background: #fee2e2; color: var(--danger); border: none; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 600; }
+        
+        .spinner-container { display: flex; flex-direction: column; align-items: center; padding: 50px 0; }
+        .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -131,26 +114,27 @@
 <div class="main">
     <div id="loader" class="spinner-container">
         <div class="spinner"></div>
-        <p style="color: var(--text-sub); font-size: 14px;">Loading your cart...</p>
     </div>
 
     <div id="cartList"></div>
 
-    <div id="emptyMsg">
-        <p style="font-size: 50px; margin: 0;">🛒</p>
-        <h3 style="margin: 10px 0;">Your cart is empty!</h3>
-        <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">பொருட்களை வாங்க ஸ்டோர் பகுதிக்கு செல்லவும்.</p>
-        <a href="store.html" style="display: inline-block; background: var(--primary); color: white; padding: 12px 25px; border-radius: 12px; text-decoration: none; font-weight: 600;">Go to Store</a>
+    <div id="emptyMsg" style="text-align: center; display:none; padding: 50px 0;">
+        <h3>Your cart is empty!</h3>
+        <a href="store.html" style="color: var(--primary); text-decoration: none;">Go to Store</a>
     </div>
 
     <div id="summary" style="display:none;">
         <div class="total-card">
-            <p style="margin-bottom: 5px; opacity: 0.8; font-size: 14px;">Total Amount</p>
-            <h2 id="totalPrice">₹0</h2>
+            <p style="margin:0; font-size: 14px; opacity: 0.9;">Total Amount</p>
+            <h2 id="totalPrice" style="margin: 5px 0 0 0;">₹0</h2>
         </div>
-        <button class="checkout-btn" id="whatsappBtn">
-            <span class="btn-text">Order via WhatsApp ✅</span>
-            <div class="btn-loading-spinner"></div>
+
+        <button class="checkout-btn upi-btn" id="payBtn">
+            Pay Total via UPI 💳
+        </button>
+
+        <button class="checkout-btn wa-btn" id="whatsappBtn">
+            Sent Your Payment Screen Short ✅
         </button>
     </div>
 </div>
@@ -181,38 +165,31 @@
     const db = getDatabase(app);
     const currentUser = localStorage.getItem("aquaUser");
 
-    // Sidebar Toggle
-    const menuBtn = document.getElementById("menuBtn");
-    const sidebar = document.getElementById("sidebar");
-    const overlay = document.getElementById("overlay");
+    const cartList = document.getElementById("cartList");
+    const summary = document.getElementById("summary");
+    const totalPriceEl = document.getElementById("totalPrice");
+    const loader = document.getElementById("loader");
+    const emptyMsg = document.getElementById("emptyMsg");
 
-    const toggleMenu = () => {
-        sidebar.classList.toggle("open");
-        overlay.classList.toggle("show");
+    document.getElementById("menuBtn").onclick = () => {
+        document.getElementById("sidebar").classList.toggle("open");
+        document.getElementById("overlay").classList.toggle("show");
+    };
+    document.getElementById("overlay").onclick = () => {
+        document.getElementById("sidebar").classList.remove("open");
+        document.getElementById("overlay").classList.remove("show");
     };
 
-    menuBtn.onclick = toggleMenu;
-    overlay.onclick = toggleMenu;
-
     function fetchCart() {
-        if (!currentUser) {
-            document.getElementById("loader").innerHTML = "<p>Please login first.</p>";
-            return;
-        }
+        if (!currentUser) return;
 
         const cartRef = ref(db, 'carts/' + currentUser);
         onValue(cartRef, (snapshot) => {
             const data = snapshot.val();
-            const cartList = document.getElementById("cartList");
-            const emptyMsg = document.getElementById("emptyMsg");
-            const summary = document.getElementById("summary");
-            const totalPriceEl = document.getElementById("totalPrice");
-            const loader = document.getElementById("loader");
-
             loader.style.display = "none";
             cartList.innerHTML = "";
             let total = 0;
-            let itemsForWhatsapp = [];
+            let itemList = [];
 
             if (!data) {
                 emptyMsg.style.display = "block";
@@ -226,7 +203,7 @@
             Object.keys(data).forEach((key) => {
                 const item = data[key];
                 total += parseInt(item.price);
-                itemsForWhatsapp.push(`• ${item.productName} - ₹${item.price}`);
+                itemList.push(`• ${item.productName} (₹${item.price})`);
 
                 cartList.innerHTML += `
                     <div class="cart-item">
@@ -234,38 +211,34 @@
                             <img src="${item.image || 'https://via.placeholder.com/50'}" class="cart-img">
                             <div>
                                 <h4>${item.productName}</h4>
-                                <p>₹${item.price}</p>
+                                <p style="color:var(--primary); font-weight:700; margin:0;">₹${item.price}</p>
                             </div>
                         </div>
-                        <button class="remove-btn" onclick="deleteCartItem('${key}')">Remove</button>
-                    </div>
-                `;
+                        <button class="remove-btn" onclick="deleteItem('${key}')">Remove</button>
+                    </div>`;
             });
 
             totalPriceEl.innerText = "₹" + total;
 
-            document.getElementById("whatsappBtn").onclick = function() {
-                const btn = this;
-                btn.classList.add('loading');
-                
-                const message = `*Meadi Aqua Tech - Order*%0A%0A${itemsForWhatsapp.join('%0A')}%0A%0A*Total Amount: ₹${total}*%0A%0A_Please confirm my order._`;
-                
-                setTimeout(() => {
-                    btn.classList.remove('loading');
-                    window.open(`https://wa.me/919344165879?text=${message}`);
-                }, 1000);
+            document.getElementById("payBtn").onclick = () => {
+                const upiUrl = `upi://pay?pa=mm05270331@oksbi&pn=Meadi Aqua Tech&am=${total}&cu=INR`;
+                window.location.href = upiUrl;
+            };
+
+            document.getElementById("whatsappBtn").onclick = () => {
+                const msg = `*New Order - Meadi Aqua Tech*%0A%0A*Items:*%0A${itemList.join('%0A')}%0A%0A*Total: ₹${total}*%0A%0A_I have paid via UPI. Here is my payment screenshot._`;
+                window.open(`https://wa.me/919344165879?text=${msg}`);
             };
         });
     }
 
-    window.deleteCartItem = function(itemKey) {
-        if(confirm("Are you sure you want to remove this item?")) {
-            const itemRef = ref(db, `carts/${currentUser}/${itemKey}`);
-            remove(itemRef);
+    window.deleteItem = (key) => {
+        if(confirm("பொருளை நீக்கவா?")) {
+            remove(ref(db, `carts/${currentUser}/${key}`));
         }
     }
 
-    window.onload = fetchCart;
+    fetchCart();
 </script>
 
 </body>
