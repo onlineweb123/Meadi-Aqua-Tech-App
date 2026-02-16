@@ -41,7 +41,6 @@
     .bill-info { font-size: 15px; margin: 15px 0; line-height: 1.6; flex-shrink: 0; }
     .bill-info b { color: #0056b3; }
 
-    /* Date and Contact on Right Side */
     .right-info { text-align: right; }
 
     .table-container { flex-grow: 1; overflow: hidden; margin-top: 10px; }
@@ -70,6 +69,9 @@
 <div class="container">
   <h2>💧 Meadi Aqua Tech</h2>
   
+  <label>Date:</label>
+  <input type="date" id="invoiceDate">
+
   <label>Customer Name:</label>
   <input type="text" id="custName" placeholder="Enter Name">
 
@@ -156,6 +158,12 @@
 <script>
   let items = [];
 
+  // இன்றைய தேதியை தானாகவே செட் செய்ய
+  window.onload = function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('invoiceDate').value = today;
+  };
+
   function addItem() {
     const name = document.getElementById("itemName").value;
     const qty = parseInt(document.getElementById("itemQty").value);
@@ -176,6 +184,7 @@
     const name = document.getElementById("custName").value;
     const phone = document.getElementById("custPhone").value;
     const addr = document.getElementById("custAddress").value;
+    const selectedDate = document.getElementById("invoiceDate").value;
     const service = parseFloat(document.getElementById("serviceCharge").value) || 0;
 
     if (!name || items.length === 0) {
@@ -183,10 +192,14 @@
       return;
     }
 
+    // தேதி வடிவத்தை மாற்ற (YYYY-MM-DD -> DD/MM/YYYY)
+    const dateObj = new Date(selectedDate);
+    const formattedDate = dateObj.toLocaleDateString("en-IN");
+
     document.getElementById("bName").innerText = name;
     document.getElementById("bPhone").innerText = phone;
     document.getElementById("bAddress").innerText = addr;
-    document.getElementById("bDate").innerText = new Date().toLocaleDateString("en-IN");
+    document.getElementById("bDate").innerText = formattedDate;
     document.getElementById("bService").innerText = `₹${service}`;
 
     let total = service;
