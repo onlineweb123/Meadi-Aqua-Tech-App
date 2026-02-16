@@ -32,12 +32,28 @@
         }
         .header-title { font-size: 18px; font-weight: 700; color: var(--primary); }
         
-           .menu-btn { 
+        .menu-btn { 
             position: absolute; left: 20px; font-size: 24px; 
             background: #f1f5f9; border: none; color: var(--text-main); 
             cursor: pointer; width: 40px; height: 40px; border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
         }
+
+        /* Sidebar Styles */
+        .sidebar { 
+            width: 280px; background: var(--card); position: fixed; top: 0; bottom: 0; left: -300px; 
+            padding-top: 80px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 110; 
+            box-shadow: 20px 0 50px rgba(0,0,0,0.05);
+        }
+        .sidebar.open { left: 0; }
+        .sidebar a { 
+            display: flex; align-items: center; padding: 16px 24px; text-decoration: none; 
+            color: var(--text-main); font-weight: 500; font-size: 15px; transition: 0.2s;
+        }
+        .sidebar a:hover { background: #f8fafc; color: var(--primary); padding-left: 30px; }
+
+        .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); display: none; z-index: 105; backdrop-filter: blur(4px); }
+        .overlay.show { display: block; }
 
         .filter-container {
             display: flex; gap: 8px; margin-bottom: 20px; background: #e2e8f0;
@@ -80,7 +96,7 @@
         .btn-update { padding: 8px 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; }
         .btn-delete { padding: 8px 15px; background: #fff1f1; color: var(--danger); border: 1px solid #fee2e2; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; }
 
-               .bottom {
+        .bottom {
             height: 75px; position: fixed; bottom: 0; left: 0; right: 0; 
             display: flex; justify-content: space-around; align-items: center; 
             background: var(--glass); backdrop-filter: blur(12px);
@@ -93,8 +109,6 @@
         }
         .bottom button.active { color: var(--primary); }
         .bottom .icon { font-size: 22px; margin-bottom: 4px; }
-       
-       
     </style>
 </head>
 <body>
@@ -104,14 +118,14 @@
     <div class="header-title">Service Records</div>
 </header>
 
-
 <div id="sidebar" class="sidebar">
   <a href="index.html">🏠 Dashboard</a>
   <a href="service.html">🛠 Service</a>
   <a href="store.html">🛒 Store </a>
   <a href="profile.html">👤 Profile</a>
   <a href="cart.html">🛒 My Cart</a>
-
+</div> 
+<div id="overlay" class="overlay"></div>
 
 <div class="main">
     <div class="filter-container">
@@ -153,8 +167,24 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+
+    // Sidebar Control
+    const menuBtn = document.getElementById('menuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+
+    menuBtn.onclick = () => {
+        sidebar.classList.add('open');
+        overlay.classList.add('show');
+    };
+
+    overlay.onclick = () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('show');
+    };
+
     let allData = [];
-    let currentFilter = 'all'; // தற்போதைய பில்டரை டிராக் செய்ய
+    let currentFilter = 'all';
 
     const bookingsRef = ref(db, 'bookings');
     onValue(bookingsRef, (snapshot) => {
@@ -162,7 +192,7 @@
         if (snapshot.exists()) {
             const data = snapshot.val();
             allData = Object.keys(data).map(id => ({ id, ...data[id] })).reverse();
-            applyFilter(); // டேட்டா மாறும்போது பில்டரை மீண்டும் ரன் செய்யும்
+            applyFilter();
         } else {
             listDiv.innerHTML = '<div style="text-align:center; padding:40px; color:#64748b;">No Service Records Found</div>';
         }
@@ -176,7 +206,7 @@
             const card = document.createElement('div');
             card.className = 'booking-card';
             
-            // "Completed" பில்டரில் இருந்தால் மட்டுமே டெலிட் பட்டன் காட்டும் லாஜிக்
+            // Delete பட்டன் "Completed" பில்டரில் மட்டுமே தெரியும்படி மாற்றம்
             const deleteBtnHtml = (currentFilter === 'Completed') 
                 ? `<button class="btn-delete" data-id="${item.id}">🗑</button>` 
                 : '';
