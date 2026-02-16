@@ -3,51 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <title>Meadi Aqua Tech | Festival Offers</title>
-
-
-
-
-
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
-    authDomain: "meadi-aqua-tech.firebaseapp.com",
-    databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
-    projectId: "meadi-aqua-tech",
-    storageBucket: "meadi-aqua-tech.firebasestorage.app",
-    messagingSenderId: "531151217708",
-    appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89",
-    measurementId: "G-QW495L6JVE"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
-
-
-
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root { 
-            --bg: #fffcf2; 
+            --bg: #f8fbff; 
             --festive-gold: #ffb703;
             --festive-red: #d00000;
             --primary: #0077b6; 
+            --accent: #00b4d8;
             --text-main: #1e293b;
+            --text-sub: #64748b;
             --white: #ffffff;
+            --glass: rgba(255, 255, 255, 0.9);
+            --border: #e2e8f0; 
         }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body { 
             margin: 0; 
@@ -56,189 +29,212 @@
             color: var(--text-main); 
         }
 
+        /* --- Header & Sidebar --- */
         header { 
             height: 70px; display: flex; align-items: center; justify-content: center; 
             position: fixed; top: 0; left: 0; right: 0; 
-            background: rgba(255,255,255,0.9); backdrop-filter: blur(10px);
-            z-index: 100; border-bottom: 1px solid #eee;
+            background: var(--glass); backdrop-filter: blur(12px);
+            z-index: 100; border-bottom: 1px solid var(--border);
         }
-        .back-btn { position: absolute; left: 15px; background: none; border: none; font-size: 20px; cursor: pointer; }
 
-        .main { padding: 90px 15px 100px; max-width: 600px; margin: 0 auto; }
+        .header-title { font-size: 18px; font-weight: 700; color: var(--primary); letter-spacing: -0.5px; }
 
-        /* Festive Banner */
+        .menu-btn { 
+            position: absolute; left: 20px; font-size: 24px; 
+            background: #f1f5f9; border: none; color: var(--text-main); 
+            cursor: pointer; width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .sidebar { 
+            width: 280px; background: var(--white); position: fixed; top: 0; bottom: 0; left: -300px; 
+            padding-top: 80px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 110; 
+            box-shadow: 20px 0 50px rgba(0,0,0,0.05);
+        }
+        .sidebar.open { left: 0; }
+        .sidebar a { display: flex; align-items: center; padding: 16px 24px; text-decoration: none; color: var(--text-main); font-weight: 500; font-size: 15px; }
+
+        .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); display: none; z-index: 105; backdrop-filter: blur(4px); }
+        .overlay.show { display: block; }
+
+        /* --- Main Content --- */
+        .main { padding: 90px 20px 100px 20px; max-width: 600px; margin: 0 auto; }
+
+        /* Loader Style */
+        .loading-container {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 200px;
+        }
+        .loading-spinner {
+            width: 40px; height: 40px; border: 4px solid rgba(0, 119, 182, 0.1);
+            border-top: 4px solid var(--primary); border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 15px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
         .festive-hero {
-            background: linear-gradient(45deg, #d00000, #ffb703);
-            border-radius: 25px;
-            padding: 30px 20px;
-            color: white;
-            text-align: center;
-            margin-bottom: 25px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 10px 25px rgba(208, 0, 0, 0.2);
+            background: linear-gradient(135deg, #d00000, #ffb703);
+            border-radius: 24px; padding: 35px 20px; color: white; text-align: center;
+            margin-bottom: 25px; box-shadow: 0 10px 25px rgba(208, 0, 0, 0.2);
         }
-        .festive-hero h1 { margin: 0; font-size: 28px; text-transform: uppercase; }
-        .festive-hero p { margin: 10px 0 0; font-weight: 500; opacity: 0.9; }
+        .festive-hero h1 { margin: 0; font-size: 24px; font-weight: 800; text-transform: uppercase; }
 
-        /* Offer Card Style */
-        .offer-card {
-            background: var(--white);
-            border-radius: 20px;
-            padding: 15px;
-            margin-bottom: 20px;
-            border: 2px solid #ffeecc;
-            display: flex;
-            align-items: center;
-            position: relative;
-            transition: 0.3s;
-        }
-        .offer-card:hover { transform: translateY(-5px); border-color: var(--festive-gold); }
-
-        .tag {
-            position: absolute;
-            top: -10px;
-            left: 15px;
-            background: var(--festive-red);
-            color: white;
-            font-size: 10px;
-            font-weight: 800;
-            padding: 4px 10px;
-            border-radius: 50px;
-            text-transform: uppercase;
-        }
-
-        .offer-img {
-            width: 90px;
-            height: 90px;
-            background: #fff9e6;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            margin-right: 15px;
-        }
-
-        .offer-info { flex: 1; }
-        .offer-info h3 { margin: 0; font-size: 17px; color: #333; }
-        .offer-info .price-tag { margin: 8px 0; }
-        .old-price { text-decoration: line-through; color: #94a3b8; font-size: 13px; }
-        .new-price { color: var(--festive-red); font-weight: 800; font-size: 18px; margin-left: 5px; }
-
-        .claim-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 13px;
-        }
-
-        /* Countdown Timer */
         .timer-box {
-            background: #fff;
-            padding: 15px;
-            border-radius: 15px;
-            text-align: center;
-            margin-bottom: 25px;
-            border: 1px solid #ddd;
+            background: var(--white); padding: 20px; border-radius: 20px;
+            text-align: center; margin-bottom: 20px; border: 1px solid var(--border);
         }
-        .timer-grid { display: flex; justify-content: center; gap: 15px; margin-top: 10px; }
-        .time-item { display: flex; flex-direction: column; }
-        .time-val { font-weight: 800; font-size: 20px; color: var(--festive-red); }
+        .timer-grid { display: flex; justify-content: center; gap: 20px; margin-top: 12px; }
+        .time-val { font-weight: 800; font-size: 26px; color: var(--festive-red); }
         .time-lab { font-size: 10px; text-transform: uppercase; color: var(--text-sub); }
+
+        .offer-details-card {
+            background: var(--white); padding: 25px; border-radius: 20px;
+            border: 2px dashed var(--festive-gold); text-align: center;
+            margin-bottom: 20px; line-height: 1.6; font-weight: 600;
+        }
+
+        #noOfferMsg { display: none; text-align: center; padding: 60px 20px; }
 
         .bottom {
             height: 75px; position: fixed; bottom: 0; left: 0; right: 0; 
             display: flex; justify-content: space-around; align-items: center; 
-            background: white; border-top: 1px solid #eee; z-index: 100;
+            background: var(--glass); backdrop-filter: blur(12px); border-top: 1px solid var(--border); z-index: 100;
         }
-        .bottom button { background: none; border: none; font-size: 11px; color: #64748b; }
-        .bottom .active { color: var(--festive-red); font-weight: 700; }
+        .bottom button { background: none; border: none; font-size: 11px; font-weight: 600; color: var(--text-sub); display: flex; flex-direction: column; align-items: center; }
+        .bottom button.active { color: var(--primary); }
     </style>
 </head>
 <body>
 
 <header>
-    <button class="back-btn" onclick="history.back()">🔙</button>
-    <div style="font-weight: 700; color: var(--festive-red);">FESTIVAL DHAMAKA 🪔</div>
+    <button class="menu-btn" id="menuBtn">☰</button>
+    <div class="header-title">Offers</div>
 </header>
 
+<div id="sidebar" class="sidebar">
+  <a href="index.html">🏠 Dashboard</a>
+  <a href="service.html">🛠 Service</a>
+  <a href="store.html">🛒 Store </a>
+  <a href="profile.html">👤 Profile</a>
+  <a href="cart.html">🛒 My Cart</a>
+</div>
+
+<div id="overlay" class="overlay"></div>
+
 <div class="main">
-    <div class="festive-hero">
-        <h1>Diwali Sale Is Live!</h1>
-        <p>சுத்தமான தண்ணீர் - மகிழ்ச்சியான தீபாவளி!</p>
+    <div id="loader" class="loading-container">
+        <div class="loading-spinner"></div>
+        <p style="color: var(--text-sub); font-weight: 600; font-size: 14px;">Checking Offers...</p>
     </div>
 
-    <div class="timer-box">
-        <span style="font-size: 14px; font-weight: 600;">Offer Ends In:</span>
-        <div class="timer-grid">
-            <div class="time-item"><span class="time-val">02</span><span class="time-lab">Days</span></div>
-            <div class="time-item"><span class="time-val">14</span><span class="time-lab">Hrs</span></div>
-            <div class="time-item"><span class="time-val">45</span><span class="time-lab">Mins</span></div>
+    <div id="offerContent" style="display: none;">
+        <div class="festive-hero">
+            <h1 id="displayTitle"></h1>
+            <p id="displaySubTitle" style="margin-top: 10px; opacity: 0.9;"></p>
         </div>
-    </div>
 
-    <div class="offer-card">
-        <span class="tag">Diwali Special</span>
-        <div class="offer-img">🪔</div>
-        <div class="offer-info">
-            <h3>RO Service Combo</h3>
-            <div class="price-tag">
-                <span class="old-price">₹1500</span>
-                <span class="new-price">₹999</span>
+        <div class="timer-box">
+            <span style="font-size: 13px; font-weight: 700; color: var(--text-sub);">TIME REMAINING</span>
+            <div class="timer-grid">
+                <div class="time-item"><span class="time-val" id="days">00</span><span class="time-lab">Days</span></div>
+                <div class="time-item"><span class="time-val" id="hours">00</span><span class="time-lab">Hrs</span></div>
+                <div class="time-item"><span class="time-val" id="mins">00</span><span class="time-lab">Mins</span></div>
             </div>
-            <button class="claim-btn" onclick="addToCart('Diwali Service Combo', 999)">Book Now</button>
+        </div>
+
+        <div class="offer-details-card">
+            <p id="displayMsg" style="margin: 0;"></p>
         </div>
     </div>
 
-    <div class="offer-card">
-        <span class="tag" style="background: #2a9d8f;">Pongal Advance</span>
-        <div class="offer-img">🌾</div>
-        <div class="offer-info">
-            <h3>New Filter Pack</h3>
-            <div class="price-tag">
-                <span class="old-price">₹850</span>
-                <span class="new-price">₹599</span>
-            </div>
-            <button class="claim-btn" onclick="addToCart('Pongal Filter Pack', 599)">Add to Cart</button>
-        </div>
+    <div id="noOfferMsg">
+        <div style="font-size: 60px; margin-bottom: 15px;">🎁</div>
+        <h3 style="margin:0; color: var(--text-main);">No Live Offers!</h3>
+        <p style="color: var(--text-sub); font-size: 14px;">Stay tuned for our next big update.</p>
     </div>
-
-    <div class="offer-card">
-        <span class="tag" style="background: #f4a261;">Filter Offer</span>
-        <div class="offer-img">💧</div>
-        <div class="offer-info">
-            <h3>75 GPD Membrane</h3>
-            <div class="price-tag">
-                <span class="old-price">₹1250</span>
-                <span class="new-price">₹899</span>
-            </div>
-            <button class="claim-btn" onclick="addToCart('Offer Membrane', 899)">Add to Cart</button>
-        </div>
-    </div>
-
 </div>
 
 <div class="bottom">
-    <button onclick="location.href='index.html'"><div style="font-size:20px">🏠</div>Home</button>
-    <button onclick="location.href='store.html'"><div style="font-size:20px">📦</div>Shop</button>
-    <button class="active"><div style="font-size:20px">🎁</div>Offers</button>
-    <button onclick="location.href='cart.html'"><div style="font-size:20px">🛒</div>Cart</button>
+    <button onclick="location.href='index.html'"><span style="font-size:22px">🏠</span>Home</button>
+    <button onclick="location.href='service.html'"><span style="font-size:22px">⚒️</span>Service</button>
+    <button onclick="location.href='store.html'"><span style="font-size:22px">🛒</span>Store</button>
+    <button onclick="location.href='profile.html'"><span style="font-size:22px">👤</span>Profile</button>
 </div>
 
-<script>
-    function addToCart(name, price) {
-        let cart = JSON.parse(localStorage.getItem("aquaCart")) || [];
-        cart.push({ name: name, price: price });
-        localStorage.setItem("aquaCart", JSON.stringify(cart));
-        alert("Special Offer added: " + name);
-        if(navigator.vibrate) navigator.vibrate([50, 30, 50]);
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
+        authDomain: "meadi-aqua-tech.firebaseapp.com",
+        databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
+        projectId: "meadi-aqua-tech",
+        storageBucket: "meadi-aqua-tech.firebasestorage.app",
+        messagingSenderId: "531151217708",
+        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const offerRef = ref(db, 'currentOffer');
+
+    // Sidebar
+    const menuBtn = document.getElementById("menuBtn");
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+    menuBtn.onclick = () => { sidebar.classList.add("open"); overlay.classList.add("show"); };
+    overlay.onclick = () => { sidebar.classList.remove("open"); overlay.classList.remove("show"); };
+
+    let countdownInterval;
+
+    onValue(offerRef, (snapshot) => {
+        document.getElementById("loader").style.display = "none"; // Hide spinner after check
+        const data = snapshot.val();
+        
+        if (data) {
+            const now = Date.now();
+            if (now > data.endTime) {
+                remove(offerRef);
+                showEmpty();
+            } else {
+                displayOffer(data);
+                startCountdown(data.endTime);
+            }
+        } else {
+            showEmpty();
+        }
+    });
+
+    function displayOffer(data) {
+        document.getElementById("offerContent").style.display = "block";
+        document.getElementById("noOfferMsg").style.display = "none";
+        document.getElementById("displayTitle").innerText = data.title;
+        document.getElementById("displaySubTitle").innerText = data.sub;
+        document.getElementById("displayMsg").innerText = data.message;
+    }
+
+    function startCountdown(endTime) {
+        if (countdownInterval) clearInterval(countdownInterval);
+        countdownInterval = setInterval(() => {
+            const now = Date.now();
+            const distance = endTime - now;
+            if (distance < 0) {
+                clearInterval(countdownInterval);
+                remove(offerRef);
+                showEmpty();
+                return;
+            }
+            document.getElementById("days").innerText = Math.floor(distance / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
+            document.getElementById("hours").innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+            document.getElementById("mins").innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+        }, 1000);
+    }
+
+    function showEmpty() {
+        document.getElementById("offerContent").style.display = "none";
+        document.getElementById("noOfferMsg").style.display = "block";
     }
 </script>
-
 </body>
 </html>
