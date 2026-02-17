@@ -178,7 +178,7 @@
             </div>
             <div class="form-group">
                 <label>Phone Number</label>
-                <input type="tel" id="regPhone" placeholder="+91 00000 00000" required>
+                <input type="tel" id="regPhone" placeholder="9876543210" required>
             </div>
             <div class="form-group">
                 <label>City</label>
@@ -213,9 +213,10 @@
         <div id="step1">
             <div class="form-group">
                 <label>Enter Registered Phone Number</label>
-                <input type="tel" id="resetPhone" placeholder="+919876543210">
+                <input type="tel" id="resetPhone" placeholder="9876543210">
             </div>
             <div id="recaptcha-container"></div>
+            
             <button type="button" class="btn-auth" id="sendOtpBtn" onclick="handleSendOTP()">
                 <span class="btn-text">Send OTP</span>
                 <div class="btn-spinner"></div>
@@ -296,6 +297,7 @@
         document.getElementById('resetSection').style.display = 'none';
     };
 
+    // --- Signup ---
     document.getElementById('signupForm').onsubmit = async (e) => {
         e.preventDefault();
         const btn = document.getElementById('signupBtn');
@@ -303,7 +305,7 @@
         btn.disabled = true;
         const user = document.getElementById('regUser').value;
         const name = document.getElementById('regName').value;
-        const phone = document.getElementById('regPhone').value;
+        const phone = document.getElementById('regPhone').value.trim();
         const city = document.getElementById('regCity').value;
         const pass = document.getElementById('regPass').value;
         try {
@@ -324,6 +326,7 @@
         }
     };
 
+    // --- Login ---
     document.getElementById('loginForm').onsubmit = async (e) => {
         e.preventDefault();
         const btn = document.getElementById('loginBtn');
@@ -353,11 +356,23 @@
         }
     };
 
+    // --- மேம்படுத்தப்பட்ட OTP அனுப்பும் முறை (Fixed Country Code & reCAPTCHA) ---
     window.handleSendOTP = async function() {
-        const phone = document.getElementById('resetPhone').value;
+        let rawPhone = document.getElementById('resetPhone').value.trim();
         const btn = document.getElementById('sendOtpBtn');
         
-        if(!phone) { alert("Enter Phone Number"); return; }
+        if(!rawPhone) { alert("Please enter phone number"); return; }
+        
+        // தானாகவே +91 சேர்த்துக் கொள்ளும் முறை
+        let finalPhone = rawPhone;
+        if (!rawPhone.startsWith('+')) {
+            if (rawPhone.length === 10) {
+                finalPhone = '+91' + rawPhone;
+            } else {
+                alert("Enter a valid 10-digit number");
+                return;
+            }
+        }
         
         btn.classList.add('loading');
         btn.disabled = true;
@@ -369,7 +384,8 @@
             if (usersSnapshot.exists()) {
                 const data = usersSnapshot.val();
                 for(let u in data) {
-                    if(data[u].phone === phone) {
+                    // டேட்டாபேஸில் உள்ள நம்பர் மற்றும் உள்ளீடு செய்யப்பட்ட நம்பரை ஒப்பிடுதல்
+                    if(data[u].phone.includes(rawPhone.slice(-10))) {
                         phoneExists = true;
                         foundUsername = data[u].user;
                         break;
@@ -378,14 +394,19 @@
             }
 
             if (phoneExists) {
-                if (!window.recaptchaVerifier) {
-                    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible' });
+                // reCAPTCHA பிரச்சனை வராமல் இருக்க பழையதை நீக்கி புதியதை உருவாக்குதல்
+                if (window.recaptchaVerifier) {
+                    window.recaptchaVerifier.clear();
                 }
                 
-                signInWithPhoneNumber(auth, phone, window.recaptchaVerifier)
+                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 
+                    'size': 'invisible' 
+                });
+
+                signInWithPhoneNumber(auth, finalPhone, window.recaptchaVerifier)
                 .then((confirmationResult) => {
                     window.confirmationResult = confirmationResult;
-                    alert("OTP Sent!");
+                    alert("OTP Sent to " + finalPhone);
                     document.getElementById('step1').style.display = 'none';
                     document.getElementById('step2').style.display = 'block';
                 }).catch((err) => {
@@ -415,7 +436,7 @@
         btn.disabled = true;
 
         confirmationResult.confirm(code).then(() => {
-            alert("✅ Verified!");
+            alert("✅ OTP Verified!");
             document.getElementById('step2').style.display = 'none';
             document.getElementById('step3').style.display = 'block';
         }).catch(() => {
