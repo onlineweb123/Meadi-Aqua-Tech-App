@@ -216,7 +216,10 @@
                 <input type="tel" id="resetPhone" placeholder="+919876543210">
             </div>
             <div id="recaptcha-container"></div>
-            <button type="button" class="btn-auth" id="sendOtpBtn" onclick="handleSendOTP()">Send OTP</button>
+            <button type="button" class="btn-auth" id="sendOtpBtn" onclick="handleSendOTP()">
+                <span class="btn-text">Send OTP</span>
+                <div class="btn-spinner"></div>
+            </button>
         </div>
 
         <div id="step2" style="display:none;">
@@ -224,7 +227,10 @@
                 <label>Enter 6-Digit OTP</label>
                 <input type="text" id="otpCode" placeholder="123456">
             </div>
-            <button type="button" class="btn-auth" onclick="handleVerifyOTP()">Verify OTP</button>
+            <button type="button" class="btn-auth" id="verifyOtpBtn" onclick="handleVerifyOTP()">
+                <span class="btn-text">Verify OTP</span>
+                <div class="btn-spinner"></div>
+            </button>
         </div>
 
         <div id="step3" style="display:none;">
@@ -232,7 +238,10 @@
                 <label>New Password</label>
                 <input type="password" id="newPass" placeholder="••••••••">
             </div>
-            <button type="button" class="btn-auth" onclick="handleUpdatePass()">Update Password</button>
+            <button type="button" class="btn-auth" id="updatePassBtn" onclick="handleUpdatePass()">
+                <span class="btn-text">Update Password</span>
+                <div class="btn-spinner"></div>
+            </button>
         </div>
         
         <p class="footer-text"><a onclick="hideReset()">← Back to Login</a></p>
@@ -259,7 +268,6 @@
     const db = getDatabase(app);
     const auth = getAuth(app);
 
-    // பயனர் பெயர் சேமிக்க உலகளாவிய மாறி
     let foundUsername = "";
 
     window.switchTab = (type) => {
@@ -345,10 +353,14 @@
         }
     };
 
-    // --- OTP Logic (Phone Only) ---
     window.handleSendOTP = async function() {
         const phone = document.getElementById('resetPhone').value;
+        const btn = document.getElementById('sendOtpBtn');
+        
         if(!phone) { alert("Enter Phone Number"); return; }
+        
+        btn.classList.add('loading');
+        btn.disabled = true;
 
         try {
             const usersSnapshot = await get(child(ref(db), 'users'));
@@ -359,46 +371,80 @@
                 for(let u in data) {
                     if(data[u].phone === phone) {
                         phoneExists = true;
-                        foundUsername = data[u].user; // பாஸ்வேர்ட் மாற்ற Username தேவை
+                        foundUsername = data[u].user;
                         break;
                     }
                 }
             }
 
             if (phoneExists) {
-                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible' });
+                if (!window.recaptchaVerifier) {
+                    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible' });
+                }
+                
                 signInWithPhoneNumber(auth, phone, window.recaptchaVerifier)
                 .then((confirmationResult) => {
                     window.confirmationResult = confirmationResult;
                     alert("OTP Sent!");
                     document.getElementById('step1').style.display = 'none';
                     document.getElementById('step2').style.display = 'block';
-                }).catch((err) => alert("SMS Error: " + err.message));
+                }).catch((err) => {
+                    alert("SMS Error: " + err.message);
+                    btn.classList.remove('loading');
+                    btn.disabled = false;
+                });
             } else {
                 alert("❌ This phone number is not registered!");
+                btn.classList.remove('loading');
+                btn.disabled = false;
             }
-        } catch (e) { alert("Error: " + e.message); }
+        } catch (e) { 
+            alert("Error: " + e.message); 
+            btn.classList.remove('loading');
+            btn.disabled = false;
+        }
     };
 
     window.handleVerifyOTP = function() {
         const code = document.getElementById('otpCode').value;
+        const btn = document.getElementById('verifyOtpBtn');
+        
+        if(!code) { alert("Enter OTP"); return; }
+        
+        btn.classList.add('loading');
+        btn.disabled = true;
+
         confirmationResult.confirm(code).then(() => {
             alert("✅ Verified!");
             document.getElementById('step2').style.display = 'none';
             document.getElementById('step3').style.display = 'block';
-        }).catch(() => alert("❌ Invalid OTP"));
+        }).catch(() => {
+            alert("❌ Invalid OTP");
+            btn.classList.remove('loading');
+            btn.disabled = false;
+        });
     };
 
     window.handleUpdatePass = async function() {
         const newPass = document.getElementById('newPass').value;
+        const btn = document.getElementById('updatePassBtn');
+        
         if(!newPass) { alert("Enter new password"); return; }
+        
+        btn.classList.add('loading');
+        btn.disabled = true;
         
         try {
             await update(ref(db, `users/${foundUsername}`), { pass: newPass });
             alert("✅ Password Updated Successfully!");
             hideReset();
             switchTab('login');
-        } catch (e) { alert("Update failed"); }
+        } catch (e) { 
+            alert("Update failed"); 
+        } finally {
+            btn.classList.remove('loading');
+            btn.disabled = false;
+        }
     };
 
 </script>
