@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <title>Service History | Meadi Aqua Tech</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        if (localStorage.getItem("isLoggedIn") !== "true") {
+            window.location.href = "login.html";
+        }
+    </script>
+
+    <style>
+        :root { 
+            --bg: #f8fbff; 
+            --card: #ffffff; 
+            --border: #e2e8f0; 
+            --primary: #0077b6; 
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --glass: rgba(255, 255, 255, 0.8);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body { 
+            margin: 0; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main); 
+        }
+
+        header { 
+            height: 70px; display: flex; align-items: center; justify-content: center; 
+            position: fixed; top: 0; left: 0; right: 0; 
+            background: var(--glass); backdrop-filter: blur(12px);
+            z-index: 100; border-bottom: 1px solid var(--border);
+        }
+        .header-title { font-size: 18px; font-weight: 700; color: var(--primary); }
+        
+        .menu-btn { 
+            position: absolute; left: 20px; font-size: 24px; 
+            background: #f1f5f9; border: none; color: var(--text-main); 
+            cursor: pointer; width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .sidebar { 
+            width: 280px; background: var(--card); position: fixed; top: 0; bottom: 0; left: -300px; 
+            padding-top: 80px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 110; 
+            box-shadow: 20px 0 50px rgba(0,0,0,0.05);
+        }
+        .sidebar.open { left: 0; }
+        .sidebar a { 
+            display: flex; align-items: center; padding: 16px 24px; text-decoration: none; 
+            color: var(--text-main); font-weight: 500; font-size: 15px;
+        }
+        .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); display: none; z-index: 105; backdrop-filter: blur(4px); }
+        .overlay.show { display: block; }
+
+        .main { padding: 90px 20px 100px 20px; max-width: 600px; margin: 0 auto; }
+
+        .timeline { position: relative; padding-left: 30px; margin-top: 10px; }
+        .timeline::before {
+            content: ''; position: absolute; left: 10px; top: 5px; bottom: 5px;
+            width: 2px; background: #e2e8f0;
+        }
+
+        .history-card {
+            background: var(--card); border-radius: 15px; padding: 15px;
+            border: 1px solid var(--border); margin-bottom: 12px; position: relative;
+        }
+        .history-card::before {
+            content: ''; position: absolute; left: -25px; top: 22px;
+            width: 10px; height: 10px; border-radius: 50%;
+            background: var(--primary); border: 2px solid white;
+        }
+
+        .h-date { font-size: 11px; font-weight: 700; color: var(--primary); display: block; margin-bottom: 2px; }
+        .h-title { font-size: 15px; font-weight: 700; }
+
+        .bottom {
+            height: 75px; position: fixed; bottom: 0; left: 0; right: 0; 
+            display: flex; justify-content: space-around; align-items: center; 
+            background: var(--glass); backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border); z-index: 100; padding-bottom: env(safe-area-inset-bottom);
+        }
+        .bottom button {
+            background: none; border: none; font-size: 11px; font-weight: 600;
+            display: flex; flex-direction: column; align-items: center; color: var(--text-sub);
+            cursor: pointer;
+        }
+        .bottom .icon { font-size: 22px; margin-bottom: 4px; }
+        
+        .empty-state, .loading-text { text-align: center; margin-top: 50px; color: var(--text-sub); font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <button class="menu-btn" id="menuBtn">☰</button>
+    <div class="header-title">Service History</div>
+</header>
+
+<div id="sidebar" class="sidebar">
+  <a href="index.html">🏠 Dashboard</a>
+  <a href="service.html">🛠 Service</a>
+  <a href="store.html">🛒 Store </a>
+  <a href="profile.html">👤 Profile</a>
+  <a href="history.html" style="color: var(--primary); font-weight: 700;">📜 History</a>
+</div>
+
+<div id="overlay" class="overlay"></div>
+
+<div class="main">
+    <div class="timeline" id="historyTimeline">
+        <div class="loading-text">Loading records...</div>
+    </div>
+</div>
+
+<div class="bottom">
+    <button onclick="location.href='index.html'"><span class="icon">🏠</span>Home</button>
+    <button onclick="location.href='service.html'"><span class="icon">⚒️</span>Service</button>
+    <button onclick="location.href='store.html'"><span class="icon">🛒</span>Store</button>
+    <button onclick="location.href='profile.html'"><span class="icon">👤</span>Profile</button>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
+        authDomain: "meadi-aqua-tech.firebaseapp.com",
+        databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
+        projectId: "meadi-aqua-tech",
+        storageBucket: "meadi-aqua-tech.firebasestorage.app",
+        messagingSenderId: "531151217708",
+        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const toggleMenu = () => {
+        document.getElementById("sidebar").classList.toggle("open");
+        document.getElementById("overlay").classList.toggle("show");
+    };
+    document.getElementById("menuBtn").onclick = toggleMenu;
+    document.getElementById("overlay").onclick = toggleMenu;
+
+    async function fetchHistory() {
+        const user = localStorage.getItem("aquaUser");
+        const timeline = document.getElementById('historyTimeline');
+        
+        if(!user) {
+            timeline.innerHTML = '<div class="empty-state">Please login</div>';
+            return;
+        }
+
+        try {
+            const snapshot = await get(ref(db, `users/${user}/history`));
+            if (snapshot.exists()) {
+                timeline.innerHTML = "";
+                const data = snapshot.val();
+                
+                // Object-ஐ Array-ஆக மாற்றுகிறோம்
+                let historyArray = [];
+                if (Array.isArray(data)) {
+                    historyArray = data;
+                } else {
+                    historyArray = Object.keys(data).map(key => ({
+                        id: key,
+                        ...data[key]
+                    }));
+                }
+
+                // தேதியை வைத்து வரிசைப்படுத்துகிறோம் (சமீபத்தியது மேலே வர)
+                // ஒருவேளை உங்கள் Date Format வேறுபட்டால் .reverse() மட்டும் பயன்படுத்தலாம்
+                historyArray.sort((a, b) => {
+                    return new Date(b.date) - new Date(a.date);
+                });
+
+                // வரிசைப்படுத்தப்பட்ட தரவை HTML-ல் சேர்க்கிறோம்
+                historyArray.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'history-card';
+                    card.innerHTML = `
+                        <span class="h-date">${item.date || ''}</span>
+                        <span class="h-title">${item.type || 'N/A'}</span>
+                    `;
+                    timeline.appendChild(card);
+                });
+
+            } else {
+                timeline.innerHTML = '<div class="empty-state">No records found.</div>';
+            }
+        } catch (e) {
+            console.error(e);
+            timeline.innerHTML = '<div class="empty-state">Error loading data.</div>';
+        }
+    }
+    fetchHistory();
+</script>
+</body>
+</html>
