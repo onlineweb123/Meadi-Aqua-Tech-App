@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Meadi Aqua Tech | Login & Reset</title>
+    <title>Meadi Aqua Tech | Logi  Welcome</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -28,6 +28,7 @@
             padding: 20px;
         }
 
+        /* --- Button Spinner CSS --- */
         .btn-auth {
             position: relative;
             width: 100%;
@@ -49,8 +50,9 @@
 
         .btn-auth:disabled { background: var(--text-sub); cursor: not-allowed; }
 
+        /* பட்டனுக்குள் சுற்றும் அனிமேஷன் */
         .btn-spinner {
-            display: none; 
+            display: none; /* ஆரம்பத்தில் மறைத்து வைக்கவும் */
             width: 20px;
             height: 20px;
             border: 3px solid rgba(255,255,255,0.3);
@@ -61,8 +63,10 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* லோடிங் போது எழுத்தை மறைக்க */
         .loading .btn-text { display: none; }
         .loading .btn-spinner { display: block; }
+        /* --------------------------- */
 
         .auth-container {
             width: 100%;
@@ -77,7 +81,6 @@
         .logo-area span { font-size: 40px; }
         .logo-area h1 { font-size: 24px; color: var(--primary); margin: 10px 0 5px; }
         .logo-area p { font-size: 14px; color: var(--text-sub); margin: 0; }
-        
         .tab-group {
             display: flex;
             background: #f1f5f9;
@@ -128,16 +131,7 @@
             color: var(--text-sub);
             margin-top: 20px;
         }
-        .footer-text a { color: var(--primary); text-decoration: none; font-weight: 700; cursor: pointer; }
-
-        #resetSection {
-            display: none;
-            margin-top: 20px;
-            padding: 20px;
-            background: #f0f9ff;
-            border-radius: 20px;
-            border: 1px dashed var(--primary);
-        }
+        .footer-text a { color: var(--primary); text-decoration: none; font-weight: 700; }
     </style>
 </head>
 <body>
@@ -149,110 +143,66 @@
         <p>Pure water, pure life.</p>
     </div>
 
-    <div id="authContent">
-        <div class="tab-group">
-            <div class="tab active" id="tabLogin">Login</div>
-            <div class="tab" id="tabSignup">Create Account</div>
-        </div>
-
-        <form id="loginForm" class="active">
-            <div class="form-group">
-                <label>Username</label>
-                <input type="text" id="loginUser" placeholder="Enter your username" required>
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="loginPass" placeholder="••••••••" required>
-            </div>
-            <button type="submit" class="btn-auth" id="loginBtn">
-                <span class="btn-text">Sign In</span>
-                <div class="btn-spinner"></div>
-            </button>
-            <p class="footer-text">Forgot password? <a onclick="showReset()">Reset here</a></p>
-        </form>
-
-        <form id="signupForm">
-            <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" id="regName" placeholder="Ex: John Doe" required>
-            </div>
-            <div class="form-group">
-                <label>Phone Number</label>
-                <input type="tel" id="regPhone" placeholder="9876543210" required>
-            </div>
-            <div class="form-group">
-                <label>City</label>
-                <select id="regCity" required>
-                    <option value="" disabled selected>Select your city</option>
-                    <option value="Cuddalore">Cuddalore</option>
-                    <option value="Chennai">Chennai</option>
-                    <option value="Madurai">Madurai</option>
-                    <option value="Coimbatore">Coimbatore</option>
-                    <option value="Trichy">Trichy</option>
-                    <option value="Salem">Salem</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Username</label>
-                <input type="text" id="regUser" placeholder="Choose a username" required>
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="regPass" placeholder="Create a password" required>
-            </div>
-            <button type="submit" class="btn-auth" id="signupBtn">
-                <span class="btn-text">Create Account</span>
-                <div class="btn-spinner"></div>
-            </button>
-        </form>
+    <div class="tab-group">
+        <div class="tab active" id="tabLogin">Login</div>
+        <div class="tab" id="tabSignup">Create Account</div>
     </div>
 
-    <div id="resetSection">
-        <h3 style="text-align: center; color: var(--primary); font-size: 18px;">Reset Password</h3>
-        
-        <div id="step1">
-            <div class="form-group">
-                <label>Enter Registered Phone Number</label>
-                <input type="tel" id="resetPhone" placeholder="9876543210">
-            </div>
-            <div id="recaptcha-container"></div>
-            
-            <button type="button" class="btn-auth" id="sendOtpBtn" onclick="handleSendOTP()">
-                <span class="btn-text">Send OTP</span>
-                <div class="btn-spinner"></div>
-            </button>
+    <form id="loginForm" class="active">
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="loginUser" placeholder="Enter your username" required>
         </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="loginPass" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn-auth" id="loginBtn">
+            <span class="btn-text">Sign In</span>
+            <div class="btn-spinner"></div>
+        </button>
+        <p class="footer-text">Forgot password? <a href="#">Reset here</a></p>
+    </form>
 
-        <div id="step2" style="display:none;">
-            <div class="form-group">
-                <label>Enter 6-Digit OTP</label>
-                <input type="text" id="otpCode" placeholder="123456">
-            </div>
-            <button type="button" class="btn-auth" id="verifyOtpBtn" onclick="handleVerifyOTP()">
-                <span class="btn-text">Verify OTP</span>
-                <div class="btn-spinner"></div>
-            </button>
+    <form id="signupForm">
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="regName" placeholder="Ex: John Doe" required>
         </div>
-
-        <div id="step3" style="display:none;">
-            <div class="form-group">
-                <label>New Password</label>
-                <input type="password" id="newPass" placeholder="••••••••">
-            </div>
-            <button type="button" class="btn-auth" id="updatePassBtn" onclick="handleUpdatePass()">
-                <span class="btn-text">Update Password</span>
-                <div class="btn-spinner"></div>
-            </button>
+        <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" id="regPhone" placeholder="+91 00000 00000" required>
         </div>
-        
-        <p class="footer-text"><a onclick="hideReset()">← Back to Login</a></p>
-    </div>
+        <div class="form-group">
+            <label>City</label>
+            <select id="regCity" required>
+                <option value="" disabled selected>Select your city</option>
+                <option value="Cuddalore">Cuddalore</option>
+                <option value="Chennai">Chennai</option>
+                <option value="Madurai">Madurai</option>
+                <option value="Coimbatore">Coimbatore</option>
+                <option value="Trichy">Trichy</option>
+                <option value="Salem">Salem</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="regUser" placeholder="Choose a username" required>
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="regPass" placeholder="Create a password" required>
+        </div>
+        <button type="submit" class="btn-auth" id="signupBtn">
+            <span class="btn-text">Create Account</span>
+            <div class="btn-spinner"></div>
+        </button>
+    </form>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, get, child, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
@@ -267,15 +217,14 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const auth = getAuth(app);
 
-    let foundUsername = "";
-
+    // UI Tab Switching
     window.switchTab = (type) => {
         const loginForm = document.getElementById('loginForm');
         const signupForm = document.getElementById('signupForm');
         const tabL = document.getElementById('tabLogin');
         const tabS = document.getElementById('tabSignup');
+
         if(type === 'login') {
             tabL.classList.add('active'); tabS.classList.remove('active');
             loginForm.classList.add('active'); signupForm.classList.remove('active');
@@ -288,33 +237,40 @@
     document.getElementById('tabLogin').onclick = () => switchTab('login');
     document.getElementById('tabSignup').onclick = () => switchTab('signup');
 
-    window.showReset = () => {
-        document.getElementById('authContent').style.display = 'none';
-        document.getElementById('resetSection').style.display = 'block';
-    };
-    window.hideReset = () => {
-        document.getElementById('authContent').style.display = 'block';
-        document.getElementById('resetSection').style.display = 'none';
-    };
-
-    // --- Signup ---
+    // Signup Handle
     document.getElementById('signupForm').onsubmit = async (e) => {
         e.preventDefault();
         const btn = document.getElementById('signupBtn');
         btn.classList.add('loading');
         btn.disabled = true;
+
         const user = document.getElementById('regUser').value;
         const name = document.getElementById('regName').value;
-        const phone = document.getElementById('regPhone').value.trim();
+        const phone = document.getElementById('regPhone').value;
         const city = document.getElementById('regCity').value;
         const pass = document.getElementById('regPass').value;
+
         try {
             const dbRef = ref(db);
+            // 1. Check Username
             const userSnapshot = await get(child(dbRef, `users/${user}`));
             if (userSnapshot.exists()) {
                 alert("❌ Username already taken!");
                 return;
             }
+
+            // 2. Check Phone
+            const allUsersSnapshot = await get(child(dbRef, 'users'));
+            if (allUsersSnapshot.exists()) {
+                const users = allUsersSnapshot.val();
+                for (let u in users) {
+                    if (users[u].phone === phone) {
+                        alert("❌ Phone number already registered!");
+                        return;
+                    }
+                }
+            }
+
             await set(ref(db, 'users/' + user), { name, phone, city, user, pass });
             alert("Account Created! Please Login.");
             switchTab('login');
@@ -326,20 +282,27 @@
         }
     };
 
-    // --- Login ---
+    // Login Handle
     document.getElementById('loginForm').onsubmit = async (e) => {
         e.preventDefault();
         const btn = document.getElementById('loginBtn');
         btn.classList.add('loading');
         btn.disabled = true;
+
         const user = document.getElementById('loginUser').value;
         const pass = document.getElementById('loginPass').value;
+
         try {
             const snapshot = await get(child(ref(db), `users/${user}`));
             if (snapshot.exists()) {
                 const userData = snapshot.val();
                 if (userData.pass === pass) {
                     localStorage.setItem("isLoggedIn", "true");
+                    localStorage.setItem("aquaUser", userData.user);
+                    localStorage.setItem("aquaName", userData.name);
+                    localStorage.setItem("aquaPhone", userData.phone);
+                    localStorage.setItem("aquaCity", userData.city);
+                    
                     alert("Welcome " + userData.name);
                     window.location.href = 'index.html';
                 } else {
@@ -349,125 +312,12 @@
                 alert("❌ User not found!");
             }
         } catch (error) {
-            alert("Check connection.");
+            alert("Check your internet connection.");
         } finally {
             btn.classList.remove('loading');
             btn.disabled = false;
         }
     };
-
-    // --- மேம்படுத்தப்பட்ட OTP அனுப்பும் முறை (Fixed Country Code & reCAPTCHA) ---
-    window.handleSendOTP = async function() {
-        let rawPhone = document.getElementById('resetPhone').value.trim();
-        const btn = document.getElementById('sendOtpBtn');
-        
-        if(!rawPhone) { alert("Please enter phone number"); return; }
-        
-        // தானாகவே +91 சேர்த்துக் கொள்ளும் முறை
-        let finalPhone = rawPhone;
-        if (!rawPhone.startsWith('+')) {
-            if (rawPhone.length === 10) {
-                finalPhone = '+91' + rawPhone;
-            } else {
-                alert("Enter a valid 10-digit number");
-                return;
-            }
-        }
-        
-        btn.classList.add('loading');
-        btn.disabled = true;
-
-        try {
-            const usersSnapshot = await get(child(ref(db), 'users'));
-            let phoneExists = false;
-            
-            if (usersSnapshot.exists()) {
-                const data = usersSnapshot.val();
-                for(let u in data) {
-                    // டேட்டாபேஸில் உள்ள நம்பர் மற்றும் உள்ளீடு செய்யப்பட்ட நம்பரை ஒப்பிடுதல்
-                    if(data[u].phone.includes(rawPhone.slice(-10))) {
-                        phoneExists = true;
-                        foundUsername = data[u].user;
-                        break;
-                    }
-                }
-            }
-
-            if (phoneExists) {
-                // reCAPTCHA பிரச்சனை வராமல் இருக்க பழையதை நீக்கி புதியதை உருவாக்குதல்
-                if (window.recaptchaVerifier) {
-                    window.recaptchaVerifier.clear();
-                }
-                
-                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 
-                    'size': 'invisible' 
-                });
-
-                signInWithPhoneNumber(auth, finalPhone, window.recaptchaVerifier)
-                .then((confirmationResult) => {
-                    window.confirmationResult = confirmationResult;
-                    alert("OTP Sent to " + finalPhone);
-                    document.getElementById('step1').style.display = 'none';
-                    document.getElementById('step2').style.display = 'block';
-                }).catch((err) => {
-                    alert("SMS Error: " + err.message);
-                    btn.classList.remove('loading');
-                    btn.disabled = false;
-                });
-            } else {
-                alert("❌ This phone number is not registered!");
-                btn.classList.remove('loading');
-                btn.disabled = false;
-            }
-        } catch (e) { 
-            alert("Error: " + e.message); 
-            btn.classList.remove('loading');
-            btn.disabled = false;
-        }
-    };
-
-    window.handleVerifyOTP = function() {
-        const code = document.getElementById('otpCode').value;
-        const btn = document.getElementById('verifyOtpBtn');
-        
-        if(!code) { alert("Enter OTP"); return; }
-        
-        btn.classList.add('loading');
-        btn.disabled = true;
-
-        confirmationResult.confirm(code).then(() => {
-            alert("✅ OTP Verified!");
-            document.getElementById('step2').style.display = 'none';
-            document.getElementById('step3').style.display = 'block';
-        }).catch(() => {
-            alert("❌ Invalid OTP");
-            btn.classList.remove('loading');
-            btn.disabled = false;
-        });
-    };
-
-    window.handleUpdatePass = async function() {
-        const newPass = document.getElementById('newPass').value;
-        const btn = document.getElementById('updatePassBtn');
-        
-        if(!newPass) { alert("Enter new password"); return; }
-        
-        btn.classList.add('loading');
-        btn.disabled = true;
-        
-        try {
-            await update(ref(db, `users/${foundUsername}`), { pass: newPass });
-            alert("✅ Password Updated Successfully!");
-            hideReset();
-            switchTab('login');
-        } catch (e) { 
-            alert("Update failed"); 
-        } finally {
-            btn.classList.remove('loading');
-            btn.disabled = false;
-        }
-    };
-
 </script>
 
 </body>
