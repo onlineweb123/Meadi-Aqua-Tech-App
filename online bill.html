@@ -5,7 +5,10 @@
   <title>Meadi Aqua Tech - A4 Fixed Invoice</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
   <style>
     body { font-family: 'Poppins', sans-serif; background: #f0f8ff; margin: 0; padding: 15px; }
     .container { max-width: 650px; margin: auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
@@ -17,9 +20,11 @@
     button { width: 100%; padding: 12px; margin-top: 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
     .btn-add { background: #007bff; color: white; }
     .btn-gen { background: #28a745; color: white; }
-    .btn-download { background: #dc3545; color: white; display: none; margin: 20px auto; }
     
-    /* Fixed A4 Bill Styling */
+    .download-options { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-download { background: #dc3545; color: white; display: none; flex: 1; }
+    .btn-pdf { background: #17a2b8; color: white; display: none; flex: 1; }
+    
     #billSection { margin-top: 30px; overflow-x: auto; padding-bottom: 20px; }
     
     #billArea { 
@@ -40,7 +45,6 @@
     
     .bill-info { font-size: 15px; margin: 15px 0; line-height: 1.6; flex-shrink: 0; }
     .bill-info b { color: #0056b3; }
-
     .right-info { text-align: right; }
 
     .table-container { flex-grow: 1; overflow: hidden; margin-top: 10px; }
@@ -86,7 +90,7 @@
 
   <hr style="margin-top:20px; border: 0.5px solid #eee;">
   
-  <label>Item / Spare Parts:</label>
+  <label>Item / Spare Parts (Optional):</label>
   <div class="flex-row">
     <input type="text" id="itemName" style="flex: 2;" placeholder="e.g. Sediment Filter">
     <input type="number" id="itemQty" style="flex: 0.5;" placeholder="Qty">
@@ -151,14 +155,16 @@
       </div>
     </div>
     
-    <button id="downloadBtn" class="btn-download">📥 Download A4 Invoice as Image</button>
+    <div class="download-options">
+        <button id="downloadBtn" class="btn-download">📥 Download Image</button>
+        <button id="pdfBtn" class="btn-pdf" onclick="downloadPDF()">📄 Download High-Quality PDF</button>
+    </div>
   </div>
 </div>
 
 <script>
   let items = [];
 
-  // இன்றைய தேதியை தானாகவே செட் செய்ய
   window.onload = function() {
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('invoiceDate').value = today;
@@ -187,12 +193,11 @@
     const selectedDate = document.getElementById("invoiceDate").value;
     const service = parseFloat(document.getElementById("serviceCharge").value) || 0;
 
-    if (!name || items.length === 0) {
-      alert("Please enter Customer Name and at least one Item!");
+    if (!name || (items.length === 0 && service === 0)) {
+      alert("Please enter Customer Name and at least one Item or Service Charge!");
       return;
     }
 
-    // தேதி வடிவத்தை மாற்ற (YYYY-MM-DD -> DD/MM/YYYY)
     const dateObj = new Date(selectedDate);
     const formattedDate = dateObj.toLocaleDateString("en-IN");
 
@@ -210,21 +215,27 @@
       html += `<tr><td>${item.name}</td><td class="text-right">${item.qty}</td><td class="text-right">₹${item.rate}</td><td class="text-right">₹${lineTotal}</td></tr>`;
     });
 
+    if(items.length === 0) {
+        html = "<tr><td colspan='4' style='text-align:center; color:#999; padding: 40px 0;'>Service Only (No items added)</td></tr>";
+    }
+
     document.getElementById("billItems").innerHTML = html;
     document.getElementById("bTotal").innerText = `₹${total}`;
+    
     document.getElementById("billSection").style.display = "block";
     document.getElementById("downloadBtn").style.display = "block";
+    document.getElementById("pdfBtn").style.display = "block";
     
     setTimeout(() => {
         document.getElementById("billSection").scrollIntoView({ behavior: 'smooth' });
     }, 100);
   }
 
+  // Image Download (Scale 2 for good quality)
   document.getElementById("downloadBtn").addEventListener("click", () => {
     html2canvas(document.getElementById("billArea"), { 
         scale: 2,
-        useCORS: true,
-        allowTaint: true
+        useCORS: true
     }).then(canvas => {
       const link = document.createElement("a");
       const fileName = document.getElementById("custName").value.replace(/\s+/g, '_');
@@ -233,6 +244,24 @@
       link.click();
     });
   });
+
+  // PDF Download (Increased Scale for Sharp Text)
+  async function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const bill = document.getElementById("billArea");
+    const fileName = document.getElementById("custName").value.replace(/\s+/g, '_');
+
+    // Scale 3 or 4 will make it very sharp
+    html2canvas(bill, { scale: 3, useCORS: true, logging: false }).then(canvas => {
+        const imgData = canvas.toDataURL('image/jpeg', 1.0); // High quality JPEG
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+        pdf.save(`Invoice_${fileName}.pdf`);
+    });
+  }
 </script>
 
 </body>
