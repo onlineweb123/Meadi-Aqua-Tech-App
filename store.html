@@ -138,7 +138,7 @@
   <a href="profile.html">👤 Profile</a>
   <a href="cart.html">🛒 My Cart</a>
 
-  
+
 </div>
 
 <div id="overlay" class="overlay" onclick="toggleMenu()"></div>
@@ -161,9 +161,9 @@
                 <div class="btn-spinner"></div>
             </button>
         </div>
-        
+
           <!-- Product End  -->
-                     
+
              <!-- Product Open  -->
 
         <div class="product-card">
@@ -176,10 +176,10 @@
                 <div class="btn-spinner"></div>
             </button>
         </div>
-        
+
          <!-- Product End  -->          
-                     
-        
+
+
         <!-- Product Open  -->
 
         <div class="product-card">
@@ -192,10 +192,10 @@
                 <div class="btn-spinner"></div>
             </button>
         </div>
-        
+
         <!-- Product End  -->
-        
-        
+
+
         <!-- Product Open  -->
 
         <div class="product-card">
@@ -203,15 +203,15 @@
             <span class="product-name">Aqua Quee </span>
             <p class="product-desc">8 Liter Tank capacity. Suitable for small families. Per day 15L use.</p>
             <span class="product-price">₹9,000</span>
-            <button class="add-btn" onclick="handleAddToCart(this, 'Aqua Queen', 9000, 'b.jpg')">
+            <button class="add-btn" onclick="handleAddToCart(this, 'Aqua Queen', 9000, 'd.jpg')">
                 <span class="btn-text">Add to Cart</span>
                 <div class="btn-spinner"></div>
             </button>
         </div>
-        
+
         <!-- Product End  -->
-        
-        
+
+
           <!-- Product Open  -->
 
         <div class="product-card">
@@ -224,10 +224,10 @@
                 <div class="btn-spinner"></div>
             </button>
         </div>
-        
+
         <!-- Product End  -->
-        
-        
+
+
           <!-- Product Open  -->
 
         <div class="product-card">
@@ -240,11 +240,11 @@
                 <div class="btn-spinner"></div>
             </button>
         </div>
-        
+
         <!-- Product End  -->
-        
-        
-        
+
+
+
         <!-- Product Open  -->
 
         <div class="product-card">
@@ -257,10 +257,10 @@
                 <div class="btn-spinner"></div>
             </button>
         </div>
-        
+
         <!-- Product End  -->
-        
-        
+
+
             <!-- Product Open  -->
 
         <div class="product-card">
@@ -273,18 +273,18 @@
                 <div class="btn-spinner"></div>
             </button>
         </div>
-        
+
         <!-- Product End  -->
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
         <!-- All Product End  -->
     </div>
-    
+
     <div id="noResult" style="display:none; text-align:center; padding: 20px; color: var(--text-sub);">
         No products found!
     </div>
@@ -322,7 +322,7 @@
     // Updated handleAddToCart with 'this' context
     window.handleAddToCart = async function(btn, name, price, img) {
         const currentUser = localStorage.getItem("aquaUser");
-        
+
         if (!currentUser) {
             alert("Please login first!");
             return;
@@ -381,7 +381,7 @@
         for (let i = 0; i < cards.length; i++) {
             let name = cards[i].querySelector('.product-name').innerText.toLowerCase();
             let desc = cards[i].querySelector('.product-desc').innerText.toLowerCase();
-            
+
             if (name.includes(input) || desc.includes(input)) {
                 cards[i].style.display = "flex";
                 visibleCount++;
