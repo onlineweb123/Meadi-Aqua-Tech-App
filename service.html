@@ -3,65 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Meadi Aqua Tech | Book Service</title>
-
-
-
-
-
-
-<!-- Monitor Open -->
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, serverTimestamp, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-    const firebaseConfig = {
-        // உங்கள் Firebase Config (அப்படியே பயன்படுத்தவும்)
-        apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
-        authDomain: "meadi-aqua-tech.firebaseapp.com",
-        databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
-        projectId: "meadi-aqua-tech",
-        storageBucket: "meadi-aqua-tech.firebasestorage.app",
-        messagingSenderId: "531151217708",
-        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    const user = localStorage.getItem("aquaUser") || "Guest (Not Logged In)";
-    const currentPage = window.location.pathname.split("/").pop() || "index.html";
-    const sessionID = Date.now(); // ஒரு முறையிலான விசிட்டை குறிக்க
-
-    // 1. விசிட் தகவலைப் பதிவு செய்தல்
-    const visitRef = ref(db, 'analytics/visits');
-    const newVisit = push(visitRef);
-    set(newVisit, {
-        username: user,
-        page: currentPage,
-        time: serverTimestamp(),
-        device: navigator.userAgent
-    });
-
-    // 2. எவ்வளவு நேரம் இருந்தார்கள் என்பதைக் கணக்கிட
-    const startTime = Date.now();
-    window.addEventListener("beforeunload", () => {
-        const duration = (Date.now() - startTime) / 1000; // நொடிகளில்
-        const exitRef = ref(db, 'analytics/exits');
-        push(exitRef, {
-            username: user,
-            page: currentPage,
-            duration: duration + " seconds",
-            time: serverTimestamp()
-        });
-    });
-</script>
-
-<!-- Monitor End -->
-
-
-
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -120,7 +61,6 @@
 
         .card { padding: 20px; background: var(--card); border-radius: 20px; border: 1px solid var(--border); margin-bottom: 20px; }
 
-        /* --- Button Loading Spinner CSS --- */
         .btn-submit { 
             width: 100%; padding: 16px; background: var(--primary); color: white; 
             border: none; border-radius: 14px; font-size: 16px; font-weight: 700; 
@@ -132,20 +72,15 @@
         .btn-submit:disabled { background: var(--text-sub); cursor: not-allowed; }
 
         .spinner {
-            display: none;
-            width: 20px; height: 20px;
+            display: none; width: 20px; height: 20px;
             border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
+            border-radius: 50%; border-top-color: white;
             animation: spin 0.8s linear infinite;
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* லோடிங் நிலையில் பட்டன் மாற்றம் */
         .loading .btn-text { display: none; }
         .loading .spinner { display: block; }
-        /* ---------------------------------- */
 
         .bottom {
             height: 75px; position: fixed; bottom: 0; left: 0; right: 0; 
@@ -175,8 +110,6 @@
   <a href="store.html">🛒 Store </a>
   <a href="profile.html">👤 Profile</a>
   <a href="cart.html">🛒 My Cart</a>
-
-  
 </div>
 
 <div id="overlay" class="overlay"></div>
@@ -232,7 +165,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, serverTimestamp, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
@@ -241,16 +174,51 @@
         projectId: "meadi-aqua-tech",
         storageBucket: "meadi-aqua-tech.firebasestorage.app",
         messagingSenderId: "531151217708",
-        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89",
-        measurementId: "G-QW495L6JVE"
+        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    let selectedService = "General Service";
+    // --- 1. MONITOR SECTION ---
+    const userLocal = localStorage.getItem("aquaUser") || "Guest";
+    const currentPage = window.location.pathname.split("/").pop() || "service.html";
+    const startTime = Date.now();
 
-    // Chip selection logic
+    try {
+        push(ref(db, 'analytics/visits'), {
+            username: userLocal,
+            page: currentPage,
+            time: serverTimestamp(),
+            device: navigator.userAgent
+        });
+    } catch(e) {}
+
+    window.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === 'hidden') {
+            const duration = (Date.now() - startTime) / 1000;
+            push(ref(db, 'analytics/exits'), {
+                username: userLocal,
+                page: currentPage,
+                duration: duration + "s",
+                time: serverTimestamp()
+            });
+        }
+    });
+
+    // --- 2. SIDEBAR & UI LOGIC ---
+    let selectedService = "General Service";
+    const menuBtn = document.getElementById('menuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+
+    const toggleMenu = () => {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('show');
+    };
+    menuBtn.onclick = toggleMenu;
+    overlay.onclick = toggleMenu;
+
     const chips = document.querySelectorAll('.chip');
     chips.forEach(chip => {
         chip.addEventListener('click', () => {
@@ -260,33 +228,21 @@
         });
     });
 
-    // Sidebar Logic
-    const menuBtn = document.getElementById('menuBtn');
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-
-    menuBtn.onclick = () => { sidebar.classList.add('open'); overlay.classList.add('show'); };
-    overlay.onclick = () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); };
-
-    // Form Submission Logic
+    // --- 3. BOOKING LOGIC ---
     document.getElementById('bookingForm').onsubmit = async (e) => {
         e.preventDefault();
-        
         const btn = document.getElementById('submitBtn');
         const name = document.getElementById('custName').value;
         const phone = document.getElementById('custPhone').value;
         const date = document.getElementById('serviceDate').value;
         const address = document.getElementById('custAddress').value;
         const note = document.getElementById('issueNote').value;
-        
-        // லோடிங்கை ஆன் செய்கிறோம்
+
         btn.classList.add('loading');
         btn.disabled = true;
 
-        const currentUser = localStorage.getItem("aquaUser") || "Guest";
-
         const bookingData = {
-            username: currentUser,
+            username: userLocal,
             serviceType: selectedService,
             customerName: name,
             customerPhone: phone,
@@ -294,27 +250,23 @@
             address: address,
             issue: note,
             status: "Pending",
-            timestamp: new Date().toISOString()
+            timestamp: serverTimestamp()
         };
 
         try {
-            // Firebase-ல் சேமித்தல்
-            const bookingsRef = ref(db, 'bookings');
-            const newBookingRef = push(bookingsRef);
+            const newBookingRef = push(ref(db, 'bookings'));
             await set(newBookingRef, bookingData);
 
-            // WhatsApp மெசேஜ் தயார் செய்தல்
             const message = `*New Service Booking*%0A--------------------------%0A*Service:* ${selectedService}%0A*Customer:* ${name}%0A*Phone:* ${phone}%0A*Date:* ${date}%0A*Address:* ${address}%0A*Note:* ${note}`;
             const waNumber = "919344165879"; 
 
-            // WhatsApp-க்கு அனுப்புவதற்கு முன் ஒரு சிறிய Delay (பயனர் லோடிங்கை கவனிக்க)
             setTimeout(() => {
                 window.open(`https://wa.me/${waNumber}?text=${message}`, '_blank');
                 document.getElementById('bookingForm').reset();
                 btn.classList.remove('loading');
                 btn.disabled = false;
-            }, 1000);
-            
+            }, 800);
+
         } catch (error) {
             console.error(error);
             alert("Error saving booking.");
@@ -323,6 +275,5 @@
         }
     };
 </script>
-
 </body>
 </html>
