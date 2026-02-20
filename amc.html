@@ -3,63 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>AMC Status | Meadi Aqua Tech</title>
-
-
-
-
-
-<!-- Monitor Open -->
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, serverTimestamp, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-    const firebaseConfig = {
-        // உங்கள் Firebase Config (அப்படியே பயன்படுத்தவும்)
-        apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
-        authDomain: "meadi-aqua-tech.firebaseapp.com",
-        databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
-        projectId: "meadi-aqua-tech",
-        storageBucket: "meadi-aqua-tech.firebasestorage.app",
-        messagingSenderId: "531151217708",
-        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    const user = localStorage.getItem("aquaUser") || "Guest (Not Logged In)";
-    const currentPage = window.location.pathname.split("/").pop() || "index.html";
-    const sessionID = Date.now(); // ஒரு முறையிலான விசிட்டை குறிக்க
-
-    // 1. விசிட் தகவலைப் பதிவு செய்தல்
-    const visitRef = ref(db, 'analytics/visits');
-    const newVisit = push(visitRef);
-    set(newVisit, {
-        username: user,
-        page: currentPage,
-        time: serverTimestamp(),
-        device: navigator.userAgent
-    });
-
-    // 2. எவ்வளவு நேரம் இருந்தார்கள் என்பதைக் கணக்கிட
-    const startTime = Date.now();
-    window.addEventListener("beforeunload", () => {
-        const duration = (Date.now() - startTime) / 1000; // நொடிகளில்
-        const exitRef = ref(db, 'analytics/exits');
-        push(exitRef, {
-            username: user,
-            page: currentPage,
-            duration: duration + " seconds",
-            time: serverTimestamp()
-        });
-    });
-</script>
-
-<!-- Monitor End -->
-
-
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -80,13 +23,12 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); overflow-x: hidden; }
 
-        /* --- Content Loader Style (Modified) --- */
         #pageLoader {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 300px; /* Content பகுதியில் மட்டும் தெரியும் */
+            min-height: 300px;
             width: 100%;
         }
 
@@ -110,7 +52,7 @@
             background: var(--glass); backdrop-filter: blur(12px);
             z-index: 100; border-bottom: 1px solid var(--border);
         }
-        
+
         .menu-btn { 
             position: absolute; left: 20px; font-size: 24px; 
             background: #f1f5f9; border: none; color: var(--text-main); 
@@ -152,11 +94,11 @@
         .plan-name { font-size: 22px; font-weight: 700; margin: 0; }
         .plan-price { font-size: 36px; font-weight: 800; margin: 10px 0; }
         .plan-price span { font-size: 16px; opacity: 0.8; font-weight: 400; }
-        
+
         .card-body { padding: 25px; }
         .section-title { font-size: 13px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
         .section-title::after { content: ""; flex: 1; height: 1px; background: var(--border); }
-        
+
         .features-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 25px; }
         .feature-item { display: flex; align-items: center; gap: 15px; padding: 12px; border-radius: 15px; background: #f8fafc; border: 1px solid #f1f5f9; }
         .f-icon { width: 35px; height: 35px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.05); font-size: 18px; }
@@ -165,7 +107,7 @@
 
         .note-card { background: #fff9f0; border-radius: 18px; padding: 15px; display: flex; gap: 12px; align-items: flex-start; margin-bottom: 25px; text-align: left; }
         .buy-btn { width: 100%; padding: 18px; border-radius: 20px; border: none; background: var(--primary); color: white; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; display: block; text-align: center; text-decoration: none; box-shadow: 0 10px 20px rgba(0, 119, 182, 0.2); }
-        
+
         .features-list { list-style: none; padding: 0; margin-bottom: 20px; text-align: left; }
         .features-list li { padding: 10px 0; font-size: 14px; border-bottom: 1px dotted var(--border); display: flex; align-items: center; gap: 10px; color: var(--text-main); }
 
@@ -199,7 +141,7 @@
         <div class="active-icon">🛡️</div>
         <h2 style="color: var(--success); margin: 0;">AMC is Active!</h2>
         <p style="color: var(--text-sub); font-size: 14px;">Your machine is under Meadi Care protection.</p>
-        
+
         <div class="expiry-box">
             <p style="margin: 0; font-size: 12px; color: var(--text-sub); text-transform: uppercase;">Plan Valid Until</p>
             <h3 id="displayExpiryDate" style="margin: 5px 0 0 0; color: var(--text-main); font-size: 22px;">-- / -- / ----</h3>
@@ -220,7 +162,7 @@
             <h3 class="plan-name">Full Inline AMC</h3>
             <div class="plan-price">₹3,800 <span>/ year</span></div>
         </div>
-        
+
         <div class="card-body">
             <div class="section-title">Maintenance Includes</div>
             <div class="features-grid">
@@ -257,7 +199,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, serverTimestamp, set, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
@@ -273,59 +215,86 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Sidebar Logic
-    const toggleMenu = () => {
+    // --- 1. MONITOR SECTION ---
+    const userLocal = localStorage.getItem("aquaUser") || "Guest";
+    const currentPage = window.location.pathname.split("/").pop() || "amc.html";
+    const startTime = Date.now();
+
+    try {
+        const visitRef = ref(db, 'analytics/visits');
+        push(visitRef, {
+            username: userLocal,
+            page: currentPage,
+            time: serverTimestamp(),
+            device: navigator.userAgent
+        });
+    } catch(e) {}
+
+    window.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === 'hidden') {
+            const duration = (Date.now() - startTime) / 1000;
+            const exitRef = ref(db, 'analytics/exits');
+            push(exitRef, {
+                username: userLocal,
+                page: currentPage,
+                duration: duration + "s",
+                time: serverTimestamp()
+            });
+        }
+    });
+
+    // --- 2. SIDEBAR LOGIC ---
+    window.toggleMenu = () => {
         document.getElementById("sidebar").classList.toggle("open");
         document.getElementById("overlay").classList.toggle("show");
     };
-    document.getElementById("menuBtn").onclick = toggleMenu;
-    document.getElementById("overlay").onclick = toggleMenu;
+    document.getElementById("menuBtn").onclick = window.toggleMenu;
+    document.getElementById("overlay").onclick = window.toggleMenu;
 
-    // Load AMC Status
+    // --- 3. AMC STATUS LOAD ---
     async function loadAMCStatus() {
         const loader = document.getElementById("pageLoader");
+        const activeView = document.getElementById("activeView");
+        const purchaseView = document.getElementById("purchaseView");
+        
         const user = localStorage.getItem("aquaUser");
 
         if(!user) {
-            document.getElementById("purchaseView").style.display = "block";
+            purchaseView.style.display = "block";
             loader.style.display = "none";
             return;
         }
 
-        const dbRef = ref(db);
         try {
-            const snapshot = await get(child(dbRef, `users/${user}`));
-            
+            const snapshot = await get(child(ref(db), `users/${user}`));
+
             if (snapshot.exists()) {
                 const userData = snapshot.val();
                 if(userData.lastAMCDate) {
                     const startDate = new Date(userData.lastAMCDate);
                     const expiryDate = new Date(startDate);
                     expiryDate.setFullYear(startDate.getFullYear() + 1);
-                    const today = new Date();
-
-                    if(today < expiryDate) {
-                        document.getElementById("activeView").style.display = "block";
+                    
+                    if(new Date() < expiryDate) {
+                        activeView.style.display = "block";
                         document.getElementById("displayExpiryDate").innerText = expiryDate.toLocaleDateString('en-GB');
                     } else {
-                        document.getElementById("purchaseView").style.display = "block";
+                        purchaseView.style.display = "block";
                     }
                 } else {
-                    document.getElementById("purchaseView").style.display = "block";
+                    purchaseView.style.display = "block";
                 }
             } else {
-                document.getElementById("purchaseView").style.display = "block";
+                purchaseView.style.display = "block";
             }
         } catch (error) {
-            console.error(error);
-            document.getElementById("purchaseView").style.display = "block";
+            purchaseView.style.display = "block";
         } finally {
-            // லோடிங் முடிந்ததும் எப்போதுமே லோடரை மறைக்கவும்
             loader.style.display = "none";
         }
     }
 
-    window.onload = loadAMCStatus;
+    loadAMCStatus();
 </script>
 </body>
 </html>
