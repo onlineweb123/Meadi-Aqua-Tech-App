@@ -3,65 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Meadi Aqua Tech | My Profile</title>
-
-
-
-
-
-
-<!-- Monitor Open -->
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, serverTimestamp, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-    const firebaseConfig = {
-        // உங்கள் Firebase Config (அப்படியே பயன்படுத்தவும்)
-        apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
-        authDomain: "meadi-aqua-tech.firebaseapp.com",
-        databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
-        projectId: "meadi-aqua-tech",
-        storageBucket: "meadi-aqua-tech.firebasestorage.app",
-        messagingSenderId: "531151217708",
-        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    const user = localStorage.getItem("aquaUser") || "Guest (Not Logged In)";
-    const currentPage = window.location.pathname.split("/").pop() || "index.html";
-    const sessionID = Date.now(); // ஒரு முறையிலான விசிட்டை குறிக்க
-
-    // 1. விசிட் தகவலைப் பதிவு செய்தல்
-    const visitRef = ref(db, 'analytics/visits');
-    const newVisit = push(visitRef);
-    set(newVisit, {
-        username: user,
-        page: currentPage,
-        time: serverTimestamp(),
-        device: navigator.userAgent
-    });
-
-    // 2. எவ்வளவு நேரம் இருந்தார்கள் என்பதைக் கணக்கிட
-    const startTime = Date.now();
-    window.addEventListener("beforeunload", () => {
-        const duration = (Date.now() - startTime) / 1000; // நொடிகளில்
-        const exitRef = ref(db, 'analytics/exits');
-        push(exitRef, {
-            username: user,
-            page: currentPage,
-            duration: duration + " seconds",
-            time: serverTimestamp()
-        });
-    });
-</script>
-
-<!-- Monitor End -->
-
-
-
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -109,7 +50,6 @@
             display: flex; align-items: center; justify-content: center;
         }
 
-        /* Sidebar Styles */
         .sidebar { 
             width: 280px; background: var(--card); position: fixed; top: 0; bottom: 0; left: -300px; 
             padding-top: 80px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 110; 
@@ -122,8 +62,7 @@
             color: var(--text-main); font-weight: 500; font-size: 15px; transition: 0.2s;
         }
         .sidebar a:hover { background: #f8fafc; color: var(--primary); padding-left: 30px; }
-        
-        /* Logout in Sidebar */
+
         .sidebar-footer { margin-top: auto; padding: 20px; border-top: 1px solid var(--border); }
         .logout-link { color: var(--danger) !important; font-weight: 700 !important; cursor: pointer; }
 
@@ -211,15 +150,15 @@
         <div class="card-title">💧 Purifier Details</div>
         <div class="info-row">
             <span class="info-label">Model</span>
-            <span class="info-value" id="dispModel">Not Set</span>
+            <span class="info-value" id="dispModel">Loading...</span>
         </div>
         <div class="info-row">
             <span class="info-label">Installed on</span>
-            <span class="info-value" id="dispInstalled">Not Set</span>
+            <span class="info-value" id="dispInstalled">Loading...</span>
         </div>
         <div class="info-row">
             <span class="info-label">Warranty</span>
-            <span class="info-value" id="dispWarranty" style="color:var(--primary)">Not Set</span>
+            <span class="info-value" id="dispWarranty" style="color:var(--primary)">Loading...</span>
         </div>
     </div>
 
@@ -252,7 +191,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, serverTimestamp, set, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
@@ -261,14 +200,41 @@
         projectId: "meadi-aqua-tech",
         storageBucket: "meadi-aqua-tech.firebasestorage.app",
         messagingSenderId: "531151217708",
-        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89",
-        measurementId: "G-QW495L6JVE"
+        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Sidebar Logic
+    // --- 1. MONITOR SECTION ---
+    const userLocal = localStorage.getItem("aquaUser") || "Guest";
+    const currentPage = window.location.pathname.split("/").pop() || "profile.html";
+    const startTime = Date.now();
+
+    try {
+        const visitRef = ref(db, 'analytics/visits');
+        push(visitRef, {
+            username: userLocal,
+            page: currentPage,
+            time: serverTimestamp(),
+            device: navigator.userAgent
+        });
+    } catch(e) {}
+
+    window.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === 'hidden') {
+            const duration = (Date.now() - startTime) / 1000;
+            const exitRef = ref(db, 'analytics/exits');
+            push(exitRef, {
+                username: userLocal,
+                page: currentPage,
+                duration: duration + "s",
+                time: serverTimestamp()
+            });
+        }
+    });
+
+    // --- 2. SIDEBAR & UI SECTION ---
     const menuBtn = document.getElementById("menuBtn");
     const sidebar = document.getElementById("sidebar");
     const overlay = document.getElementById("overlay");
@@ -277,11 +243,9 @@
         sidebar.classList.toggle("open");
         overlay.classList.toggle("show");
     };
-
     menuBtn.onclick = toggleMenu;
     overlay.onclick = toggleMenu;
 
-    // Logout Function
     document.getElementById("logoutBtn").onclick = () => {
         if(confirm("Are you sure you want to sign out?")) {
             localStorage.clear();
@@ -289,24 +253,21 @@
         }
     };
 
-    // Fetch and Load Profile Data
+    // --- 3. PROFILE DATA SECTION ---
     async function loadProfile() {
-        const currentUsername = localStorage.getItem("aquaUser"); 
-        
-        if(!currentUsername) {
+        if(userLocal === "Guest") {
             window.location.href = "login.html";
             return;
         }
 
-        const dbRef = ref(db);
         try {
-            const snapshot = await get(child(dbRef, `users/${currentUsername}`));
-            
+            const snapshot = await get(child(ref(db), `users/${userLocal}`));
+
             if (snapshot.exists()) {
                 const userData = snapshot.val();
 
                 document.getElementById("profileName").innerText = userData.name || "User";
-                document.getElementById("profileID").innerText = "@" + currentUsername;
+                document.getElementById("profileID").innerText = "@" + userLocal;
                 document.getElementById("avatarLetter").innerText = (userData.name || "U").charAt(0).toUpperCase();
                 document.getElementById("profilePhone").innerText = userData.phone || "Not Set";
                 document.getElementById("profileCity").innerText = userData.city || "Not Set";
@@ -319,7 +280,8 @@
                     historyContainer.innerHTML = "";
                     const historyArray = Array.isArray(userData.history) ? userData.history : Object.values(userData.history);
                     
-                    historyArray.forEach(item => {
+                    // லேட்டஸ்ட் ஹிஸ்டரி முதலில் வர வரிசைப்படுத்துதல்
+                    historyArray.reverse().slice(0, 5).forEach(item => {
                         historyContainer.innerHTML += `
                             <div class="history-item">
                                 <div>
