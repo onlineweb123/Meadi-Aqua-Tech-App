@@ -3,69 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Meadi Aqua Tech | Notifications</title>
-
-
-
-
-
-
-<!-- Monitor Open -->
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, serverTimestamp, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-    const firebaseConfig = {
-        // உங்கள் Firebase Config (அப்படியே பயன்படுத்தவும்)
-        apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
-        authDomain: "meadi-aqua-tech.firebaseapp.com",
-        databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
-        projectId: "meadi-aqua-tech",
-        storageBucket: "meadi-aqua-tech.firebasestorage.app",
-        messagingSenderId: "531151217708",
-        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    const user = localStorage.getItem("aquaUser") || "Guest (Not Logged In)";
-    const currentPage = window.location.pathname.split("/").pop() || "index.html";
-    const sessionID = Date.now(); // ஒரு முறையிலான விசிட்டை குறிக்க
-
-    // 1. விசிட் தகவலைப் பதிவு செய்தல்
-    const visitRef = ref(db, 'analytics/visits');
-    const newVisit = push(visitRef);
-    set(newVisit, {
-        username: user,
-        page: currentPage,
-        time: serverTimestamp(),
-        device: navigator.userAgent
-    });
-
-    // 2. எவ்வளவு நேரம் இருந்தார்கள் என்பதைக் கணக்கிட
-    const startTime = Date.now();
-    window.addEventListener("beforeunload", () => {
-        const duration = (Date.now() - startTime) / 1000; // நொடிகளில்
-        const exitRef = ref(db, 'analytics/exits');
-        push(exitRef, {
-            username: user,
-            page: currentPage,
-            duration: duration + " seconds",
-            time: serverTimestamp()
-        });
-    });
-</script>
-
-<!-- Monitor End -->
-
-
-
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <script>
+        // லாகின் சரிபார்ப்பு
         if (localStorage.getItem("isLoggedIn") !== "true") {
             window.location.href = "login.html";
         }
@@ -197,7 +139,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, get, child, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, serverTimestamp, set, get, child, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
@@ -213,6 +155,35 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
+    // --- 1. MONITOR SECTION ---
+    const userLocal = localStorage.getItem("aquaUser") || "Guest";
+    const currentPage = window.location.pathname.split("/").pop() || "notification.html";
+    const startTime = Date.now();
+
+    try {
+        const visitRef = ref(db, 'analytics/visits');
+        push(visitRef, {
+            username: userLocal,
+            page: currentPage,
+            time: serverTimestamp(),
+            device: navigator.userAgent
+        });
+    } catch(e) { console.log("Analytics error"); }
+
+    window.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === 'hidden') {
+            const duration = (Date.now() - startTime) / 1000;
+            const exitRef = ref(db, 'analytics/exits');
+            push(exitRef, {
+                username: userLocal,
+                page: currentPage,
+                duration: duration + "s",
+                time: serverTimestamp()
+            });
+        }
+    });
+
+    // --- 2. NOTIFICATION HELPERS ---
     function formatMyDate(dateString) {
         if(!dateString) return "Recently";
         try {
@@ -226,16 +197,11 @@
         } catch(e) { return dateString; }
     }
 
-    // --- Automatic Delete Logic (30 Days) ---
     async function checkAndAutoDelete(username, msgTimestamp) {
         if (!msgTimestamp) return false;
-        
         const sentDate = new Date(msgTimestamp);
         const today = new Date();
-        
-        // மில்லி விநாடிகளை நாட்களாக மாற்றுகிறோம்
-        const diffInTime = today.getTime() - sentDate.getTime();
-        const diffInDays = diffInTime / (1000 * 3600 * 24);
+        const diffInDays = (today.getTime() - sentDate.getTime()) / (1000 * 3600 * 24);
 
         if (diffInDays >= 30) {
             try {
@@ -243,14 +209,13 @@
                     adminMessage: null,
                     msgTimestamp: null
                 });
-                return true; // நீக்கப்பட்டுவிட்டது
-            } catch (e) {
-                console.error("Auto-delete failed", e);
-            }
+                return true; 
+            } catch (e) { console.error("Auto-delete failed", e); }
         }
-        return false; // இன்னும் 30 நாள் ஆகவில்லை
+        return false;
     }
 
+    // --- 3. FETCH NOTIFICATIONS ---
     async function fetchNotifications() {
         const currentUsername = localStorage.getItem("aquaUser"); 
         const container = document.getElementById("notifContainer");
@@ -261,23 +226,19 @@
         }
 
         try {
-            const dbRef = ref(db);
-            const snapshot = await get(child(dbRef, `users/${currentUsername}`));
-            
+            const snapshot = await get(child(ref(db), `users/${currentUsername}`));
+
             if (snapshot.exists()) {
                 const userData = snapshot.val();
-                
+
                 if (userData.adminMessage) {
-                    // முதலில் 30 நாள் ஆகிவிட்டதா என்று சோதிக்கிறோம்
                     const isDeleted = await checkAndAutoDelete(currentUsername, userData.msgTimestamp);
-                    
                     if (isDeleted) {
                         showEmptyState();
                         return;
                     }
 
                     const displayDate = formatMyDate(userData.msgTimestamp);
-
                     container.innerHTML = `
                         <div class="notif-card">
                             <button class="delete-btn" id="delBtn">🗑️</button>
@@ -291,7 +252,7 @@
                     `;
 
                     document.getElementById('delBtn').onclick = async () => {
-                        if(confirm("நிச்சயமாக நீக்க வேண்டுமா?")) {
+                        if(confirm("Are you sure you want to delete this?")) {
                             try {
                                 await update(ref(db, `users/${currentUsername}`), {
                                     adminMessage: null,
@@ -301,7 +262,6 @@
                             } catch (err) { alert("Failed to delete."); }
                         }
                     };
-
                 } else {
                     showEmptyState();
                 }
@@ -318,13 +278,13 @@
             <div class="empty-state">
                 <span class="empty-icon">🔔</span>
                 <p style="font-weight: 700; color: var(--text-main); font-size: 16px;">No new notifications</p>
-                <p style="font-size: 13px; color: var(--text-sub);">அட்மினிடமிருந்து தகவல்கள் வரும்போது இங்கே காண்பிக்கப்படும்.</p>
+                <p style="font-size: 13px; color: var(--text-sub);">Messages from admin will appear here.</p>
             </div>
         `;
     }
 
+    // லோடர் தெரிவதற்காக ஒரு சிறிய காலதாமதம்
     setTimeout(fetchNotifications, 800);
 </script>
-
 </body>
 </html>
