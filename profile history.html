@@ -3,6 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <title>Service History | Meadi Aqua Tech</title>
+
+
+
+
+
+
+<!-- Monitor Open -->
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push, serverTimestamp, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        // உங்கள் Firebase Config (அப்படியே பயன்படுத்தவும்)
+        apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
+        authDomain: "meadi-aqua-tech.firebaseapp.com",
+        databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
+        projectId: "meadi-aqua-tech",
+        storageBucket: "meadi-aqua-tech.firebasestorage.app",
+        messagingSenderId: "531151217708",
+        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const user = localStorage.getItem("aquaUser") || "Guest (Not Logged In)";
+    const currentPage = window.location.pathname.split("/").pop() || "index.html";
+    const sessionID = Date.now(); // ஒரு முறையிலான விசிட்டை குறிக்க
+
+    // 1. விசிட் தகவலைப் பதிவு செய்தல்
+    const visitRef = ref(db, 'analytics/visits');
+    const newVisit = push(visitRef);
+    set(newVisit, {
+        username: user,
+        page: currentPage,
+        time: serverTimestamp(),
+        device: navigator.userAgent
+    });
+
+    // 2. எவ்வளவு நேரம் இருந்தார்கள் என்பதைக் கணக்கிட
+    const startTime = Date.now();
+    window.addEventListener("beforeunload", () => {
+        const duration = (Date.now() - startTime) / 1000; // நொடிகளில்
+        const exitRef = ref(db, 'analytics/exits');
+        push(exitRef, {
+            username: user,
+            page: currentPage,
+            duration: duration + " seconds",
+            time: serverTimestamp()
+        });
+    });
+</script>
+
+<!-- Monitor End -->
+
+
+
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     
