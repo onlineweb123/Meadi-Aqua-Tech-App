@@ -3,64 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Meadi Aqua Tech | Festival Offers</title>
-
-
-
-
-
-
-<!-- Monitor Open -->
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, serverTimestamp, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-    const firebaseConfig = {
-        // உங்கள் Firebase Config (அப்படியே பயன்படுத்தவும்)
-        apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
-        authDomain: "meadi-aqua-tech.firebaseapp.com",
-        databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
-        projectId: "meadi-aqua-tech",
-        storageBucket: "meadi-aqua-tech.firebasestorage.app",
-        messagingSenderId: "531151217708",
-        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    const user = localStorage.getItem("aquaUser") || "Guest (Not Logged In)";
-    const currentPage = window.location.pathname.split("/").pop() || "index.html";
-    const sessionID = Date.now(); // ஒரு முறையிலான விசிட்டை குறிக்க
-
-    // 1. விசிட் தகவலைப் பதிவு செய்தல்
-    const visitRef = ref(db, 'analytics/visits');
-    const newVisit = push(visitRef);
-    set(newVisit, {
-        username: user,
-        page: currentPage,
-        time: serverTimestamp(),
-        device: navigator.userAgent
-    });
-
-    // 2. எவ்வளவு நேரம் இருந்தார்கள் என்பதைக் கணக்கிட
-    const startTime = Date.now();
-    window.addEventListener("beforeunload", () => {
-        const duration = (Date.now() - startTime) / 1000; // நொடிகளில்
-        const exitRef = ref(db, 'analytics/exits');
-        push(exitRef, {
-            username: user,
-            page: currentPage,
-            duration: duration + " seconds",
-            time: serverTimestamp()
-        });
-    });
-</script>
-
-<!-- Monitor End -->
-
-
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -87,7 +29,6 @@
             color: var(--text-main); 
         }
 
-        /* --- Header & Sidebar --- */
         header { 
             height: 70px; display: flex; align-items: center; justify-content: center; 
             position: fixed; top: 0; left: 0; right: 0; 
@@ -115,10 +56,8 @@
         .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); display: none; z-index: 105; backdrop-filter: blur(4px); }
         .overlay.show { display: block; }
 
-        /* --- Main Content --- */
         .main { padding: 90px 20px 100px 20px; max-width: 600px; margin: 0 auto; }
 
-        /* Loader Style */
         .loading-container {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             min-height: 200px;
@@ -158,7 +97,7 @@
             display: flex; justify-content: space-around; align-items: center; 
             background: var(--glass); backdrop-filter: blur(12px); border-top: 1px solid var(--border); z-index: 100;
         }
-        .bottom button { background: none; border: none; font-size: 11px; font-weight: 600; color: var(--text-sub); display: flex; flex-direction: column; align-items: center; }
+        .bottom button { background: none; border: none; font-size: 11px; font-weight: 600; color: var(--text-sub); display: flex; flex-direction: column; align-items: center; cursor: pointer; }
         .bottom button.active { color: var(--primary); }
     </style>
 </head>
@@ -221,7 +160,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, serverTimestamp, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
@@ -235,21 +174,89 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const offerRef = ref(db, 'currentOffer');
 
-    // Sidebar
+    // --- 1. MONITOR SECTION ---
+    const userLocal = localStorage.getItem("aquaUser") || "Guest";
+    const currentPage = window.location.pathname.split("/").pop() || "offers.html";
+    const startTime = Date.now();
+
+    try {
+        const visitRef = ref(db, 'analytics/visits');
+        push(visitRef, {
+            username: userLocal,
+            page: currentPage,
+            time: serverTimestamp(),
+            device: navigator.userAgent
+        });
+    } catch(e) {}
+
+    window.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === 'hidden') {
+            const duration = (Date.now() - startTime) / 1000;
+            const exitRef = ref(db, 'analytics/exits');
+            push(exitRef, {
+                username: userLocal,
+                page: currentPage,
+                duration: duration + "s",
+                time: serverTimestamp()
+            });
+        }
+    });
+
+    // --- 2. UI LOGIC (Sidebar) ---
     const menuBtn = document.getElementById("menuBtn");
     const sidebar = document.getElementById("sidebar");
     const overlay = document.getElementById("overlay");
-    menuBtn.onclick = () => { sidebar.classList.add("open"); overlay.classList.add("show"); };
-    overlay.onclick = () => { sidebar.classList.remove("open"); overlay.classList.remove("show"); };
+    
+    menuBtn.onclick = () => { 
+        sidebar.classList.add("open"); 
+        overlay.classList.add("show"); 
+    };
+    overlay.onclick = () => { 
+        sidebar.classList.remove("open"); 
+        overlay.classList.remove("show"); 
+    };
 
+    // --- 3. OFFER SYSTEM ---
+    const offerRef = ref(db, 'currentOffer');
     let countdownInterval;
 
+    function showEmpty() {
+        document.getElementById("offerContent").style.display = "none";
+        document.getElementById("noOfferMsg").style.display = "block";
+        document.getElementById("loader").style.display = "none";
+    }
+
+    function displayOffer(data) {
+        document.getElementById("offerContent").style.display = "block";
+        document.getElementById("noOfferMsg").style.display = "none";
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("displayTitle").innerText = data.title;
+        document.getElementById("displaySubTitle").innerText = data.sub;
+        document.getElementById("displayMsg").innerText = data.message;
+    }
+
+    function startCountdown(endTime) {
+        if (countdownInterval) clearInterval(countdownInterval);
+        countdownInterval = setInterval(() => {
+            const now = Date.now();
+            const distance = endTime - now;
+            
+            if (distance < 0) {
+                clearInterval(countdownInterval);
+                remove(offerRef);
+                showEmpty();
+                return;
+            }
+
+            document.getElementById("days").innerText = Math.floor(distance / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
+            document.getElementById("hours").innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+            document.getElementById("mins").innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+        }, 1000);
+    }
+
     onValue(offerRef, (snapshot) => {
-        document.getElementById("loader").style.display = "none"; // Hide spinner after check
         const data = snapshot.val();
-        
         if (data) {
             const now = Date.now();
             if (now > data.endTime) {
@@ -263,36 +270,6 @@
             showEmpty();
         }
     });
-
-    function displayOffer(data) {
-        document.getElementById("offerContent").style.display = "block";
-        document.getElementById("noOfferMsg").style.display = "none";
-        document.getElementById("displayTitle").innerText = data.title;
-        document.getElementById("displaySubTitle").innerText = data.sub;
-        document.getElementById("displayMsg").innerText = data.message;
-    }
-
-    function startCountdown(endTime) {
-        if (countdownInterval) clearInterval(countdownInterval);
-        countdownInterval = setInterval(() => {
-            const now = Date.now();
-            const distance = endTime - now;
-            if (distance < 0) {
-                clearInterval(countdownInterval);
-                remove(offerRef);
-                showEmpty();
-                return;
-            }
-            document.getElementById("days").innerText = Math.floor(distance / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
-            document.getElementById("hours").innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
-            document.getElementById("mins").innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
-        }, 1000);
-    }
-
-    function showEmpty() {
-        document.getElementById("offerContent").style.display = "none";
-        document.getElementById("noOfferMsg").style.display = "block";
-    }
 </script>
 </body>
 </html>
