@@ -3,65 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Meadi Aqua Tech | Your Cart</title>
-
-
-
-
-
-
-
-<!-- Monitor Open -->
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, serverTimestamp, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-    const firebaseConfig = {
-        // உங்கள் Firebase Config (அப்படியே பயன்படுத்தவும்)
-        apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
-        authDomain: "meadi-aqua-tech.firebaseapp.com",
-        databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
-        projectId: "meadi-aqua-tech",
-        storageBucket: "meadi-aqua-tech.firebasestorage.app",
-        messagingSenderId: "531151217708",
-        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    const user = localStorage.getItem("aquaUser") || "Guest (Not Logged In)";
-    const currentPage = window.location.pathname.split("/").pop() || "index.html";
-    const sessionID = Date.now(); // ஒரு முறையிலான விசிட்டை குறிக்க
-
-    // 1. விசிட் தகவலைப் பதிவு செய்தல்
-    const visitRef = ref(db, 'analytics/visits');
-    const newVisit = push(visitRef);
-    set(newVisit, {
-        username: user,
-        page: currentPage,
-        time: serverTimestamp(),
-        device: navigator.userAgent
-    });
-
-    // 2. எவ்வளவு நேரம் இருந்தார்கள் என்பதைக் கணக்கிட
-    const startTime = Date.now();
-    window.addEventListener("beforeunload", () => {
-        const duration = (Date.now() - startTime) / 1000; // நொடிகளில்
-        const exitRef = ref(db, 'analytics/exits');
-        push(exitRef, {
-            username: user,
-            page: currentPage,
-            duration: duration + " seconds",
-            time: serverTimestamp()
-        });
-    });
-</script>
-
-<!-- Monitor End -->
-
-
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -107,7 +48,6 @@
         .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); display: none; z-index: 105; backdrop-filter: blur(4px); }
         .overlay.show { display: block; }
 
-        /* --- நீங்கள் கேட்ட Bottom Navigation Style --- */
         .bottom {
             height: 75px; position: fixed; bottom: 0; left: 0; right: 0; 
             display: flex; justify-content: space-around; align-items: center; 
@@ -122,7 +62,6 @@
         }
         .bottom button.active { color: var(--primary); }
         .bottom .icon { font-size: 22px; margin-bottom: 4px; }
-        /* ------------------------------------------ */
 
         .main { padding: 90px 20px 140px 20px; max-width: 600px; margin: 0 auto; }
 
@@ -133,7 +72,7 @@
         }
         .item-info { display: flex; align-items: center; gap: 15px; }
         .cart-img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; }
-        
+
         .total-card {
             background: linear-gradient(135deg, var(--primary), #023e8a);
             color: white; border-radius: 20px; padding: 20px; margin-top: 20px; text-align: center;
@@ -142,13 +81,13 @@
         .checkout-btn {
             width: 100%; border: none; padding: 16px; border-radius: 18px; font-size: 16px; font-weight: 700;
             margin-top: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            transition: 0.3s; color: white;
+            transition: 0.3s; color: white; text-decoration: none;
         }
         .upi-btn { background: #0077b6; box-shadow: 0 5px 15px rgba(0, 119, 182, 0.3); }
         .wa-btn { background: #25d366; box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3); }
 
         .remove-btn { background: #fee2e2; color: var(--danger); border: none; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 600; }
-        
+
         .spinner-container { display: flex; flex-direction: column; align-items: center; padding: 50px 0; }
         .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -188,13 +127,8 @@
             <h2 id="totalPrice" style="margin: 5px 0 0 0;">₹0</h2>
         </div>
 
-        <button class="checkout-btn upi-btn" id="payBtn">
-            Pay Total via UPI 💳
-        </button>
-
-        <button class="checkout-btn wa-btn" id="whatsappBtn">
-            Sent Your Payment Screen Short ✅
-        </button>
+        <button class="checkout-btn upi-btn" id="payBtn">Pay Total via UPI 💳</button>
+        <button class="checkout-btn wa-btn" id="whatsappBtn">Send Payment Screenshot ✅</button>
     </div>
 </div>
 
@@ -207,7 +141,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, serverTimestamp, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
@@ -216,31 +150,67 @@
         projectId: "meadi-aqua-tech",
         storageBucket: "meadi-aqua-tech.firebasestorage.app",
         messagingSenderId: "531151217708",
-        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89",
-        measurementId: "G-QW495L6JVE"
+        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const currentUser = localStorage.getItem("aquaUser");
 
+    // --- 1. MONITOR LOGIC ---
+    const currentUser = localStorage.getItem("aquaUser") || "Guest";
+    const currentPage = window.location.pathname.split("/").pop() || "cart.html";
+    const startTime = Date.now();
+
+    try {
+        const visitRef = ref(db, 'analytics/visits');
+        push(visitRef, {
+            username: currentUser,
+            page: currentPage,
+            time: serverTimestamp(),
+            device: navigator.userAgent
+        });
+    } catch(e) {}
+
+    window.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === 'hidden') {
+            const duration = (Date.now() - startTime) / 1000;
+            push(ref(db, 'analytics/exits'), {
+                username: currentUser,
+                page: currentPage,
+                duration: duration + "s",
+                time: serverTimestamp()
+            });
+        }
+    });
+
+    // --- 2. SIDEBAR & GLOBAL FUNCTIONS ---
+    window.toggleMenu = () => {
+        document.getElementById("sidebar").classList.toggle("open");
+        document.getElementById("overlay").classList.toggle("show");
+    };
+    document.getElementById("menuBtn").onclick = window.toggleMenu;
+    document.getElementById("overlay").onclick = window.toggleMenu;
+
+    // Delete item function exposed to window
+    window.deleteItem = (key) => {
+        if(confirm("பொருளை நீக்கவா?")) {
+            remove(ref(db, `carts/${currentUser}/${key}`));
+        }
+    };
+
+    // --- 3. CART LOGIC ---
     const cartList = document.getElementById("cartList");
     const summary = document.getElementById("summary");
     const totalPriceEl = document.getElementById("totalPrice");
     const loader = document.getElementById("loader");
     const emptyMsg = document.getElementById("emptyMsg");
 
-    document.getElementById("menuBtn").onclick = () => {
-        document.getElementById("sidebar").classList.toggle("open");
-        document.getElementById("overlay").classList.toggle("show");
-    };
-    document.getElementById("overlay").onclick = () => {
-        document.getElementById("sidebar").classList.remove("open");
-        document.getElementById("overlay").classList.remove("show");
-    };
-
     function fetchCart() {
-        if (!currentUser) return;
+        if (currentUser === "Guest") {
+            loader.style.display = "none";
+            emptyMsg.style.display = "block";
+            return;
+        }
 
         const cartRef = ref(db, 'carts/' + currentUser);
         onValue(cartRef, (snapshot) => {
@@ -269,7 +239,7 @@
                         <div class="item-info">
                             <img src="${item.image || 'https://via.placeholder.com/50'}" class="cart-img">
                             <div>
-                                <h4>${item.productName}</h4>
+                                <h4 style="margin:0;">${item.productName}</h4>
                                 <p style="color:var(--primary); font-weight:700; margin:0;">₹${item.price}</p>
                             </div>
                         </div>
@@ -291,15 +261,8 @@
         });
     }
 
-    window.deleteItem = (key) => {
-        if(confirm("பொருளை நீக்கவா?")) {
-            remove(ref(db, `carts/${currentUser}/${key}`));
-        }
-    }
-
     fetchCart();
 </script>
 
 </body>
 </html>
-
