@@ -3,68 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Service History | Meadi Aqua Tech</title>
-
-
-
-
-
-
-<!-- Monitor Open -->
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, serverTimestamp, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-    const firebaseConfig = {
-        // உங்கள் Firebase Config (அப்படியே பயன்படுத்தவும்)
-        apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
-        authDomain: "meadi-aqua-tech.firebaseapp.com",
-        databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
-        projectId: "meadi-aqua-tech",
-        storageBucket: "meadi-aqua-tech.firebasestorage.app",
-        messagingSenderId: "531151217708",
-        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    const user = localStorage.getItem("aquaUser") || "Guest (Not Logged In)";
-    const currentPage = window.location.pathname.split("/").pop() || "index.html";
-    const sessionID = Date.now(); // ஒரு முறையிலான விசிட்டை குறிக்க
-
-    // 1. விசிட் தகவலைப் பதிவு செய்தல்
-    const visitRef = ref(db, 'analytics/visits');
-    const newVisit = push(visitRef);
-    set(newVisit, {
-        username: user,
-        page: currentPage,
-        time: serverTimestamp(),
-        device: navigator.userAgent
-    });
-
-    // 2. எவ்வளவு நேரம் இருந்தார்கள் என்பதைக் கணக்கிட
-    const startTime = Date.now();
-    window.addEventListener("beforeunload", () => {
-        const duration = (Date.now() - startTime) / 1000; // நொடிகளில்
-        const exitRef = ref(db, 'analytics/exits');
-        push(exitRef, {
-            username: user,
-            page: currentPage,
-            duration: duration + " seconds",
-            time: serverTimestamp()
-        });
-    });
-</script>
-
-<!-- Monitor End -->
-
-
-
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <script>
         if (localStorage.getItem("isLoggedIn") !== "true") {
             window.location.href = "login.html";
@@ -91,29 +32,20 @@
             color: var(--text-main); 
         }
 
-        /* --- Page Loader Style --- */
         #pageLoader {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 300px;
-            width: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 300px; width: 100%;
         }
 
         .spinner {
-            width: 40px;
-            height: 40px;
+            width: 40px; height: 40px;
             border: 4px solid var(--border);
             border-top: 4px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         header { 
             height: 70px; display: flex; align-items: center; justify-content: center; 
@@ -122,7 +54,7 @@
             z-index: 100; border-bottom: 1px solid var(--border);
         }
         .header-title { font-size: 18px; font-weight: 700; color: var(--primary); }
-        
+
         .menu-btn { 
             position: absolute; left: 20px; font-size: 24px; 
             background: #f1f5f9; border: none; color: var(--text-main); 
@@ -136,16 +68,14 @@
             box-shadow: 20px 0 50px rgba(0,0,0,0.05);
         }
         .sidebar.open { left: 0; }
-        .sidebar a { 
-            display: flex; align-items: center; padding: 16px 24px; text-decoration: none; 
-            color: var(--text-main); font-weight: 500; font-size: 15px;
-        }
+        .sidebar a { display: flex; align-items: center; padding: 16px 24px; text-decoration: none; color: var(--text-main); font-weight: 500; font-size: 15px; }
+
         .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); display: none; z-index: 105; backdrop-filter: blur(4px); }
         .overlay.show { display: block; }
 
         .main { padding: 90px 20px 100px 20px; max-width: 600px; margin: 0 auto; }
 
-        .timeline { position: relative; padding-left: 30px; margin-top: 10px; display: none; } /* லோடிங் ஆகும் வரை மறைத்து வைக்கவும் */
+        .timeline { position: relative; padding-left: 30px; margin-top: 10px; display: none; }
         .timeline::before {
             content: ''; position: absolute; left: 10px; top: 5px; bottom: 5px;
             width: 2px; background: #e2e8f0;
@@ -176,7 +106,7 @@
             cursor: pointer;
         }
         .bottom .icon { font-size: 22px; margin-bottom: 4px; }
-        
+
         .empty-state { text-align: center; margin-top: 50px; color: var(--text-sub); font-size: 14px; }
     </style>
 </head>
@@ -215,7 +145,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, serverTimestamp, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
@@ -230,32 +160,62 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const toggleMenu = () => {
+    // --- 1. MONITOR SECTION ---
+    const userLocal = localStorage.getItem("aquaUser") || "Guest";
+    const currentPage = window.location.pathname.split("/").pop() || "history.html";
+    const startTime = Date.now();
+
+    try {
+        push(ref(db, 'analytics/visits'), {
+            username: userLocal,
+            page: currentPage,
+            time: serverTimestamp(),
+            device: navigator.userAgent
+        });
+    } catch(e) {}
+
+    window.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === 'hidden') {
+            const duration = (Date.now() - startTime) / 1000;
+            push(ref(db, 'analytics/exits'), {
+                username: userLocal,
+                page: currentPage,
+                duration: duration + "s",
+                time: serverTimestamp()
+            });
+        }
+    });
+
+    // --- 2. SIDEBAR LOGIC ---
+    window.toggleMenu = () => {
         document.getElementById("sidebar").classList.toggle("open");
         document.getElementById("overlay").classList.toggle("show");
     };
-    document.getElementById("menuBtn").onclick = toggleMenu;
-    document.getElementById("overlay").onclick = toggleMenu;
+    document.getElementById("menuBtn").onclick = window.toggleMenu;
+    document.getElementById("overlay").onclick = window.toggleMenu;
 
+    // --- 3. FETCH HISTORY LOGIC ---
     async function fetchHistory() {
-        const user = localStorage.getItem("aquaUser");
         const timeline = document.getElementById('historyTimeline');
         const loader = document.getElementById('pageLoader');
-        
-        if(!user) {
+
+        if(userLocal === "Guest") {
             loader.style.display = 'none';
             timeline.style.display = 'block';
-            timeline.innerHTML = '<div class="empty-state">Please login</div>';
+            timeline.innerHTML = '<div class="empty-state">தயவுசெய்து லாகின் செய்யவும்.</div>';
             return;
         }
 
         try {
-            const snapshot = await get(ref(db, `users/${user}/history`));
+            const snapshot = await get(ref(db, `users/${userLocal}/history`));
+            loader.style.display = 'none';
+            timeline.style.display = 'block';
+
             if (snapshot.exists()) {
                 timeline.innerHTML = "";
                 const data = snapshot.val();
-                
                 let historyArray = [];
+
                 if (Array.isArray(data)) {
                     historyArray = data;
                 } else {
@@ -265,6 +225,7 @@
                     }));
                 }
 
+                // புதிய தேதி முதலில் வரும்படி வரிசைப்படுத்துதல்
                 historyArray.sort((a, b) => new Date(b.date) - new Date(a.date));
 
                 historyArray.forEach(item => {
@@ -276,19 +237,16 @@
                     `;
                     timeline.appendChild(card);
                 });
-
             } else {
-                timeline.innerHTML = '<div class="empty-state">No records found.</div>';
+                timeline.innerHTML = '<div class="empty-state">பதிவுகள் எதுவும் இல்லை.</div>';
             }
         } catch (e) {
-            console.error(e);
-            timeline.innerHTML = '<div class="empty-state">Error loading data.</div>';
-        } finally {
-            // லோடர் மறைந்து டைம்லைன் தெரியும்
             loader.style.display = 'none';
             timeline.style.display = 'block';
+            timeline.innerHTML = '<div class="empty-state">தரவுகளைப் பெறுவதில் சிக்கல்.</div>';
         }
     }
+
     fetchHistory();
 </script>
 </body>
