@@ -3,65 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Meadi Aqua Tech | Shop</title>
-
-
-
-
-
-
-
-<!-- Monitor Open -->
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, serverTimestamp, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-    const firebaseConfig = {
-        // உங்கள் Firebase Config (அப்படியே பயன்படுத்தவும்)
-        apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
-        authDomain: "meadi-aqua-tech.firebaseapp.com",
-        databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
-        projectId: "meadi-aqua-tech",
-        storageBucket: "meadi-aqua-tech.firebasestorage.app",
-        messagingSenderId: "531151217708",
-        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    const user = localStorage.getItem("aquaUser") || "Guest (Not Logged In)";
-    const currentPage = window.location.pathname.split("/").pop() || "index.html";
-    const sessionID = Date.now(); // ஒரு முறையிலான விசிட்டை குறிக்க
-
-    // 1. விசிட் தகவலைப் பதிவு செய்தல்
-    const visitRef = ref(db, 'analytics/visits');
-    const newVisit = push(visitRef);
-    set(newVisit, {
-        username: user,
-        page: currentPage,
-        time: serverTimestamp(),
-        device: navigator.userAgent
-    });
-
-    // 2. எவ்வளவு நேரம் இருந்தார்கள் என்பதைக் கணக்கிட
-    const startTime = Date.now();
-    window.addEventListener("beforeunload", () => {
-        const duration = (Date.now() - startTime) / 1000; // நொடிகளில்
-        const exitRef = ref(db, 'analytics/exits');
-        push(exitRef, {
-            username: user,
-            page: currentPage,
-            duration: duration + " seconds",
-            time: serverTimestamp()
-        });
-    });
-</script>
-
-<!-- Monitor End -->
-
-
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -135,7 +76,6 @@
         .product-desc { font-size: 11px; color: var(--text-sub); margin-bottom: 12px; line-height: 1.4; flex-grow: 1; }
         .product-price { font-size: 16px; font-weight: 800; color: var(--primary); margin-bottom: 8px; }
 
-        /* --- Updated Add to Cart Button with Loading --- */
         .add-btn { 
             width: 100%; padding: 10px; background: #f1f5f9; border: none; 
             border-radius: 10px; font-weight: 700; color: var(--primary); 
@@ -157,7 +97,6 @@
 
         .loading .btn-text { display: none; }
         .loading .btn-spinner { display: block; }
-        /* ----------------------------------------------- */
 
         .image-viewer {
             display: none; position: fixed; z-index: 999;
@@ -193,11 +132,9 @@
 <div id="sidebar" class="sidebar">
   <a href="index.html">🏠 Dashboard</a>
   <a href="service.html">🛠 Service</a>
-  <a href="store.html">🛒 Store </a>
+  <a href="store.html" style="color: var(--primary); font-weight: 700;">🛒 Store </a>
   <a href="profile.html">👤 Profile</a>
   <a href="cart.html">🛒 My Cart</a>
-
-
 </div>
 
 <div id="overlay" class="overlay" onclick="toggleMenu()"></div>
@@ -206,8 +143,6 @@
     <div class="search-box">
         <input type="text" id="searchInput" onkeyup="searchProduct()" placeholder="Search products...">
     </div>
-
-      <!-- Product Open  -->
 
     <div class="product-grid" id="productGrid">
         <div class="product-card">
@@ -221,10 +156,6 @@
             </button>
         </div>
 
-          <!-- Product End  -->
-
-             <!-- Product Open  -->
-
         <div class="product-card">
             <div class="product-image" onclick="openViewer(this)"><img src="b.jpg"></div>
             <span class="product-name">Aqua 2090</span>
@@ -235,11 +166,6 @@
                 <div class="btn-spinner"></div>
             </button>
         </div>
-
-         <!-- Product End  -->          
-
-
-        <!-- Product Open  -->
 
         <div class="product-card">
             <div class="product-image" onclick="openViewer(this)"><img src="c.jpg"></div>
@@ -252,14 +178,9 @@
             </button>
         </div>
 
-        <!-- Product End  -->
-
-
-        <!-- Product Open  -->
-
         <div class="product-card">
             <div class="product-image" onclick="openViewer(this)"><img src="d.jpg"></div>
-            <span class="product-name">Aqua Quee </span>
+            <span class="product-name">Aqua Queen</span>
             <p class="product-desc">8 Liter Tank capacity. Suitable for small families. Per day 15L use.</p>
             <span class="product-price">₹9,000</span>
             <button class="add-btn" onclick="handleAddToCart(this, 'Aqua Queen', 9000, 'd.jpg')">
@@ -268,15 +189,10 @@
             </button>
         </div>
 
-        <!-- Product End  -->
-
-
-          <!-- Product Open  -->
-
         <div class="product-card">
             <div class="product-image" onclick="openViewer(this)"><img src="e.jpg"></div>
-            <span class="product-name">Innovica </span>
-            <p class="product-desc">Premium Lettest Model  .</p>
+            <span class="product-name">Innovica</span>
+            <p class="product-desc">Premium Latest Model.</p>
             <span class="product-price">₹22,000</span>
             <button class="add-btn" onclick="handleAddToCart(this, 'Innovica', 22000, 'e.jpg')">
                 <span class="btn-text">Add to Cart</span>
@@ -284,14 +200,9 @@
             </button>
         </div>
 
-        <!-- Product End  -->
-
-
-          <!-- Product Open  -->
-
         <div class="product-card">
             <div class="product-image" onclick="openViewer(this)"><img src="f.jpg"></div>
-            <span class="product-name">H2O </span>
+            <span class="product-name">H2O</span>
             <p class="product-desc">Service Friendly Good Model</p>
             <span class="product-price">₹10,500</span>
             <button class="add-btn" onclick="handleAddToCart(this, 'H2O', 10500, 'f.jpg')">
@@ -300,15 +211,9 @@
             </button>
         </div>
 
-        <!-- Product End  -->
-
-
-
-        <!-- Product Open  -->
-
         <div class="product-card">
             <div class="product-image" onclick="openViewer(this)"><img src="g.jpg"></div>
-            <span class="product-name">Mars </span>
+            <span class="product-name">Mars</span>
             <p class="product-desc">Service Friendly Good Model</p>
             <span class="product-price">₹10,500</span>
             <button class="add-btn" onclick="handleAddToCart(this, 'Mars', 10500, 'g.jpg')">
@@ -316,11 +221,6 @@
                 <div class="btn-spinner"></div>
             </button>
         </div>
-
-        <!-- Product End  -->
-
-
-            <!-- Product Open  -->
 
         <div class="product-card">
             <div class="product-image" onclick="openViewer(this)"><img src="h.jpg"></div>
@@ -332,16 +232,6 @@
                 <div class="btn-spinner"></div>
             </button>
         </div>
-
-        <!-- Product End  -->
-
-
-
-
-
-
-
-        <!-- All Product End  -->
     </div>
 
     <div id="noResult" style="display:none; text-align:center; padding: 20px; color: var(--text-sub);">
@@ -362,7 +252,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, serverTimestamp, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
@@ -371,43 +261,67 @@
         projectId: "meadi-aqua-tech",
         storageBucket: "meadi-aqua-tech.firebasestorage.app",
         messagingSenderId: "531151217708",
-        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89",
-        measurementId: "G-QW495L6JVE"
+        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Updated handleAddToCart with 'this' context
+    // --- 1. MONITOR SECTION ---
+    const userLocal = localStorage.getItem("aquaUser") || "Guest";
+    const currentPage = "store.html";
+    const startTime = Date.now();
+
+    try {
+        push(ref(db, 'analytics/visits'), {
+            username: userLocal,
+            page: currentPage,
+            time: serverTimestamp(),
+            device: navigator.userAgent
+        });
+    } catch(e) {}
+
+    window.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === 'hidden') {
+            const duration = (Date.now() - startTime) / 1000;
+            push(ref(db, 'analytics/exits'), {
+                username: userLocal,
+                page: currentPage,
+                duration: duration + "s",
+                time: serverTimestamp()
+            });
+        }
+    });
+
+    // --- 2. SHOP LOGIC SECTION ---
     window.handleAddToCart = async function(btn, name, price, img) {
         const currentUser = localStorage.getItem("aquaUser");
 
         if (!currentUser) {
             alert("Please login first!");
+            window.location.href = "login.html";
             return;
         }
 
-        // பட்டனில் லோடிங் காட்ட
         btn.classList.add('loading');
         btn.disabled = true;
 
-        const cartRef = ref(db, 'carts/' + currentUser);
-        const newProductRef = push(cartRef);
-
         try {
+            const cartRef = ref(db, 'carts/' + currentUser);
+            const newProductRef = push(cartRef);
             await set(newProductRef, {
                 productName: name,
                 price: price,
                 image: img,
-                addedAt: new Date().toISOString()
+                addedAt: serverTimestamp()
             });
-            alert(name + " added to Cloud Cart!");
+            
             if(navigator.vibrate) navigator.vibrate(50);
+            alert(name + " added to Cart!");
         } catch (error) {
             console.error(error);
-            alert("Check your internet connection!");
+            alert("Error: Check your connection!");
         } finally {
-            // லோடிங்கை நிறுத்தி பட்டனை பழைய நிலைக்கு மாற்ற
             btn.classList.remove('loading');
             btn.disabled = false;
         }
