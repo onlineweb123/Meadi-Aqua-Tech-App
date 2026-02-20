@@ -2,65 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Meadi Aqua Tech | Logi  Welcome</title>
-
-
-
-
-
-
-<!-- Monitor Open -->
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, serverTimestamp, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-    const firebaseConfig = {
-        // உங்கள் Firebase Config (அப்படியே பயன்படுத்தவும்)
-        apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
-        authDomain: "meadi-aqua-tech.firebaseapp.com",
-        databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
-        projectId: "meadi-aqua-tech",
-        storageBucket: "meadi-aqua-tech.firebasestorage.app",
-        messagingSenderId: "531151217708",
-        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    const user = localStorage.getItem("aquaUser") || "Guest (Not Logged In)";
-    const currentPage = window.location.pathname.split("/").pop() || "index.html";
-    const sessionID = Date.now(); // ஒரு முறையிலான விசிட்டை குறிக்க
-
-    // 1. விசிட் தகவலைப் பதிவு செய்தல்
-    const visitRef = ref(db, 'analytics/visits');
-    const newVisit = push(visitRef);
-    set(newVisit, {
-        username: user,
-        page: currentPage,
-        time: serverTimestamp(),
-        device: navigator.userAgent
-    });
-
-    // 2. எவ்வளவு நேரம் இருந்தார்கள் என்பதைக் கணக்கிட
-    const startTime = Date.now();
-    window.addEventListener("beforeunload", () => {
-        const duration = (Date.now() - startTime) / 1000; // நொடிகளில்
-        const exitRef = ref(db, 'analytics/exits');
-        push(exitRef, {
-            username: user,
-            page: currentPage,
-            duration: duration + " seconds",
-            time: serverTimestamp()
-        });
-    });
-</script>
-
-<!-- Monitor End -->
-
-
-
+    <title>Meadi Aqua Tech | Login & Welcome</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -86,7 +28,6 @@
             padding: 20px;
         }
 
-        /* --- Button Spinner CSS --- */
         .btn-auth {
             position: relative;
             width: 100%;
@@ -108,9 +49,8 @@
 
         .btn-auth:disabled { background: var(--text-sub); cursor: not-allowed; }
 
-        /* பட்டனுக்குள் சுற்றும் அனிமேஷன் */
         .btn-spinner {
-            display: none; /* ஆரம்பத்தில் மறைத்து வைக்கவும் */
+            display: none;
             width: 20px;
             height: 20px;
             border: 3px solid rgba(255,255,255,0.3);
@@ -120,11 +60,8 @@
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* லோடிங் போது எழுத்தை மறைக்க */
         .loading .btn-text { display: none; }
         .loading .btn-spinner { display: block; }
-        /* --------------------------- */
 
         .auth-container {
             width: 100%;
@@ -139,6 +76,7 @@
         .logo-area span { font-size: 40px; }
         .logo-area h1 { font-size: 24px; color: var(--primary); margin: 10px 0 5px; }
         .logo-area p { font-size: 14px; color: var(--text-sub); margin: 0; }
+        
         .tab-group {
             display: flex;
             background: #f1f5f9;
@@ -231,54 +169,15 @@
             <label>Phone Number</label>
             <input type="tel" id="regPhone" placeholder="+91 00000 00000" required>
         </div>   
-                                                            
-                <div class="form-group">
-    <label>City / District</label>
-    <select id="regCity" required>
-        <option value="" disabled selected>Select your district</option>
-        <option value="Ariyalur">Ariyalur</option>
-        <option value="Chengalpattu">Chengalpattu</option>
-        <option value="Chennai">Chennai</option>
-        <option value="Coimbatore">Coimbatore</option>
-        <option value="Cuddalore">Cuddalore</option>
-        <option value="Dharmapuri">Dharmapuri</option>
-        <option value="Dindigul">Dindigul</option>
-        <option value="Erode">Erode</option>
-        <option value="Kallakurichi">Kallakurichi</option>
-        <option value="Kanchipuram">Kanchipuram</option>
-        <option value="Kanyakumari">Kanyakumari</option>
-        <option value="Karur">Karur</option>
-        <option value="Krishnagiri">Krishnagiri</option>
-        <option value="Madurai">Madurai</option>
-        <option value="Mayiladuthurai">Mayiladuthurai</option>
-        <option value="Nagapattinam">Nagapattinam</option>
-        <option value="Namakkal">Namakkal</option>
-        <option value="Nilgiris">Nilgiris</option>
-        <option value="Perambalur">Perambalur</option>
-        <option value="Pudukkottai">Pudukkottai</option>
-        <option value="Ramanathapuram">Ramanathapuram</option>
-        <option value="Ranipet">Ranipet</option>
-        <option value="Salem">Salem</option>
-        <option value="Sivaganga">Sivaganga</option>
-        <option value="Tenkasi">Tenkasi</option>
-        <option value="Thanjavur">Thanjavur</option>
-        <option value="Theni">Theni</option>
-        <option value="Thoothukudi">Thoothukudi</option>
-        <option value="Tiruchirappalli">Tiruchirappalli</option>
-        <option value="Tirunelveli">Tirunelveli</option>
-        <option value="Tirupathur">Tirupathur</option>
-        <option value="Tiruppur">Tiruppur</option>
-        <option value="Tiruvallur">Tiruvallur</option>
-        <option value="Tiruvannamalai">Tiruvannamalai</option>
-        <option value="Tiruvarur">Tiruvarur</option>
-        <option value="Vellore">Vellore</option>
-        <option value="Viluppuram">Viluppuram</option>
-        <option value="Virudhunagar">Virudhunagar</option>
-    </select>
-    
+        <div class="form-group">
+            <label>City / District</label>
+            <select id="regCity" required>
+                <option value="" disabled selected>Select your district</option>
+                <option value="Chennai">Chennai</option>
+                <option value="Madurai">Madurai</option>
+                <option value="Coimbatore">Coimbatore</option>
+                </select>
         </div>
-        
-        
         <div class="form-group">
             <label>Username</label>
             <input type="text" id="regUser" placeholder="Choose a username" required>
@@ -296,7 +195,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, serverTimestamp, set, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
@@ -305,15 +204,44 @@
         projectId: "meadi-aqua-tech",
         storageBucket: "meadi-aqua-tech.firebasestorage.app",
         messagingSenderId: "531151217708",
-        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89",
-        measurementId: "G-QW495L6JVE"
+        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // UI Tab Switching
-    window.switchTab = (type) => {
+    // --- 1. MONITORING SECTION ---
+    const user = localStorage.getItem("aquaUser") || "Guest";
+    const currentPage = window.location.pathname.split("/").pop() || "index.html";
+    const startTime = Date.now();
+
+    // விசிட் ரெக்கார்டு
+    try {
+        const visitRef = ref(db, 'analytics/visits');
+        push(visitRef, {
+            username: user,
+            page: currentPage,
+            time: serverTimestamp(),
+            device: navigator.userAgent
+        });
+    } catch(e) { console.error("Analytics Error", e); }
+
+    // வெளியேறும் நேரத்தை பதிவு செய்தல்
+    window.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === 'hidden') {
+            const duration = (Date.now() - startTime) / 1000;
+            const exitRef = ref(db, 'analytics/exits');
+            push(exitRef, {
+                username: user,
+                page: currentPage,
+                duration: duration + "s",
+                time: serverTimestamp()
+            });
+        }
+    });
+
+    // --- 2. UI TAB SWITCHING ---
+    const switchTab = (type) => {
         const loginForm = document.getElementById('loginForm');
         const signupForm = document.getElementById('signupForm');
         const tabL = document.getElementById('tabLogin');
@@ -331,72 +259,52 @@
     document.getElementById('tabLogin').onclick = () => switchTab('login');
     document.getElementById('tabSignup').onclick = () => switchTab('signup');
 
-    // Signup Handle
+    // --- 3. LOGIN & SIGNUP LOGIC ---
     document.getElementById('signupForm').onsubmit = async (e) => {
         e.preventDefault();
         const btn = document.getElementById('signupBtn');
-        btn.classList.add('loading');
-        btn.disabled = true;
+        btn.classList.add('loading'); btn.disabled = true;
 
-        const user = document.getElementById('regUser').value;
-        const name = document.getElementById('regName').value;
-        const phone = document.getElementById('regPhone').value;
-        const city = document.getElementById('regCity').value;
-        const pass = document.getElementById('regPass').value;
+        const regData = {
+            user: document.getElementById('regUser').value,
+            name: document.getElementById('regName').value,
+            phone: document.getElementById('regPhone').value,
+            city: document.getElementById('regCity').value,
+            pass: document.getElementById('regPass').value
+        };
 
         try {
-            const dbRef = ref(db);
-            // 1. Check Username
-            const userSnapshot = await get(child(dbRef, `users/${user}`));
-            if (userSnapshot.exists()) {
+            const snapshot = await get(child(ref(db), `users/${regData.user}`));
+            if (snapshot.exists()) {
                 alert("❌ Username already taken!");
-                return;
+            } else {
+                await set(ref(db, 'users/' + regData.user), regData);
+                alert("Account Created! Please Login.");
+                switchTab('login');
             }
-
-            // 2. Check Phone
-            const allUsersSnapshot = await get(child(dbRef, 'users'));
-            if (allUsersSnapshot.exists()) {
-                const users = allUsersSnapshot.val();
-                for (let u in users) {
-                    if (users[u].phone === phone) {
-                        alert("❌ Phone number already registered!");
-                        return;
-                    }
-                }
-            }
-
-            await set(ref(db, 'users/' + user), { name, phone, city, user, pass });
-            alert("Account Created! Please Login.");
-            switchTab('login');
         } catch (error) {
             alert("Error: " + error.message);
         } finally {
-            btn.classList.remove('loading');
-            btn.disabled = false;
+            btn.classList.remove('loading'); btn.disabled = false;
         }
     };
 
-    // Login Handle
     document.getElementById('loginForm').onsubmit = async (e) => {
         e.preventDefault();
         const btn = document.getElementById('loginBtn');
-        btn.classList.add('loading');
-        btn.disabled = true;
+        btn.classList.add('loading'); btn.disabled = true;
 
-        const user = document.getElementById('loginUser').value;
-        const pass = document.getElementById('loginPass').value;
+        const userVal = document.getElementById('loginUser').value;
+        const passVal = document.getElementById('loginPass').value;
 
         try {
-            const snapshot = await get(child(ref(db), `users/${user}`));
+            const snapshot = await get(child(ref(db), `users/${userVal}`));
             if (snapshot.exists()) {
                 const userData = snapshot.val();
-                if (userData.pass === pass) {
+                if (userData.pass === passVal) {
                     localStorage.setItem("isLoggedIn", "true");
                     localStorage.setItem("aquaUser", userData.user);
                     localStorage.setItem("aquaName", userData.name);
-                    localStorage.setItem("aquaPhone", userData.phone);
-                    localStorage.setItem("aquaCity", userData.city);
-                    
                     alert("Welcome " + userData.name);
                     window.location.href = 'index.html';
                 } else {
@@ -406,10 +314,9 @@
                 alert("❌ User not found!");
             }
         } catch (error) {
-            alert("Check your internet connection.");
+            alert("Connection Error.");
         } finally {
-            btn.classList.remove('loading');
-            btn.disabled = false;
+            btn.classList.remove('loading'); btn.disabled = false;
         }
     };
 </script>
