@@ -4,64 +4,6 @@
     <meta charset="UTF-8">
     <title> Meadi Aqua Tech App | Water Purifier Solutions</title>
 
-
-
-
-
-<!-- Monitor Open -->
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, serverTimestamp, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-    const firebaseConfig = {
-        // உங்கள் Firebase Config (அப்படியே பயன்படுத்தவும்)
-        apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
-        authDomain: "meadi-aqua-tech.firebaseapp.com",
-        databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
-        projectId: "meadi-aqua-tech",
-        storageBucket: "meadi-aqua-tech.firebasestorage.app",
-        messagingSenderId: "531151217708",
-        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    const user = localStorage.getItem("aquaUser") || "Guest (Not Logged In)";
-    const currentPage = window.location.pathname.split("/").pop() || "index.html";
-    const sessionID = Date.now(); // ஒரு முறையிலான விசிட்டை குறிக்க
-
-    // 1. விசிட் தகவலைப் பதிவு செய்தல்
-    const visitRef = ref(db, 'analytics/visits');
-    const newVisit = push(visitRef);
-    set(newVisit, {
-        username: user,
-        page: currentPage,
-        time: serverTimestamp(),
-        device: navigator.userAgent
-    });
-
-    // 2. எவ்வளவு நேரம் இருந்தார்கள் என்பதைக் கணக்கிட
-    const startTime = Date.now();
-    window.addEventListener("beforeunload", () => {
-        const duration = (Date.now() - startTime) / 1000; // நொடிகளில்
-        const exitRef = ref(db, 'analytics/exits');
-        push(exitRef, {
-            username: user,
-            page: currentPage,
-            duration: duration + " seconds",
-            time: serverTimestamp()
-        });
-    });
-</script>
-
-<!-- Monitor End -->
-
-
-
-
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -70,7 +12,7 @@
     <link rel="apple-touch-icon" href="icon-192x192.png">
 
     <script>
-        // லாகின் சரிபார்ப்பு - Login check
+        // லாகின் சரிபார்ப்பு
         if (localStorage.getItem("isLoggedIn") !== "true") {
             window.location.href = "login.html";
         }
@@ -111,9 +53,7 @@
         }
 
         .header-title { font-size: 20px; font-weight: 700; color: var(--primary); letter-spacing: -0.5px; }
-        
-        
-        /* Notification Button Style */
+
         .notif-btn { 
             position: absolute; right: 20px; font-size: 22px; 
             background: #f1f5f9; border: none; color: var(--text-main); 
@@ -121,7 +61,6 @@
             display: flex; align-items: center; justify-content: center;
             text-decoration: none;
         }
-
 
         .menu-btn { 
             position: absolute; left: 20px; font-size: 24px; 
@@ -206,7 +145,7 @@
 <header>
     <button class="menu-btn" id="menuBtn">☰</button>
     <div class="header-title">Meadi Aqua Tech</div>
-     <a href="notification.html" class="notif-btn">🔔</a>
+    <a href="notification.html" class="notif-btn">🔔</a>
 </header>
 
 <div id="sidebar" class="sidebar">
@@ -259,7 +198,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, serverTimestamp, set, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
@@ -275,35 +214,63 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Sidebar functions
-    const toggleMenu = () => {
+    // --- 1. MONITOR SECTION ---
+    const userLocal = localStorage.getItem("aquaUser") || "Guest";
+    const currentPage = window.location.pathname.split("/").pop() || "index.html";
+    const startTime = Date.now();
+
+    // விசிட் பதிவு
+    try {
+        const visitRef = ref(db, 'analytics/visits');
+        push(visitRef, {
+            username: userLocal,
+            page: currentPage,
+            time: serverTimestamp(),
+            device: navigator.userAgent
+        });
+    } catch(e) { console.log("Monitor error"); }
+
+    // வெளியேறும் நேரப் பதிவு
+    window.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === 'hidden') {
+            const duration = (Date.now() - startTime) / 1000;
+            const exitRef = ref(db, 'analytics/exits');
+            push(exitRef, {
+                username: userLocal,
+                page: currentPage,
+                duration: duration + "s",
+                time: serverTimestamp()
+            });
+        }
+    });
+
+    // --- 2. SIDEBAR LOGIC ---
+    // Module-க்குள் இருப்பதை வெளியே கொண்டு வர window-வில் சேர்க்கிறோம்
+    window.toggleMenu = () => {
         document.getElementById("sidebar").classList.toggle("open");
         document.getElementById("overlay").classList.toggle("show");
     };
 
-    document.getElementById("menuBtn").onclick = toggleMenu;
-    document.getElementById("overlay").onclick = toggleMenu;
+    document.getElementById("menuBtn").onclick = window.toggleMenu;
+    document.getElementById("overlay").onclick = window.toggleMenu;
 
-    // Load User Data
+
+    // --- 3. DASHBOARD LOAD DATA ---
     async function loadDashboard() {
         const currentUsername = localStorage.getItem("aquaUser"); 
-        
-        if(!currentUsername) {
-            console.log("No user found in localStorage");
-            return;
-        }
+        if(!currentUsername) return;
 
         const dbRef = ref(db);
         try {
             const snapshot = await get(child(dbRef, `users/${currentUsername}`));
-            
+
             if (snapshot.exists()) {
-                const user = snapshot.val();
-                document.getElementById("userNameDisplay").innerText = user.name || currentUsername;
+                const userData = snapshot.val();
+                document.getElementById("userNameDisplay").innerText = userData.name || currentUsername;
 
                 // --- FILTER LOGIC ---
-                if(user.lastFilterDate) {
-                    const lastDate = new Date(user.lastFilterDate);
+                if(userData.lastFilterDate) {
+                    const lastDate = new Date(userData.lastFilterDate);
                     const nextDue = new Date(lastDate);
                     nextDue.setMonth(lastDate.getMonth() + 3);
 
@@ -313,7 +280,7 @@
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
                     let percentUsed = Math.max(0, Math.min(100, ((totalDays - diffDays) / totalDays) * 100));
-                    
+
                     document.getElementById("filterProgress").style.width = percentUsed + "%";
                     document.getElementById("nextFilterDate").innerText = nextDue.toLocaleDateString('en-GB');
 
@@ -329,8 +296,8 @@
 
                 // --- AMC LOGIC ---
                 const amcBadge = document.getElementById("amcBadge");
-                if(user.lastAMCDate) {
-                    const amcStart = new Date(user.lastAMCDate);
+                if(userData.lastAMCDate) {
+                    const amcStart = new Date(userData.lastAMCDate);
                     const amcExpiry = new Date(amcStart);
                     amcExpiry.setFullYear(amcStart.getFullYear() + 1);
 
@@ -348,15 +315,13 @@
                     amcBadge.innerText = "NO ACTIVE PLAN";
                     amcBadge.className = "amc-badge status-none";
                 }
-            } else {
-                console.log("User not found in Database");
             }
         } catch (error) {
             console.error("Dashboard error:", error);
         }
     }
 
-    window.onload = loadDashboard;
+    loadDashboard();
 </script>
 </body>
 </html>
