@@ -11,13 +11,6 @@
     <meta name="apple-mobile-web-app-title" content="Meadi Aqua">
     <link rel="apple-touch-icon" href="icon-192x192.png">
 
-    <script>
-        // லாகின் சரிபார்ப்பு
-        if (localStorage.getItem("isLoggedIn") !== "true") {
-            window.location.href = "login.html";
-        }
-    </script>
-
     <meta name="theme-color" content="#0077b6">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -200,6 +193,11 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, push, serverTimestamp, set, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+    // லாகின் சரிபார்ப்பு - இதுவே மிகச் சரியானது
+    if (localStorage.getItem("isLoggedIn") !== "true") {
+        window.location.href = "login.html";
+    }
+
     const firebaseConfig = {
         apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
         authDomain: "meadi-aqua-tech.firebaseapp.com",
@@ -245,7 +243,6 @@
     });
 
     // --- 2. SIDEBAR LOGIC ---
-    // Module-க்குள் இருப்பதை வெளியே கொண்டு வர window-வில் சேர்க்கிறோம்
     window.toggleMenu = () => {
         document.getElementById("sidebar").classList.toggle("open");
         document.getElementById("overlay").classList.toggle("show");
