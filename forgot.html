@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reset Password | Meadi Aqua Tech</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg: #f0f4f8; 
+            --card: #ffffff; 
+            --border: #e2e8f0; 
+            --primary: #0077b6; 
+            --primary-hover: #005f92;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --success: #10b981;
+            --success-hover: #059669;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body { 
+            margin: 0; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; padding: 20px;
+            color: var(--text-main);
+        }
+
+        .auth-container {
+            width: 100%; max-width: 400px;
+            background: var(--card); padding: 40px 30px;
+            border-radius: 30px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+
+        .logo-area { text-align: center; margin-bottom: 30px; }
+        
+        .logo-area h2 { 
+            color: var(--primary); 
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0 0 10px; 
+            letter-spacing: -0.5px;
+        }
+
+        .logo-area p { 
+            font-size: 14px; 
+            color: var(--text-sub); 
+            line-height: 1.5;
+            margin: 0;
+            max-width: 250px;
+            margin: 0 auto;
+        }
+
+        .form-group { margin-bottom: 20px; }
+
+        label { 
+            display: block; 
+            font-size: 14px; 
+            font-weight: 700; 
+            margin-bottom: 8px; 
+            color: var(--text-main);
+            margin-left: 4px;
+        }
+
+        input {
+            width: 100%; 
+            padding: 15px 18px; 
+            border: 1.5px solid var(--border);
+            border-radius: 16px; 
+            font-size: 15px; 
+            font-family: inherit;
+            outline: none; 
+            transition: all 0.3s ease;
+            background: #fdfdfd;
+        }
+
+        input:focus { 
+            border-color: var(--primary); 
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(0, 119, 182, 0.1);
+        }
+
+        input::placeholder { color: #cbd5e1; }
+
+        .btn-auth {
+            width: 100%; 
+            padding: 16px; 
+            background: var(--primary);
+            color: white; 
+            border: none; 
+            border-radius: 16px;
+            font-size: 16px; 
+            font-weight: 700; 
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0, 119, 182, 0.2);
+            margin-top: 10px;
+        }
+
+        .btn-auth:hover { background: var(--primary-hover); transform: translateY(-1px); }
+        .btn-auth:active { transform: translateY(1px); }
+        .btn-auth:disabled { background: var(--text-sub); cursor: not-allowed; transform: none; box-shadow: none; }
+
+        #resetSection { 
+            display: none; 
+            margin-top: 25px; 
+            padding-top: 25px; 
+            border-top: 2px dashed #f1f5f9; 
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .back-link { 
+            text-align: center; 
+            margin-top: 25px; 
+        }
+
+        .back-link a { 
+            color: var(--text-sub); 
+            text-decoration: none; 
+            font-size: 14px;
+            font-weight: 600; 
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .back-link a:hover { color: var(--primary); }
+
+        #btnUpdate {
+            background: var(--success);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2);
+        }
+
+        #btnUpdate:hover { background: var(--success-hover); }
+    </style>
+
+</head>
+<body>
+
+<div class="auth-container">
+    <div class="logo-area">
+        <h2>Reset Password</h2>
+        <p>Enter your details to recover your account..</p>
+    </div>
+
+    <div id="verifySection">
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="verifyUser" placeholder="Enter username" required>
+        </div>
+        <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" id="verifyPhone" placeholder="Registered phone number" required>
+        </div>
+        <button class="btn-auth" id="btnVerify">Verify Details</button>
+    </div>
+
+    <div id="resetSection">
+        <div class="form-group">
+            <label>New Password</label>
+            <input type="password" id="newPass" placeholder="Enter new password" required>
+        </div>
+        <div class="form-group">
+            <label>Confirm Password</label>
+            <input type="password" id="confirmPass" placeholder="Confirm new password" required>
+        </div>
+        <button class="btn-auth" id="btnUpdate" style="background: var(--success);">Update Password</button>
+    </div>
+
+    <div class="back-link">
+        <a href="login.html">← Back to Login</a>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, get, child, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
+        authDomain: "meadi-aqua-tech.firebaseapp.com",
+        databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
+        projectId: "meadi-aqua-tech",
+        storageBucket: "meadi-aqua-tech.firebasestorage.app",
+        messagingSenderId: "531151217708",
+        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let finalUserKey = ""; // டேட்டாபேஸில் உள்ள ஒரிஜினல் பெயரை இங்கே சேமிப்போம்
+
+    // 1. பயனரை சரியாகத் தேடி கண்டுபிடித்தல்
+    document.getElementById('btnVerify').onclick = async () => {
+        const inputUser = document.getElementById('verifyUser').value.trim();
+        const inputPhone = document.getElementById('verifyPhone').value.trim();
+        const btn = document.getElementById('btnVerify');
+
+        if(!inputUser || !inputPhone) return alert("Please fill all fields!");
+
+        btn.innerText = "Checking...";
+        btn.disabled = true;
+
+        try {
+            // 'users' நோடில் உள்ள அனைத்தையும் எடுக்கிறோம்
+            const usersRef = ref(db, 'users');
+            const snapshot = await get(usersRef);
+
+            if (snapshot.exists()) {
+                let userFound = false;
+
+                snapshot.forEach((childSnapshot) => {
+                    const dbUsername = childSnapshot.key; // எ.கா: "Mathavan"
+                    const userData = childSnapshot.val();
+
+                    // பயனர் டைப் செய்த பெயரும் (small/caps எதுவாக இருந்தாலும்) 
+                    // டேட்டாபேஸில் உள்ள பெயரும் ஒன்றாக இருந்தால்:
+                    if (dbUsername.toLowerCase() === inputUser.toLowerCase() && userData.phone === inputPhone) {
+                        finalUserKey = dbUsername; // ஒரிஜினல் பெயரை (Case sensitive) எடுக்கிறோம்
+                        userFound = true;
+                    }
+                });
+
+                if (userFound) {
+                    document.getElementById('verifySection').style.opacity = "0.5";
+                    document.getElementById('verifySection').style.pointerEvents = "none";
+                    document.getElementById('resetSection').style.display = "block";
+                    alert("✅ User Verified! Now enter your new password.");
+                } else {
+                    alert("❌ Incorrect Username or Phone Number!");
+                }
+            } else {
+                alert("❌ No users found in database!");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Connection Error.");
+        } finally {
+            btn.innerText = "Verify Details";
+            btn.disabled = false;
+        }
+    };
+
+    // 2. பாஸ்வேர்டை அப்டேட் செய்தல்
+    document.getElementById('btnUpdate').onclick = async () => {
+        const newPass = document.getElementById('newPass').value;
+        const confirmPass = document.getElementById('confirmPass').value;
+
+        if(!newPass || newPass !== confirmPass) return alert("Passwords do not match!");
+        if(newPass.length < 4) return alert("Password must be at least 4 characters!");
+
+        const btn = document.getElementById('btnUpdate');
+        btn.innerText = "Updating...";
+        btn.disabled = true;
+
+        try {
+            // கண்டறியப்பட்ட சரியான User Key-யில் பாஸ்வேர்டை மாற்றுகிறோம்
+            await update(ref(db, 'users/' + finalUserKey), {
+                pass: newPass
+            });
+            alert("🚀 Password Updated for " + finalUserKey + "! Now you can login.");
+            window.location.href = 'index.html'; // உங்கள் Login பக்கம்
+        } catch (error) {
+            alert("Failed to update password.");
+        } finally {
+            btn.innerText = "Update Password";
+            btn.disabled = false;
+        }
+    };
+</script>
+
+
+</body>
+</html>
