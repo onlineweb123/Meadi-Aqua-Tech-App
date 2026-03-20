@@ -177,10 +177,17 @@
             <label>Full Name</label>
             <input type="text" id="regName" placeholder="Ex: John Doe" required>
         </div>
+   
         <div class="form-group">
-            <label>Phone Number</label>
-            <input type="tel" id="regPhone" placeholder="+91 00000 00000" required>
-        </div>   
+    <label>Phone Number</label>
+    <input type="tel" id="regPhone" placeholder="Enter 10 digit number" 
+           maxlength="10" 
+           pattern="[0-9]{10}" 
+           oninput="this.value = this.value.replace(/[^0-9]/g, '');" 
+           required>
+</div>
+
+          
 
                    <div class="form-group">
     <label>City / District</label>
