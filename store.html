@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Login Rediract Open  -->
-    
+
     <script>
     // Login Redirect
     if (localStorage.getItem("isLoggedIn") !== "true") {
@@ -15,7 +15,7 @@
     }
 </script>
 
-    
+
     <!-- Login Rediract End   -->
 
     <style>
@@ -327,7 +327,7 @@
                 image: img,
                 addedAt: serverTimestamp()
             });
-            
+
             if(navigator.vibrate) navigator.vibrate(50);
             alert(name + " added to Cart!");
         } catch (error) {
@@ -376,6 +376,49 @@
         }
         noResult.style.display = visibleCount === 0 ? "block" : "none";
     }
+    
+    
+    // Input/Textarea தவிர மற்ற இடங்களில் Select & Copy-ஐ தடுப்பதற்கான code
+    document.addEventListener('selectstart', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            return true;
+        }
+        e.preventDefault();
+    });
+
+    document.addEventListener('copy', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            return true;
+        }
+        e.preventDefault();
+    });
+
+    document.addEventListener('contextmenu', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            return true;
+        }
+        e.preventDefault();
+    });
+
+    // CSS வழியாக Selection-ஐ தடுத்தல்
+    const styleTag = document.createElement('style');
+    styleTag.innerHTML = `
+        body {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        input, textarea {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+    `;
+    document.head.appendChild(styleTag);
+
+
 </script>
 
 </body>
