@@ -247,7 +247,50 @@
         }
     }
 
-    fetchHistory();
+    fetchHistory(); 
+    
+        // Service History பக்கத்தில் பதிவுகளை Copy செய்யாமல் தடுப்பதற்கான code
+    document.addEventListener('copy', (e) => {
+        // Sidebar links மற்றும் Navigation buttons-க்கு மட்டும் அனுமதி
+        if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+            return true;
+        }
+        e.preventDefault();
+    });
+
+    document.addEventListener('contextmenu', (e) => {
+        if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+            return true;
+        }
+        e.preventDefault();
+    });
+
+    document.addEventListener('selectstart', (e) => {
+        if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+            return true;
+        }
+        e.preventDefault();
+    });
+
+    // CSS வழியாக Selection-ஐ தடுத்தல்
+    const historyStyle = document.createElement('style');
+    historyStyle.innerHTML = `
+        body {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        /* Navigation மட்டும் இயல்பாக வேலை செய்ய */
+        button, a, .menu-btn {
+            -webkit-user-select: auto;
+            -moz-user-select: auto;
+            -ms-user-select: auto;
+            user-select: auto;
+        }
+    `;
+    document.head.appendChild(historyStyle);
+
 </script>
 </body>
 </html>
