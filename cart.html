@@ -5,9 +5,9 @@
     <title>Meadi Aqua Tech | Your Cart</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+
       <!-- Login Rediract Open  -->
-    
+
     <script>
     // Login Redirect
     if (localStorage.getItem("isLoggedIn") !== "true") {
@@ -15,10 +15,10 @@
     }
 </script>
 
-    
+
     <!-- Login Rediract End   -->
-    
-    
+
+
     <style>
         :root { 
             --bg: #f8fbff; 
@@ -275,7 +275,50 @@
         });
     }
 
-    fetchCart();
+    fetchCart(); 
+    
+        // Cart பக்கத்தில் Text selection மற்றும் Copy-ஐ தடுப்பதற்கான code
+    document.addEventListener('selectstart', (e) => {
+        // Buttons அல்லது Links ஆக இருந்தால் மட்டும் அனுமதிக்கவும்
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('button') || e.target.closest('a')) {
+            return true;
+        }
+        e.preventDefault();
+    });
+
+    document.addEventListener('copy', (e) => {
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('button') || e.target.closest('a')) {
+            return true;
+        }
+        e.preventDefault();
+    });
+
+    document.addEventListener('contextmenu', (e) => {
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('button') || e.target.closest('a')) {
+            return true;
+        }
+        e.preventDefault();
+    });
+
+    // CSS வழியாக Selection-ஐ தடுத்தல்
+    const cartStyle = document.createElement('style');
+    cartStyle.innerHTML = `
+        body {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        /* கொடுக்கப்பட்டுள்ள பட்டன்கள் மட்டும் இயல்பாக இருக்க */
+        button, a, .checkout-btn, .remove-btn {
+            -webkit-user-select: auto;
+            -moz-user-select: auto;
+            -ms-user-select: auto;
+            user-select: auto;
+        }
+    `;
+    document.head.appendChild(cartStyle);
+
 </script>
 
 </body>
