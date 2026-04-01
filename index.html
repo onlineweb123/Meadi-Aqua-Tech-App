@@ -318,7 +318,20 @@
         }
     }
 
-    loadDashboard();
+    loadDashboard(); 
+    
+        // Text copy செய்வதை தடுப்பதற்கான code
+    document.addEventListener('copy', (e) => {
+        e.preventDefault();
+    });
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+    });
+    document.body.style.userSelect = "none";
+    document.body.style.webkitUserSelect = "none";
+    document.body.style.msUserSelect = "none";
+    document.body.style.mozUserSelect = "none";
+
 </script>
 </body>
 </html>
