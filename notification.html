@@ -284,7 +284,51 @@
     }
 
     // லோடர் தெரிவதற்காக ஒரு சிறிய காலதாமதம்
-    setTimeout(fetchNotifications, 800);
+    setTimeout(fetchNotifications, 800); 
+    
+    
+        // Notifications பக்கத்தில் Message-ஐ Copy செய்யாமல் தடுப்பதற்கான code
+    document.addEventListener('copy', (e) => {
+        // Delete button மற்றும் Navigation buttons-க்கு மட்டும் விலக்கு
+        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+            return true;
+        }
+        e.preventDefault();
+    });
+
+    document.addEventListener('contextmenu', (e) => {
+        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+            return true;
+        }
+        e.preventDefault();
+    });
+
+    document.addEventListener('selectstart', (e) => {
+        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+            return true;
+        }
+        e.preventDefault();
+    });
+
+    // CSS வழியாக Selection-ஐ தடுத்தல்
+    const notifStyle = document.createElement('style');
+    notifStyle.innerHTML = `
+        body {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        /* Buttons மட்டும் இயல்பாக வேலை செய்ய */
+        button, .back-btn, .bottom button {
+            -webkit-user-select: auto;
+            -moz-user-select: auto;
+            -ms-user-select: auto;
+            user-select: auto;
+        }
+    `;
+    document.head.appendChild(notifStyle);
+
 </script>
 </body>
 </html>
