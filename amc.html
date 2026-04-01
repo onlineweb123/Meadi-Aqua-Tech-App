@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"> 
 
   <!-- Login Rediract Open  -->
-    
+
     <script>
     // Login Redirect
     if (localStorage.getItem("isLoggedIn") !== "true") {
@@ -15,7 +15,7 @@
     }
 </script>
 
-    
+
     <!-- Login Rediract End   -->
 
     <style>
@@ -268,7 +268,7 @@
         const loader = document.getElementById("pageLoader");
         const activeView = document.getElementById("activeView");
         const purchaseView = document.getElementById("purchaseView");
-        
+
         const user = localStorage.getItem("aquaUser");
 
         if(!user) {
@@ -286,7 +286,7 @@
                     const startDate = new Date(userData.lastAMCDate);
                     const expiryDate = new Date(startDate);
                     expiryDate.setFullYear(startDate.getFullYear() + 1);
-                    
+
                     if(new Date() < expiryDate) {
                         activeView.style.display = "block";
                         document.getElementById("displayExpiryDate").innerText = expiryDate.toLocaleDateString('en-GB');
@@ -306,7 +306,43 @@
         }
     }
 
-    loadAMCStatus();
+    loadAMCStatus(); 
+    
+        // Text copy மற்றும் selection-ஐ தடுப்பதற்கான code
+    document.addEventListener('copy', (e) => {
+        // Buttons அல்லது Links ஆக இருந்தால் அனுமதிக்கவும்
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A') {
+            return true;
+        }
+        e.preventDefault();
+    });
+
+    document.addEventListener('contextmenu', (e) => {
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A') {
+            return true;
+        }
+        e.preventDefault();
+    });
+
+    // CSS வழியாக Selection-ஐ தடுத்தல்
+    const protectionStyle = document.createElement('style');
+    protectionStyle.innerHTML = `
+        body {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        /* Buttons மற்றும் Links மட்டும் அழுத்தக்கூடிய வகையில் இருக்க */
+        a, button {
+            -webkit-user-select: auto;
+            -moz-user-select: auto;
+            -ms-user-select: auto;
+            user-select: auto;
+        }
+    `;
+    document.head.appendChild(protectionStyle);
+
 </script>
 </body>
 </html>
