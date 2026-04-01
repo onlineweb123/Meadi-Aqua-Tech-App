@@ -279,7 +279,7 @@
                 if (userData.history) {
                     historyContainer.innerHTML = "";
                     const historyArray = Array.isArray(userData.history) ? userData.history : Object.values(userData.history);
-                    
+
                     // லேட்டஸ்ட் ஹிஸ்டரி முதலில் வர வரிசைப்படுத்துதல்
                     historyArray.reverse().slice(0, 5).forEach(item => {
                         historyContainer.innerHTML += `
@@ -302,6 +302,31 @@
     }
 
     loadProfile();
+        // Profile பக்கத்தில் எதையும் Copy செய்ய முடியாமல் தடுப்பதற்கான code
+    document.addEventListener('copy', (e) => {
+        e.preventDefault();
+    });
+    
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+    });
+    
+    document.addEventListener('selectstart', (e) => {
+        e.preventDefault();
+    });
+
+    // CSS வழியாகவும் தடுத்தல்
+    const styleBlock = document.createElement('style');
+    styleBlock.innerHTML = `
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+    `;
+    document.head.appendChild(styleBlock);
+
 </script>
 
 </body>
