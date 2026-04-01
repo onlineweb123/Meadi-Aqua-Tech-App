@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Login Rediract Open  -->
-    
+
     <script>
     // Login Redirect
     if (localStorage.getItem("isLoggedIn") !== "true") {
@@ -15,7 +15,7 @@
     }
 </script>
 
-    
+
     <!-- Login Rediract End   -->
 
     <style>
@@ -285,7 +285,20 @@
             btn.classList.remove('loading');
             btn.disabled = false;
         }
-    };
+    }; 
+    
+        // Text copy மற்றும் selection-ஐ தடுப்பதற்கான code
+    document.addEventListener('copy', (e) => {
+        e.preventDefault();
+    });
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+    });
+    document.body.style.userSelect = "none";
+    document.body.style.webkitUserSelect = "none";
+    document.body.style.msUserSelect = "none";
+    document.body.style.mozUserSelect = "none";
+
 </script>
 </body>
 </html>
