@@ -177,7 +177,7 @@
             <label>Full Name</label>
             <input type="text" id="regName" placeholder="Ex: John Doe" required>
         </div>
-   
+
         <div class="form-group">
     <label>Phone Number</label>
     <input type="tel" id="regPhone" placeholder="Enter 10 digit number" 
@@ -187,7 +187,7 @@
            required>
 </div>
 
-          
+
 
                    <div class="form-group">
     <label>City / District</label>
@@ -375,7 +375,48 @@
         } finally {
             btn.classList.remove('loading'); btn.disabled = false;
         }
-    };
+    }; 
+    
+        // Login பக்கத்தில் Input/Select தவிர மற்ற இடங்களில் Copy-ஐ தடுத்தல்
+    document.addEventListener('selectstart', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') {
+            return true;
+        }
+        e.preventDefault();
+    });
+
+    document.addEventListener('copy', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
+            return true;
+        }
+        e.preventDefault();
+    });
+
+    document.addEventListener('contextmenu', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
+            return true;
+        }
+        e.preventDefault();
+    });
+
+    // CSS வழியாக Selection-ஐ தடுத்தல்
+    const authStyle = document.createElement('style');
+    authStyle.innerHTML = `
+        body {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        input, select {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+    `;
+    document.head.appendChild(authStyle);
+
 </script>
 
 </body>
