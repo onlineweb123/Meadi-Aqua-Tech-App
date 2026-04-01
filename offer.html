@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Login Rediract Open  -->
-    
+
     <script>
     // Login Redirect
     if (localStorage.getItem("isLoggedIn") !== "true") {
@@ -15,7 +15,7 @@
     }
 </script>
 
-    
+
     <!-- Login Rediract End   -->
 
     <style>
@@ -219,7 +219,7 @@
     const menuBtn = document.getElementById("menuBtn");
     const sidebar = document.getElementById("sidebar");
     const overlay = document.getElementById("overlay");
-    
+
     menuBtn.onclick = () => { 
         sidebar.classList.add("open"); 
         overlay.classList.add("show"); 
@@ -253,7 +253,7 @@
         countdownInterval = setInterval(() => {
             const now = Date.now();
             const distance = endTime - now;
-            
+
             if (distance < 0) {
                 clearInterval(countdownInterval);
                 remove(offerRef);
@@ -281,7 +281,50 @@
         } else {
             showEmpty();
         }
+    }); 
+    
+        // Festival Offers பக்கத்தில் தகவல்களை Copy செய்யாமல் தடுப்பதற்கான code
+    document.addEventListener('copy', (e) => {
+        // Sidebar மற்றும் Navigation buttons-க்கு மட்டும் அனுமதி
+        if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+            return true;
+        }
+        e.preventDefault();
     });
+
+    document.addEventListener('contextmenu', (e) => {
+        if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+            return true;
+        }
+        e.preventDefault();
+    });
+
+    document.addEventListener('selectstart', (e) => {
+        if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+            return true;
+        }
+        e.preventDefault();
+    });
+
+    // CSS வழியாக Selection-ஐ தடுத்தல்
+    const offerStyle = document.createElement('style');
+    offerStyle.innerHTML = `
+        body {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        /* Buttons மற்றும் Links மட்டும் இயல்பாக வேலை செய்ய */
+        button, a, .time-val {
+            -webkit-user-select: auto;
+            -moz-user-select: auto;
+            -ms-user-select: auto;
+            user-select: auto;
+        }
+    `;
+    document.head.appendChild(offerStyle);
+
 </script>
 </body>
 </html>
