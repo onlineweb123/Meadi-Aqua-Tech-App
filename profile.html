@@ -278,15 +278,21 @@
                 const historyContainer = document.getElementById("serviceHistoryList");
                 if (userData.history) {
                     historyContainer.innerHTML = "";
-                    const historyArray = Array.isArray(userData.history) ? userData.history : Object.values(userData.history);
+                    // தரவை Array ஆக மாற்றுதல்
+                    let historyArray = Array.isArray(userData.history) ? 
+                        [...userData.history] : 
+                        Object.keys(userData.history).map(key => ({ id: key, ...userData.history[key] }));
 
-                    // லேட்டஸ்ட் ஹிஸ்டரி முதலில் வர வரிசைப்படுத்துதல்
-                    historyArray.reverse().slice(0, 5).forEach(item => {
+                    // புதிய தேதி முதலில் வரும்படி (Sort) வரிசைப்படுத்துதல்
+                    historyArray.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                    // முதல் 5 பதிவுகளை மட்டும் திரையில் காட்டுதல்
+                    historyArray.slice(0, 5).forEach(item => {
                         historyContainer.innerHTML += `
                             <div class="history-item">
                                 <div>
-                                    <span class="h-type">${item.type}</span>
-                                    <span class="h-date">${item.date}</span>
+                                    <span class="h-type">${item.type || 'N/A'}</span>
+                                    <span class="h-date">${item.date || ''}</span>
                                 </div>
                                 <span class="status-badge done">Completed</span>
                             </div>
@@ -302,32 +308,16 @@
     }
 
     loadProfile();
-        // Profile பக்கத்தில் எதையும் Copy செய்ய முடியாமல் தடுப்பதற்கான code
-    document.addEventListener('copy', (e) => {
-        e.preventDefault();
-    });
     
-    document.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-    });
-    
-    document.addEventListener('selectstart', (e) => {
-        e.preventDefault();
-    });
+    // Copy protection
+    document.addEventListener('copy', (e) => { e.preventDefault(); });
+    document.addEventListener('contextmenu', (e) => { e.preventDefault(); });
+    document.addEventListener('selectstart', (e) => { e.preventDefault(); });
 
-    // CSS வழியாகவும் தடுத்தல்
     const styleBlock = document.createElement('style');
-    styleBlock.innerHTML = `
-        * {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-    `;
+    styleBlock.innerHTML = `* { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }`;
     document.head.appendChild(styleBlock);
 
 </script>
-
 </body>
 </html>
