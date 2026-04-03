@@ -1,34 +1,27 @@
-const CACHE_NAME = 'aquatech-v2'; // Version update
+const CACHE_NAME = 'aquatech-v3'; // Version update
 const ASSETS = [
   '/',
   'index.html',
   'login.html',
-  'login members.html',
-  'profile.html',
-  'service.html',
-  'service list.html',
-  'store.html',
-  'online bill.html',
-  'save data.html',
-  'admin.html',
-  'admin login.html',
-  'admin login script.js',
   'amc.html',
   'cart.html',
-  'control profile.html',
-  'customer detail.html',
-  'data manager.html',
-  'database.html',
-  'delete data.html',
+  'forgot.html',
+  'notification.html',
+  'offer.html',
+  'profile history.html',
+  'service.html',
+  'store.html',
   'manifest.json',
   'sw.js',
-  // Images
+  // Images (வீடியோவில் உள்ளபடி மாற்றப்பட்டுள்ளது)
   'a.jpg',
   'b.jpg',
   'c.jpg',
   'd.jpg',
-  'hh.jpg',
-  'images (5).jpeg',
+  'e.jpg',
+  'f.jpg',
+  'g.jpg',
+  'h.jpg',
   // Icons
   'icon-128x128.png',
   'icon-144x144.png',
@@ -45,7 +38,9 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log('Caching all assets');
-      return cache.addAll(ASSETS);
+      // இதில் ஒரு ஃபைல் இல்லை என்றாலும் மொத்த கேச்சும் ஃபெயில் ஆகிவிடும்.
+      // எனவே கவனமாக சரிபார்க்கவும்.
+      return cache.addAll(ASSETS).catch(err => console.error("Cache addAll error:", err));
     })
   );
 });
