@@ -229,10 +229,24 @@
                 historyArray.sort((a, b) => new Date(b.date) - new Date(a.date));
 
                 historyArray.forEach(item => {
+                    // தேதியை DD/MM/YYYY என மாற்றும் லாஜிக்
+                    const rawDate = item.date || '';
+                    let formattedDate = rawDate;
+
+                    if (rawDate) {
+                        const d = new Date(rawDate);
+                        if (!isNaN(d.getTime())) {
+                            const day = String(d.getDate()).padStart(2, '0');
+                            const month = String(d.getMonth() + 1).padStart(2, '0');
+                            const year = d.getFullYear();
+                            formattedDate = `${day}/${month}/${year}`;
+                        }
+                    }
+
                     const card = document.createElement('div');
                     card.className = 'history-card';
                     card.innerHTML = `
-                        <span class="h-date">${item.date || ''}</span>
+                        <span class="h-date">${formattedDate}</span>
                         <span class="h-title">${item.type || 'N/A'}</span>
                     `;
                     timeline.appendChild(card);
@@ -248,10 +262,9 @@
     }
 
     fetchHistory(); 
-    
-        // Service History பக்கத்தில் பதிவுகளை Copy செய்யாமல் தடுப்பதற்கான code
+
+    // Service History பக்கத்தில் பதிவுகளை Copy செய்யாமல் தடுப்பதற்கான code
     document.addEventListener('copy', (e) => {
-        // Sidebar links மற்றும் Navigation buttons-க்கு மட்டும் அனுமதி
         if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('button')) {
             return true;
         }
@@ -281,7 +294,6 @@
             -ms-user-select: none;
             user-select: none;
         }
-        /* Navigation மட்டும் இயல்பாக வேலை செய்ய */
         button, a, .menu-btn {
             -webkit-user-select: auto;
             -moz-user-select: auto;
