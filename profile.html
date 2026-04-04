@@ -206,6 +206,17 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
+    // --- DATE FORMAT HELPER ---
+    function formatDate(dateStr) {
+        if (!dateStr || dateStr === "Not Updated") return dateStr;
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
     // --- 1. MONITOR SECTION ---
     const userLocal = localStorage.getItem("aquaUser") || "Guest";
     const currentPage = window.location.pathname.split("/").pop() || "profile.html";
@@ -272,27 +283,27 @@
                 document.getElementById("profilePhone").innerText = userData.phone || "Not Set";
                 document.getElementById("profileCity").innerText = userData.city || "Not Set";
                 document.getElementById("dispModel").innerText = userData.model || "Not Updated";
-                document.getElementById("dispInstalled").innerText = userData.installed || "Not Updated";
+                
+                // Installed Date-ஐ DD/MM/YYYY என மாற்றுதல்
+                document.getElementById("dispInstalled").innerText = formatDate(userData.installed || "Not Updated");
+                
                 document.getElementById("dispWarranty").innerText = userData.warranty || "Not Updated";
 
                 const historyContainer = document.getElementById("serviceHistoryList");
                 if (userData.history) {
                     historyContainer.innerHTML = "";
-                    // தரவை Array ஆக மாற்றுதல்
                     let historyArray = Array.isArray(userData.history) ? 
                         [...userData.history] : 
                         Object.keys(userData.history).map(key => ({ id: key, ...userData.history[key] }));
 
-                    // புதிய தேதி முதலில் வரும்படி (Sort) வரிசைப்படுத்துதல்
                     historyArray.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-                    // முதல் 5 பதிவுகளை மட்டும் திரையில் காட்டுதல்
                     historyArray.slice(0, 5).forEach(item => {
                         historyContainer.innerHTML += `
                             <div class="history-item">
                                 <div>
                                     <span class="h-type">${item.type || 'N/A'}</span>
-                                    <span class="h-date">${item.date || ''}</span>
+                                    <span class="h-date">${formatDate(item.date || '')}</span>
                                 </div>
                                 <span class="status-badge done">Completed</span>
                             </div>
@@ -308,7 +319,7 @@
     }
 
     loadProfile();
-    
+
     // Copy protection
     document.addEventListener('copy', (e) => { e.preventDefault(); });
     document.addEventListener('contextmenu', (e) => { e.preventDefault(); });
@@ -320,4 +331,4 @@
 
 </script>
 </body>
-</html>
+</html>```
