@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meadi Aqua Tech - Creative Offer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0077b6;
+            --accent: #00b4d8;
+            --gradient: linear-gradient(135deg, #0077b6 0%, #00b4d8 100%);
+            --white: #ffffff;
+            --success: #28a745;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #e0f2f1;
+            background-image: radial-gradient(#b2ebf2 1px, transparent 1px);
+            background-size: 20px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .offer-card {
+            background: var(--white);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 420px;
+            overflow: hidden;
+            position: relative;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-header {
+            background: var(--gradient);
+            padding: 35px 20px;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+        .logo-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        .offer-tag {
+            background: #ffea00;
+            color: #333;
+            padding: 4px 15px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .card-body { padding: 40px 30px 30px; }
+        h2 { font-size: 1.3rem; color: #2c3e50; margin-bottom: 10px; text-align: center; }
+        p.subtitle { color: #7f8c8d; font-size: 0.9rem; text-align: center; margin-bottom: 30px; }
+
+        .input-group { margin-bottom: 20px; text-align: left; }
+        label { display: block; font-size: 0.85rem; font-weight: 600; color: #34495e; margin-bottom: 8px; margin-left: 5px; }
+
+        input, textarea {
+            width: 100%; padding: 14px 18px; border: 2px solid #edf2f7; border-radius: 12px;
+            font-size: 1rem; box-sizing: border-box; transition: all 0.3s ease; background: #f8fafc;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus { border-color: var(--primary); outline: none; background: var(--white); box-shadow: 0 0 0 4px rgba(0, 119, 182, 0.1); }
+        textarea { height: 90px; resize: none; }
+
+        .btn-submit {
+            width: 100%; background: var(--gradient); color: white; border: none; padding: 16px;
+            border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer;
+            transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+
+        .btn-submit:disabled { opacity: 0.8; cursor: not-allowed; }
+
+        .spinner {
+            width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%; border-top-color: #fff; animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: none; justify-content: center;
+            align-items: center; z-index: 1000;
+        }
+
+        .modal-content {
+            background: white; padding: 30px; border-radius: 20px; text-align: center;
+            max-width: 320px; width: 90%; animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes pop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .success-icon { 
+            width: 60px; height: 60px; background: #dcfce7; color: var(--success);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 30px; margin: 0 auto 15px auto;
+        }
+
+        .footer { text-align: center; margin-top: 25px; font-size: 0.75rem; color: #bdc3c7; }
+    </style>
+</head>
+<body>
+
+<div class="offer-card">
+    <div class="card-header">
+        <h1 class="logo-title">MEADI AQUA TECH</h1>
+        <span class="offer-tag">LATEST OFFER</span>
+    </div>
+
+    <div class="card-body">
+        <h2>Creative Offer!</h2>
+        <p class="subtitle">Enter your details to unlock exclusive offers.</p>
+
+        <form id="offerForm">
+            <div class="input-group">
+                <label>Name</label>
+                <input type="text" id="name" placeholder="Name" required>
+            </div>
+            <div class="input-group">
+                <label>Phone Number</label>
+
+              <input type="tel" id="phone" 
+       placeholder="98430 xxxxx" 
+       pattern="[0-9]{10}" 
+       minlength="10" 
+       maxlength="10" 
+       title="தயவுசெய்து 10 இலக்க போன் நம்பரை உள்ளிடவும்" 
+       required>                                                                                              
+            </div>
+            
+            
+            
+            
+            <div class="input-group">
+                <label>Address</label>
+                <textarea id="address" placeholder="Address..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">
+                <span class="spinner" id="btnSpinner"></span>
+                <span id="btnText">Get Offer</span>
+                <svg id="btnIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+        </form>
+        <div class="footer">© 2026 Meadi Aqua Tech | Cuddalore</div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="successModal">
+    <div class="modal-content">
+        <div class="success-icon">✓</div>
+        <h3 style="margin: 0; color: #1e293b;">Success!</h3>
+        <p id="successMsg" style="color: #64748b; font-size: 0.9rem; margin-top: 10px;">Details saved. Redirecting to WhatsApp...</p>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getDatabase, ref, push, set, onDisconnect } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
+        authDomain: "meadi-aqua-tech.firebaseapp.com",
+        databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
+        projectId: "meadi-aqua-tech",
+        storageBucket: "meadi-aqua-tech.appspot.com",
+        messagingSenderId: "1036306536069",
+        appId: "1:1036306536069:web:96e98947f63628469c41d1"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    document.getElementById('offerForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const btn = document.getElementById('submitBtn');
+        const spinner = document.getElementById('btnSpinner');
+        const btnText = document.getElementById('btnText');
+        const modal = document.getElementById('successModal');
+
+        btn.disabled = true;
+        spinner.style.display = "block";
+        btnText.innerText = "Saving...";
+
+        const name = document.getElementById('name').value;
+        const phone = document.getElementById('phone').value;
+        const address = document.getElementById('address').value;
+
+        // டவர் கிடைக்கவில்லை என்றால் 10 விநாடியில் எர்ரர் காட்ட Timeout
+        const timeout = setTimeout(() => {
+            if (btn.disabled) {
+                alert("Network slow! கவலைப்பட வேண்டாம், டவர் வந்ததும் உங்கள் தகவல் தானாக சேமிக்கப்படும்.");
+                proceedToWhatsApp(name, phone, address); // டேட்டா பேஸ் லேட்டாவாக அப்டேட் ஆகும், நாம் வாட்ஸ்அப் அனுப்பிவிடலாம்.
+            }
+        }, 8000); 
+
+        const dataRef = ref(db, 'creative_offers');
+        const newOfferRef = push(dataRef);
+        
+        try {
+            await set(newOfferRef, {
+                name: name,
+                phone: phone,
+                address: address,
+                timestamp: new Date().toISOString()
+            });
+            
+            clearTimeout(timeout);
+            showSuccess(name, phone, address);
+
+        } catch (err) {
+            console.error(err);
+            // இணையம் முற்றிலும் இல்லை என்றால்:
+            proceedToWhatsApp(name, phone, address);
+        }
+    });
+
+    function showSuccess(name, phone, address) {
+        document.getElementById('btnSpinner').style.display = "none";
+        document.getElementById('btnText').innerText = "Done!";
+        document.getElementById('successModal').style.display = "flex";
+        setTimeout(() => proceedToWhatsApp(name, phone, address), 1500);
+    }
+
+    function proceedToWhatsApp(name, phone, address) {
+        const wpNumber = "919344165879";
+        const message = `*MEADI AQUA TECH - NEW OFFER ENTRY*%0A%0A*Name:* ${name}%0A*Phone:* ${phone}%0A*Address:* ${address}`;
+        window.location.href = `https://wa.me/${wpNumber}?text=${message}`;
+    }
+</script>
+
+</body>
+</html>
