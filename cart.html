@@ -5,19 +5,13 @@
     <title>Meadi Aqua Tech | Your Cart</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-      <!-- Login Rediract Open  -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script>
-    // Login Redirect
     if (localStorage.getItem("isLoggedIn") !== "true") {
         window.location.href = "login.html";
     }
-</script>
-
-
-    <!-- Login Rediract End   -->
-
+    </script>
 
     <style>
         :root { 
@@ -33,7 +27,6 @@
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
         body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); }
 
         header { 
@@ -92,6 +85,23 @@
             color: white; border-radius: 20px; padding: 20px; margin-top: 20px; text-align: center;
         }
 
+        /* --- Updated QR Styles with Border --- */
+        .qr-container {
+            background: white; padding: 20px; border-radius: 20px;
+            margin-top: 15px; display: flex; flex-direction: column; align-items: center;
+            border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        #qrcode {
+            padding: 10px;
+            border: 3px dashed var(--primary); /* dashed border for a professional look */
+            border-radius: 15px;
+            background: #fff;
+        }
+        
+        #qrcode img { margin: 0 auto; border-radius: 5px; }
+        .qr-text { font-size: 12px; color: var(--text-sub); margin-top: 10px; font-weight: 600; }
+
         .checkout-btn {
             width: 100%; border: none; padding: 16px; border-radius: 18px; font-size: 16px; font-weight: 700;
             margin-top: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center;
@@ -99,7 +109,6 @@
         }
         .upi-btn { background: #0077b6; box-shadow: 0 5px 15px rgba(0, 119, 182, 0.3); }
         .wa-btn { background: #25d366; box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3); }
-
         .remove-btn { background: #fee2e2; color: var(--danger); border: none; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 600; }
 
         .spinner-container { display: flex; flex-direction: column; align-items: center; padding: 50px 0; }
@@ -136,6 +145,12 @@
     </div>
 
     <div id="summary" style="display:none;">
+        
+        <div class="qr-container" id="qrContainer">
+            <div id="qrcode"></div>
+            <p class="qr-text">Scan & Pay Now ⚡</p>
+        </div>
+
         <div class="total-card">
             <p style="margin:0; font-size: 14px; opacity: 0.9;">Total Amount</p>
             <h2 id="totalPrice" style="margin: 5px 0 0 0;">₹0</h2>
@@ -170,34 +185,25 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // --- 1. MONITOR LOGIC ---
     const currentUser = localStorage.getItem("aquaUser") || "Guest";
-    const currentPage = window.location.pathname.split("/").pop() || "cart.html";
-    const startTime = Date.now();
+    
+    const cartList = document.getElementById("cartList");
+    const summary = document.getElementById("summary");
+    const totalPriceEl = document.getElementById("totalPrice");
+    const loader = document.getElementById("loader");
+    const emptyMsg = document.getElementById("emptyMsg");
+    const qrcodeDiv = document.getElementById("qrcode");
 
-    try {
-        const visitRef = ref(db, 'analytics/visits');
-        push(visitRef, {
-            username: currentUser,
-            page: currentPage,
-            time: serverTimestamp(),
-            device: navigator.userAgent
-        });
-    } catch(e) {}
+    let dynamicUPI = "mm05270331-1@okaxis"; 
 
-    window.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === 'hidden') {
-            const duration = (Date.now() - startTime) / 1000;
-            push(ref(db, 'analytics/exits'), {
-                username: currentUser,
-                page: currentPage,
-                duration: duration + "s",
-                time: serverTimestamp()
-            });
+    const adminUpiRef = ref(db, 'admin_settings/upi_config');
+    onValue(adminUpiRef, (snapshot) => {
+        if(snapshot.exists()){
+            dynamicUPI = snapshot.val().upiId;
+            fetchCart(); 
         }
     });
 
-    // --- 2. SIDEBAR & GLOBAL FUNCTIONS ---
     window.toggleMenu = () => {
         document.getElementById("sidebar").classList.toggle("open");
         document.getElementById("overlay").classList.toggle("show");
@@ -205,19 +211,25 @@
     document.getElementById("menuBtn").onclick = window.toggleMenu;
     document.getElementById("overlay").onclick = window.toggleMenu;
 
-    // Delete item function exposed to window
     window.deleteItem = (key) => {
         if(confirm("பொருளை நீக்கவா?")) {
             remove(ref(db, `carts/${currentUser}/${key}`));
         }
     };
 
-    // --- 3. CART LOGIC ---
-    const cartList = document.getElementById("cartList");
-    const summary = document.getElementById("summary");
-    const totalPriceEl = document.getElementById("totalPrice");
-    const loader = document.getElementById("loader");
-    const emptyMsg = document.getElementById("emptyMsg");
+    function generateQR(amount) {
+        qrcodeDiv.innerHTML = ""; 
+        const upiData = `upi://pay?pa=${dynamicUPI}&pn=Meadi Aqua Tech&am=${amount}&cu=INR`;
+        
+        new QRCode(qrcodeDiv, {
+            text: upiData,
+            width: 150,
+            height: 150,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+    }
 
     function fetchCart() {
         if (currentUser === "Guest") {
@@ -262,9 +274,10 @@
             });
 
             totalPriceEl.innerText = "₹" + total;
+            generateQR(total);
 
             document.getElementById("payBtn").onclick = () => {
-                const upiUrl = `upi://pay?pa=mm05270331-1@okaxis&pn=Meadi Aqua Tech&am=${total}&cu=INR`;
+                const upiUrl = `upi://pay?pa=${dynamicUPI}&pn=Meadi Aqua Tech&am=${total}&cu=INR`;
                 window.location.href = upiUrl;
             };
 
@@ -276,50 +289,24 @@
     }
 
     fetchCart(); 
-    
-        // Cart பக்கத்தில் Text selection மற்றும் Copy-ஐ தடுப்பதற்கான code
+
     document.addEventListener('selectstart', (e) => {
-        // Buttons அல்லது Links ஆக இருந்தால் மட்டும் அனுமதிக்கவும்
-        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('button') || e.target.closest('a')) {
-            return true;
-        }
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('button') || e.target.closest('a')) return true;
         e.preventDefault();
     });
-
     document.addEventListener('copy', (e) => {
-        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('button') || e.target.closest('a')) {
-            return true;
-        }
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('button') || e.target.closest('a')) return true;
         e.preventDefault();
     });
-
     document.addEventListener('contextmenu', (e) => {
-        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('button') || e.target.closest('a')) {
-            return true;
-        }
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('button') || e.target.closest('a')) return true;
         e.preventDefault();
     });
 
-    // CSS வழியாக Selection-ஐ தடுத்தல்
     const cartStyle = document.createElement('style');
-    cartStyle.innerHTML = `
-        body {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        /* கொடுக்கப்பட்டுள்ள பட்டன்கள் மட்டும் இயல்பாக இருக்க */
-        button, a, .checkout-btn, .remove-btn {
-            -webkit-user-select: auto;
-            -moz-user-select: auto;
-            -ms-user-select: auto;
-            user-select: auto;
-        }
-    `;
+    cartStyle.innerHTML = `body { -webkit-user-select: none; user-select: none; } button, a { -webkit-user-select: auto; user-select: auto; }`;
     document.head.appendChild(cartStyle);
 
 </script>
-
 </body>
 </html>
