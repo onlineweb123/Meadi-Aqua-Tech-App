@@ -6,118 +6,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Login Rediract Open  -->
-
     <script>
-    // Login Redirect
-    if (localStorage.getItem("isLoggedIn") !== "true") {
-        window.location.href = "login.html";
-    }
-</script>
-
-
-    <!-- Login Rediract End   -->
+        if (localStorage.getItem("isLoggedIn") !== "true") { window.location.href = "login.html"; }
+    </script>
 
     <style>
         :root { 
-            --bg: #f8fbff; 
-            --card: #ffffff; 
-            --border: #e2e8f0; 
-            --primary: #0077b6; 
-            --accent: #00b4d8; 
-            --text-main: #1e293b;
-            --text-sub: #64748b;
-            --glass: rgba(255, 255, 255, 0.8);
+            --bg: #f8fbff; --card: #ffffff; --border: #e2e8f0; --primary: #0077b6; 
+            --accent: #00b4d8; --text-main: #1e293b; --text-sub: #64748b; --glass: rgba(255, 255, 255, 0.8);
         }
-
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); }
-
-        header { 
-            height: 70px; display: flex; align-items: center; justify-content: center; 
-            position: fixed; top: 0; left: 0; right: 0; 
-            background: var(--glass); backdrop-filter: blur(12px);
-            z-index: 100; border-bottom: 1px solid var(--border);
-        }
+        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); user-select: none; }
+        
+        header { height: 70px; display: flex; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; right: 0; background: var(--glass); backdrop-filter: blur(12px); z-index: 100; border-bottom: 1px solid var(--border); }
         .header-title { font-size: 18px; font-weight: 700; color: var(--primary); }
+        .menu-btn { position: absolute; left: 20px; font-size: 24px; background: #f1f5f9; border: none; color: var(--text-main); cursor: pointer; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
 
-        .menu-btn { 
-            position: absolute; left: 20px; font-size: 24px; 
-            background: #f1f5f9; border: none; color: var(--text-main); 
-            cursor: pointer; width: 40px; height: 40px; border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-        }
-
-        .sidebar { 
-            width: 280px; background: var(--card); position: fixed; top: 0; bottom: 0; left: -300px; 
-            padding-top: 80px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 110; 
-            box-shadow: 20px 0 50px rgba(0,0,0,0.05);
-        }
+        .sidebar { width: 280px; background: var(--card); position: fixed; top: 0; bottom: 0; left: -300px; padding-top: 80px; transition: 0.4s; z-index: 110; box-shadow: 20px 0 50px rgba(0,0,0,0.05); }
         .sidebar.open { left: 0; }
-        .sidebar a { display: flex; align-items: center; padding: 16px 24px; text-decoration: none; color: var(--text-main); font-weight: 500; font-size: 15px; transition: 0.2s; }
+        .sidebar a { display: flex; align-items: center; padding: 16px 24px; text-decoration: none; color: var(--text-main); font-weight: 500; }
 
         .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); display: none; z-index: 105; backdrop-filter: blur(4px); }
         .overlay.show { display: block; }
 
         .main { padding: 90px 15px 110px 15px; max-width: 600px; margin: 0 auto; }
-
-        .search-box {
-            background: white; border: 1px solid var(--border); padding: 12px 20px;
-            border-radius: 15px; margin-bottom: 20px; display: flex; align-items: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        }
-        .search-box input { border: none; outline: none; width: 100%; font-family: inherit; font-size: 14px; }
+        .search-box { background: white; border: 1px solid var(--border); padding: 12px 20px; border-radius: 15px; margin-bottom: 20px; display: flex; align-items: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        .search-box input { border: none; outline: none; width: 100%; font-size: 14px; }
 
         .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-
-        .product-card { 
-            background: white; border-radius: 20px; padding: 12px; 
-            border: 1px solid var(--border); display: flex; flex-direction: column; 
-            transition: 0.3s;
-        }
-
-        .product-image { 
-            width: 100%; aspect-ratio: 1/1; background: #f1f5f9; 
-            border-radius: 15px; margin-bottom: 10px; display: flex; 
-            align-items: center; justify-content: center; overflow: hidden; 
-            cursor: zoom-in;
-        }
+        .product-card { background: white; border-radius: 20px; padding: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; }
+        .product-image { width: 100%; aspect-ratio: 1/1; background: #f1f5f9; border-radius: 15px; margin-bottom: 10px; overflow: hidden; cursor: zoom-in; }
         .product-image img { width: 100%; height: 100%; object-fit: cover; }
-
-        .product-name { font-size: 14px; font-weight: 700; margin: 5px 0; color: var(--text-main); }
-        .product-desc { font-size: 11px; color: var(--text-sub); margin-bottom: 12px; line-height: 1.4; flex-grow: 1; }
+        
+        .product-name { font-size: 14px; font-weight: 700; color: var(--text-main); margin: 5px 0; }
+        .product-desc { font-size: 11px; color: var(--text-sub); margin-bottom: 12px; flex-grow: 1; }
         .product-price { font-size: 16px; font-weight: 800; color: var(--primary); margin-bottom: 8px; }
 
+        /* Button & Spinner Styling */
         .add-btn { 
             width: 100%; padding: 10px; background: #f1f5f9; border: none; 
             border-radius: 10px; font-weight: 700; color: var(--primary); 
-            cursor: pointer; transition: 0.2s;
-            display: flex; justify-content: center; align-items: center;
-            position: relative; height: 40px;
+            cursor: pointer; height: 40px; display: flex; align-items: center; justify-content: center;
+            transition: 0.2s;
         }
-        .add-btn:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
+        .add-btn:disabled { opacity: 0.7; cursor: not-allowed; }
 
-        .btn-spinner {
-            display: none;
-            width: 16px; height: 16px;
-            border: 2px solid rgba(0, 119, 182, 0.2);
-            border-radius: 50%;
-            border-top-color: var(--primary);
-            animation: spin 0.8s linear infinite;
+        .spinner {
+            width: 18px; height: 18px; border: 3px solid rgba(0,119,182,0.2);
+            border-top: 3px solid var(--primary); border-radius: 50%;
+            animation: spin 0.8s linear infinite; display: none;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .loading .btn-text { display: none; }
-        .loading .btn-spinner { display: block; }
-
-        .image-viewer {
-            display: none; position: fixed; z-index: 999;
-            left: 0; top: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            justify-content: center; align-items: center; cursor: zoom-out;
-        }
-        .image-viewer img { max-width: 90%; max-height: 80vh; border-radius: 15px; animation: zoom 0.3s ease; }
-        @keyframes zoom { from {transform: scale(0.7); opacity: 0;} to {transform: scale(1); opacity: 1;} }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .bottom {
             height: 75px; position: fixed; bottom: 0; left: 0; right: 0; 
@@ -132,6 +71,9 @@
         }
         .bottom button.active { color: var(--primary); }
         .bottom .icon { font-size: 22px; margin-bottom: 4px; }
+
+        .image-viewer { display: none; position: fixed; z-index: 999; inset: 0; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; }
+        .image-viewer img { max-width: 90%; border-radius: 15px; }
     </style>
 </head>
 <body>
@@ -156,102 +98,12 @@
         <input type="text" id="searchInput" onkeyup="searchProduct()" placeholder="Search products...">
     </div>
 
-    <div class="product-grid" id="productGrid">
-        <div class="product-card">
-            <div class="product-image" onclick="openViewer(this)"><img src="a.jpg"></div>
-            <span class="product-name">Dolphin Model</span>
-            <p class="product-desc">8 Liter Tank capacity. Suitable for small families. Per day 15L use.</p>
-            <span class="product-price">₹9,000</span>
-            <button class="add-btn" onclick="handleAddToCart(this, 'Dolphin Model', 9000, 'a.jpg')">
-                <span class="btn-text">Add to Cart</span>
-                <div class="btn-spinner"></div>
-            </button>
-        </div>
+    <div class="product-grid" id="productGrid"></div>
 
-        <div class="product-card">
-            <div class="product-image" onclick="openViewer(this)"><img src="b.jpg"></div>
-            <span class="product-name">Aqua 2090</span>
-            <p class="product-desc">Advanced Model. 12 Liter Tank. High durability.</p>
-            <span class="product-price">₹14,500</span>
-            <button class="add-btn" onclick="handleAddToCart(this, 'Aqua 2090', 14500, 'b.jpg')">
-                <span class="btn-text">Add to Cart</span>
-                <div class="btn-spinner"></div>
-            </button>
-        </div>
-
-        <div class="product-card">
-            <div class="product-image" onclick="openViewer(this)"><img src="c.jpg"></div>
-            <span class="product-name">Grand Model</span>
-            <p class="product-desc">Transparent cabinet design. Easy maintenance and 12L storage.</p>
-            <span class="product-price">₹14,500</span>
-            <button class="add-btn" onclick="handleAddToCart(this, 'Grand Model', 14500, 'c.jpg')">
-                <span class="btn-text">Add to Cart</span>
-                <div class="btn-spinner"></div>
-            </button>
-        </div>
-
-        <div class="product-card">
-            <div class="product-image" onclick="openViewer(this)"><img src="d.jpg"></div>
-            <span class="product-name">Aqua Queen</span>
-            <p class="product-desc">8 Liter Tank capacity. Suitable for small families. Per day 15L use.</p>
-            <span class="product-price">₹9,000</span>
-            <button class="add-btn" onclick="handleAddToCart(this, 'Aqua Queen', 9000, 'd.jpg')">
-                <span class="btn-text">Add to Cart</span>
-                <div class="btn-spinner"></div>
-            </button>
-        </div>
-
-        <div class="product-card">
-            <div class="product-image" onclick="openViewer(this)"><img src="e.jpg"></div>
-            <span class="product-name">Innovica</span>
-            <p class="product-desc">Premium Latest Model.</p>
-            <span class="product-price">₹18,500</span>
-            <button class="add-btn" onclick="handleAddToCart(this, 'Innovica', 18500, 'e.jpg')">
-                <span class="btn-text">Add to Cart</span>
-                <div class="btn-spinner"></div>
-            </button>
-        </div>
-
-        <div class="product-card">
-            <div class="product-image" onclick="openViewer(this)"><img src="f.jpg"></div>
-            <span class="product-name">H2O</span>
-            <p class="product-desc">Service Friendly Good Model</p>
-            <span class="product-price">₹10,500</span>
-            <button class="add-btn" onclick="handleAddToCart(this, 'H2O', 10500, 'f.jpg')">
-                <span class="btn-text">Add to Cart</span>
-                <div class="btn-spinner"></div>
-            </button>
-        </div>
-
-        <div class="product-card">
-            <div class="product-image" onclick="openViewer(this)"><img src="g.jpg"></div>
-            <span class="product-name">Mars</span>
-            <p class="product-desc">Service Friendly Good Model</p>
-            <span class="product-price">₹10,500</span>
-            <button class="add-btn" onclick="handleAddToCart(this, 'Mars', 10500, 'g.jpg')">
-                <span class="btn-text">Add to Cart</span>
-                <div class="btn-spinner"></div>
-            </button>
-        </div>
-
-        <div class="product-card">
-            <div class="product-image" onclick="openViewer(this)"><img src="h.jpg"></div>
-            <span class="product-name">Water Pia</span>
-            <p class="product-desc">Service Friendly Good Model</p>
-            <span class="product-price">₹13,500</span>
-            <button class="add-btn" onclick="handleAddToCart(this, 'Water Pia', 13500, 'h.jpg')">
-                <span class="btn-text">Add to Cart</span>
-                <div class="btn-spinner"></div>
-            </button>
-        </div>
-    </div>
-
-    <div id="noResult" style="display:none; text-align:center; padding: 20px; color: var(--text-sub);">
-        No products found!
-    </div>
+    <div id="noResult" style="display:none; text-align:center; padding: 20px;">No products found!</div>
 </div>
 
-<div id="imageViewer" class="image-viewer" onclick="closeViewer()">
+<div id="imageViewer" class="image-viewer" onclick="this.style.display='none'">
     <img id="fullImage" src="">
 </div>
 
@@ -264,7 +116,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, serverTimestamp, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, onValue, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
@@ -279,64 +131,59 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // --- 1. MONITOR SECTION ---
-    const userLocal = localStorage.getItem("aquaUser") || "Guest";
-    const currentPage = "store.html";
-    const startTime = Date.now();
-
-    try {
-        push(ref(db, 'analytics/visits'), {
-            username: userLocal,
-            page: currentPage,
-            time: serverTimestamp(),
-            device: navigator.userAgent
+    const grid = document.getElementById('productGrid');
+    onValue(ref(db, 'products'), (snapshot) => {
+        grid.innerHTML = "";
+        snapshot.forEach((child) => {
+            const data = child.val();
+            grid.innerHTML += `
+                <div class="product-card">
+                    <div class="product-image" onclick="openView('${data.img}')"><img src="${data.img}"></div>
+                    <span class="product-name">${data.name}</span>
+                    <p class="product-desc">${data.desc}</p>
+                    <span class="product-price">₹${data.price}</span>
+                    <button class="add-btn" onclick="addToCart(this, '${data.name}', ${data.price}, '${data.img}')">
+                        <span class="btn-text">Add to Cart</span>
+                        <div class="spinner"></div>
+                    </button>
+                </div>
+            `;
         });
-    } catch(e) {}
-
-    window.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === 'hidden') {
-            const duration = (Date.now() - startTime) / 1000;
-            push(ref(db, 'analytics/exits'), {
-                username: userLocal,
-                page: currentPage,
-                duration: duration + "s",
-                time: serverTimestamp()
-            });
-        }
     });
 
-    // --- 2. SHOP LOGIC SECTION ---
-    window.handleAddToCart = async function(btn, name, price, img) {
-        const currentUser = localStorage.getItem("aquaUser");
+    window.addToCart = async function(btn, name, price, img) {
+        const text = btn.querySelector('.btn-text');
+        const spinner = btn.querySelector('.spinner');
+        const user = localStorage.getItem("aquaUser") || "Guest";
 
-        if (!currentUser) {
-            alert("Please login first!");
-            window.location.href = "login.html";
-            return;
-        }
-
-        btn.classList.add('loading');
+        // Start Loading
         btn.disabled = true;
+        text.style.display = "none";
+        spinner.style.display = "block";
 
         try {
-            const cartRef = ref(db, 'carts/' + currentUser);
-            const newProductRef = push(cartRef);
-            await set(newProductRef, {
-                productName: name,
-                price: price,
-                image: img,
-                addedAt: serverTimestamp()
+            await push(ref(db, 'carts/' + user), { 
+                productName: name, 
+                price: price, 
+                image: img, 
+                addedAt: serverTimestamp() 
             });
-
-            if(navigator.vibrate) navigator.vibrate(50);
-            alert(name + " added to Cart!");
+            
+            // Success Feedback (Optional: change text color/bg)
+            alert(name + " added to cart!");
         } catch (error) {
-            console.error(error);
-            alert("Error: Check your connection!");
+            alert("Error adding to cart. Try again!");
         } finally {
-            btn.classList.remove('loading');
+            // Stop Loading
             btn.disabled = false;
+            text.style.display = "block";
+            spinner.style.display = "none";
         }
+    };
+
+    window.openView = (url) => {
+        document.getElementById('fullImage').src = url;
+        document.getElementById('imageViewer').style.display = 'flex';
     };
 </script>
 
@@ -345,81 +192,17 @@
         document.getElementById("sidebar").classList.toggle("open");
         document.getElementById("overlay").classList.toggle("show");
     }
-
-    function openViewer(element) {
-        var viewer = document.getElementById("imageViewer");
-        var fullImg = document.getElementById("fullImage");
-        fullImg.src = element.querySelector("img").src;
-        viewer.style.display = "flex";
-    }
-
-    function closeViewer() {
-        document.getElementById("imageViewer").style.display = "none";
-    }
-
     function searchProduct() {
         let input = document.getElementById('searchInput').value.toLowerCase();
         let cards = document.getElementsByClassName('product-card');
-        let noResult = document.getElementById('noResult');
-        let visibleCount = 0;
-
+        let visible = 0;
         for (let i = 0; i < cards.length; i++) {
-            let name = cards[i].querySelector('.product-name').innerText.toLowerCase();
-            let desc = cards[i].querySelector('.product-desc').innerText.toLowerCase();
-
-            if (name.includes(input) || desc.includes(input)) {
-                cards[i].style.display = "flex";
-                visibleCount++;
-            } else {
-                cards[i].style.display = "none";
-            }
+            let name = cards[i].innerText.toLowerCase();
+            cards[i].style.display = name.includes(input) ? "flex" : "none";
+            if(name.includes(input)) visible++;
         }
-        noResult.style.display = visibleCount === 0 ? "block" : "none";
+        document.getElementById('noResult').style.display = visible === 0 ? "block" : "none";
     }
-
-
-    // Input/Textarea தவிர மற்ற இடங்களில் Select & Copy-ஐ தடுப்பதற்கான code
-    document.addEventListener('selectstart', (e) => {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-            return true;
-        }
-        e.preventDefault();
-    });
-
-    document.addEventListener('copy', (e) => {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-            return true;
-        }
-        e.preventDefault();
-    });
-
-    document.addEventListener('contextmenu', (e) => {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-            return true;
-        }
-        e.preventDefault();
-    });
-
-    // CSS வழியாக Selection-ஐ தடுத்தல்
-    const styleTag = document.createElement('style');
-    styleTag.innerHTML = `
-        body {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        input, textarea {
-            -webkit-user-select: text;
-            -moz-user-select: text;
-            -ms-user-select: text;
-            user-select: text;
-        }
-    `;
-    document.head.appendChild(styleTag);
-
-
 </script>
-
 </body>
 </html>
