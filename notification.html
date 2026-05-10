@@ -140,6 +140,8 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, push, serverTimestamp, set, get, child, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    // Firebase Messaging இம்போர்ட் செய்யப்பட்டது
+    import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
@@ -154,9 +156,35 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    const messaging = getMessaging(app);
+
+    const userLocal = localStorage.getItem("aquaUser") || "Guest";
+
+    // --- NEW: PUSH NOTIFICATION PERMISSION & TOKEN SAVING ---
+    async function setupNotifications() {
+        if (!("Notification" in window)) return;
+
+        try {
+            const permission = await Notification.requestPermission();
+            if (permission === "granted") {
+                const token = await getToken(messaging, {
+                    vapidKey: "BO2y7oJXWmgnSuIZzePQe5g_khPbO50T-pfeEubDxCnipZSOhzHx9RJACEG_7TUhCARdPe7GUp0Y2XxwrA6numc"
+                });
+
+                if (token && userLocal !== "Guest") {
+                    // டோக்கனை யூசரின் டேட்டாபேஸில் சேமிக்கிறோம்
+                    await update(ref(db, `users/${userLocal}`), {
+                        fcmToken: token
+                    });
+                    console.log("Push Token Updated");
+                }
+            }
+        } catch (err) {
+            console.log("Notification setup error:", err);
+        }
+    }
 
     // --- 1. MONITOR SECTION ---
-    const userLocal = localStorage.getItem("aquaUser") || "Guest";
     const currentPage = window.location.pathname.split("/").pop() || "notification.html";
     const startTime = Date.now();
 
@@ -217,22 +245,21 @@
 
     // --- 3. FETCH NOTIFICATIONS ---
     async function fetchNotifications() {
-        const currentUsername = localStorage.getItem("aquaUser"); 
         const container = document.getElementById("notifContainer");
 
-        if(!currentUsername) {
+        if(userLocal === "Guest") {
             window.location.href = "login.html";
             return;
         }
 
         try {
-            const snapshot = await get(child(ref(db), `users/${currentUsername}`));
+            const snapshot = await get(child(ref(db), `users/${userLocal}`));
 
             if (snapshot.exists()) {
                 const userData = snapshot.val();
 
                 if (userData.adminMessage) {
-                    const isDeleted = await checkAndAutoDelete(currentUsername, userData.msgTimestamp);
+                    const isDeleted = await checkAndAutoDelete(userLocal, userData.msgTimestamp);
                     if (isDeleted) {
                         showEmptyState();
                         return;
@@ -254,7 +281,7 @@
                     document.getElementById('delBtn').onclick = async () => {
                         if(confirm("Are you sure you want to delete this?")) {
                             try {
-                                await update(ref(db, `users/${currentUsername}`), {
+                                await update(ref(db, `users/${userLocal}`), {
                                     adminMessage: null,
                                     msgTimestamp: null
                                 });
@@ -283,49 +310,30 @@
         `;
     }
 
-    // லோடர் தெரிவதற்காக ஒரு சிறிய காலதாமதம்
+    // இனிஷியல் பங்க்ஷன்கள்
+    setupNotifications();
     setTimeout(fetchNotifications, 800); 
-    
-    
-        // Notifications பக்கத்தில் Message-ஐ Copy செய்யாமல் தடுப்பதற்கான code
+
+    // Copy தடுத்தல் மற்றும் இதர பாதுகாப்பு முறைகள் (உங்கள் பழைய கோடில் இருந்தது அப்படியே)
     document.addEventListener('copy', (e) => {
-        // Delete button மற்றும் Navigation buttons-க்கு மட்டும் விலக்கு
-        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
-            return true;
-        }
+        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return true;
         e.preventDefault();
     });
 
     document.addEventListener('contextmenu', (e) => {
-        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
-            return true;
-        }
+        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return true;
         e.preventDefault();
     });
 
     document.addEventListener('selectstart', (e) => {
-        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
-            return true;
-        }
+        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return true;
         e.preventDefault();
     });
 
-    // CSS வழியாக Selection-ஐ தடுத்தல்
     const notifStyle = document.createElement('style');
     notifStyle.innerHTML = `
-        body {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        /* Buttons மட்டும் இயல்பாக வேலை செய்ய */
-        button, .back-btn, .bottom button {
-            -webkit-user-select: auto;
-            -moz-user-select: auto;
-            -ms-user-select: auto;
-            user-select: auto;
-        }
+        body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+        button, .back-btn, .bottom button { -webkit-user-select: auto; -moz-user-select: auto; -ms-user-select: auto; user-select: auto; }
     `;
     document.head.appendChild(notifStyle);
 
