@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <script>
+        // லாகின் சரிபார்ப்பு
         if (localStorage.getItem("isLoggedIn") !== "true") {
             window.location.href = "login.html";
         }
@@ -139,7 +140,6 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, push, serverTimestamp, set, get, child, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-    import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
@@ -154,49 +154,15 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const messaging = getMessaging(app);
 
+    // --- 1. MONITOR SECTION ---
     const userLocal = localStorage.getItem("aquaUser") || "Guest";
-
-    // --- திருத்தப்பட்ட NOTIFICATION SETUP ---
-    async function setupNotifications() {
-        if (!("Notification" in window)) return;
-
-        try {
-            const permission = await Notification.requestPermission();
-            if (permission === "granted") {
-                // Service Worker-ஐ ரெஜிஸ்டர் செய்து டோக்கன் பெறுகிறோம்
-                const registration = await navigator.serviceWorker.register('sw.js');
-                
-                const token = await getToken(messaging, {
-                    vapidKey: "BO2y7oJXWmgnSuIZzePQe5g_khPbO50T-pfeEubDxCnipZSOhzHx9RJACEG_7TUhCARdPe7GUp0Y2XxwrA6numc",
-                    serviceWorkerRegistration: registration
-                });
-
-                if (token && userLocal !== "Guest") {
-                    await update(ref(db, `users/${userLocal}`), {
-                        fcmToken: token
-                    });
-                    console.log("FCM Token saved to DB:", token);
-                }
-            }
-        } catch (err) {
-            console.error("Token generation error:", err);
-        }
-    }
-
-    // ஆப் ஓபன்ல இருக்கும்போது மெசேஜ் வந்தால்:
-    onMessage(messaging, (payload) => {
-        console.log('Foreground message received:', payload);
-        fetchNotifications(); // UI-ஐ புதுப்பிக்க
-    });
-
-    // --- MONITOR & ANALYTICS ---
     const currentPage = window.location.pathname.split("/").pop() || "notification.html";
     const startTime = Date.now();
 
     try {
-        push(ref(db, 'analytics/visits'), {
+        const visitRef = ref(db, 'analytics/visits');
+        push(visitRef, {
             username: userLocal,
             page: currentPage,
             time: serverTimestamp(),
@@ -204,7 +170,20 @@
         });
     } catch(e) { console.log("Analytics error"); }
 
-    // --- NOTIFICATION HELPERS ---
+    window.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === 'hidden') {
+            const duration = (Date.now() - startTime) / 1000;
+            const exitRef = ref(db, 'analytics/exits');
+            push(exitRef, {
+                username: userLocal,
+                page: currentPage,
+                duration: duration + "s",
+                time: serverTimestamp()
+            });
+        }
+    });
+
+    // --- 2. NOTIFICATION HELPERS ---
     function formatMyDate(dateString) {
         if(!dateString) return "Recently";
         try {
@@ -218,16 +197,47 @@
         } catch(e) { return dateString; }
     }
 
-    // --- FETCH NOTIFICATIONS ---
+    async function checkAndAutoDelete(username, msgTimestamp) {
+        if (!msgTimestamp) return false;
+        const sentDate = new Date(msgTimestamp);
+        const today = new Date();
+        const diffInDays = (today.getTime() - sentDate.getTime()) / (1000 * 3600 * 24);
+
+        if (diffInDays >= 30) {
+            try {
+                await update(ref(db, `users/${username}`), {
+                    adminMessage: null,
+                    msgTimestamp: null
+                });
+                return true; 
+            } catch (e) { console.error("Auto-delete failed", e); }
+        }
+        return false;
+    }
+
+    // --- 3. FETCH NOTIFICATIONS ---
     async function fetchNotifications() {
+        const currentUsername = localStorage.getItem("aquaUser"); 
         const container = document.getElementById("notifContainer");
-        if(userLocal === "Guest") return;
+
+        if(!currentUsername) {
+            window.location.href = "login.html";
+            return;
+        }
 
         try {
-            const snapshot = await get(child(ref(db), `users/${userLocal}`));
+            const snapshot = await get(child(ref(db), `users/${currentUsername}`));
+
             if (snapshot.exists()) {
                 const userData = snapshot.val();
+
                 if (userData.adminMessage) {
+                    const isDeleted = await checkAndAutoDelete(currentUsername, userData.msgTimestamp);
+                    if (isDeleted) {
+                        showEmptyState();
+                        return;
+                    }
+
                     const displayDate = formatMyDate(userData.msgTimestamp);
                     container.innerHTML = `
                         <div class="notif-card">
@@ -242,18 +252,24 @@
                     `;
 
                     document.getElementById('delBtn').onclick = async () => {
-                        if(confirm("Delete this notification?")) {
-                            await update(ref(db, `users/${userLocal}`), {
-                                adminMessage: null,
-                                msgTimestamp: null
-                            });
-                            showEmptyState();
+                        if(confirm("Are you sure you want to delete this?")) {
+                            try {
+                                await update(ref(db, `users/${currentUsername}`), {
+                                    adminMessage: null,
+                                    msgTimestamp: null
+                                });
+                                showEmptyState();
+                            } catch (err) { alert("Failed to delete."); }
                         }
                     };
-                } else { showEmptyState(); }
-            } else { showEmptyState(); }
+                } else {
+                    showEmptyState();
+                }
+            } else {
+                showEmptyState();
+            }
         } catch (error) {
-            container.innerHTML = `<p style="color:red; text-align:center;">Error loading messages.</p>`;
+            container.innerHTML = `<div style="text-align:center;"><p style="color:red;">Error loading notifications.</p></div>`;
         }
     }
 
@@ -262,13 +278,56 @@
             <div class="empty-state">
                 <span class="empty-icon">🔔</span>
                 <p style="font-weight: 700; color: var(--text-main); font-size: 16px;">No new notifications</p>
-                <p style="font-size: 13px; color: var(--text-sub);">Admin messages will appear here.</p>
+                <p style="font-size: 13px; color: var(--text-sub);">Messages from admin will appear here.</p>
             </div>
         `;
     }
 
-    setupNotifications();
-    setTimeout(fetchNotifications, 800);
+    // லோடர் தெரிவதற்காக ஒரு சிறிய காலதாமதம்
+    setTimeout(fetchNotifications, 800); 
+    
+    
+        // Notifications பக்கத்தில் Message-ஐ Copy செய்யாமல் தடுப்பதற்கான code
+    document.addEventListener('copy', (e) => {
+        // Delete button மற்றும் Navigation buttons-க்கு மட்டும் விலக்கு
+        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+            return true;
+        }
+        e.preventDefault();
+    });
+
+    document.addEventListener('contextmenu', (e) => {
+        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+            return true;
+        }
+        e.preventDefault();
+    });
+
+    document.addEventListener('selectstart', (e) => {
+        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+            return true;
+        }
+        e.preventDefault();
+    });
+
+    // CSS வழியாக Selection-ஐ தடுத்தல்
+    const notifStyle = document.createElement('style');
+    notifStyle.innerHTML = `
+        body {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        /* Buttons மட்டும் இயல்பாக வேலை செய்ய */
+        button, .back-btn, .bottom button {
+            -webkit-user-select: auto;
+            -moz-user-select: auto;
+            -ms-user-select: auto;
+            user-select: auto;
+        }
+    `;
+    document.head.appendChild(notifStyle);
 
 </script>
 </body>
