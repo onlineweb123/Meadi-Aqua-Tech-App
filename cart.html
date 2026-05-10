@@ -15,44 +15,49 @@
 
     <style>
         :root { 
-            --bg: #f8fbff; 
+            --bg: #fdfdff; 
             --card: #ffffff; 
-            --border: #e2e8f0; 
+            --border: #edf2f7; 
             --primary: #0077b6; 
             --accent: #00b4d8; 
-            --danger: #ef4444;
-            --text-main: #1e293b;
-            --text-sub: #64748b;
-            --glass: rgba(255, 255, 255, 0.8);
+            --danger: #ff4d4d;
+            --text-main: #1a202c;
+            --text-sub: #718096;
+            --glass: rgba(255, 255, 255, 0.9);
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         }
 
-        /* --- Updated: No Selection & Copy Logic --- */
+        /* --- Prevent Copy & Selection --- */
         * { 
             box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; 
-            user-select: none; /* Disables text selection */
+            user-select: none;
             -webkit-user-select: none;
-            -ms-user-select: none;
-            -moz-user-select: none;
         }
         
-        /* Re-enabling selection only for buttons/inputs if needed, though buttons don't usually need it */
         button, a, input { 
             user-select: auto; 
             -webkit-user-select: auto;
         }
 
-        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); }
+        body { 
+            margin: 0; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main);
+            line-height: 1.5;
+        }
 
         header { 
             height: 70px; display: flex; align-items: center; justify-content: center; 
             position: fixed; top: 0; left: 0; right: 0; 
-            background: var(--glass); backdrop-filter: blur(12px);
+            background: var(--glass); backdrop-filter: blur(15px);
             z-index: 100; border-bottom: 1px solid var(--border);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
         }
-        .header-title { font-size: 18px; font-weight: 700; color: var(--primary); }
+        .header-title { font-size: 18px; font-weight: 700; color: var(--primary); letter-spacing: -0.5px; }
 
-        .menu-btn { 
+          .menu-btn { 
             position: absolute; left: 20px; font-size: 24px; 
             background: #f1f5f9; border: none; color: var(--text-main); 
             cursor: pointer; width: 40px; height: 40px; border-radius: 10px;
@@ -67,15 +72,74 @@
         .sidebar.open { left: 0; }
         .sidebar a { display: flex; align-items: center; padding: 16px 24px; text-decoration: none; color: var(--text-main); font-weight: 500; font-size: 15px; }
 
-        .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); display: none; z-index: 105; backdrop-filter: blur(4px); }
+        .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); display: none; z-index: 105; backdrop-filter: blur(4px); }
         .overlay.show { display: block; }
 
+        .main { padding: 90px 16px 160px 16px; max-width: 500px; margin: 0 auto; }
+
+        /* --- Cart Item Styling --- */
+        .cart-item {
+            background: var(--card); border-radius: 20px; padding: 16px;
+            display: flex; gap: 16px; align-items: center;
+            margin-bottom: 16px; border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+        .cart-img { width: 85px; height: 85px; border-radius: 15px; object-fit: cover; background: #f8fafc; border: 1px solid #f1f5f9; }
+        .item-details { flex: 1; }
+        .item-details h4 { margin: 0; font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
+        .item-price { color: var(--primary); font-weight: 700; font-size: 16px; margin-bottom: 8px; }
+
+        .item-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+
+        /* --- Qty Controls --- */
+        .qty-controls { 
+            display: flex; align-items: center; gap: 12px; 
+            background: #f1f5f9; padding: 4px 6px; border-radius: 12px;
+        }
+        .qty-btn { 
+            background: white; border: none; width: 30px; height: 30px; 
+            border-radius: 8px; font-weight: bold; cursor: pointer; color: var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .qty-num { font-weight: 700; min-width: 24px; text-align: center; font-size: 14px; }
+
+        .remove-link { color: var(--danger); font-size: 12px; font-weight: 600; text-decoration: none; cursor: pointer; background: #fff1f1; padding: 6px 12px; border-radius: 8px; border: none; }
+
+        /* --- Checkout Section --- */
+        .checkout-section {
+            margin-top: 30px; background: white; border-radius: 24px; padding: 24px;
+            border: 1px solid var(--border); box-shadow: var(--shadow);
+        }
+        
+        .total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed var(--border); }
+        .total-label { color: var(--text-sub); font-weight: 600; font-size: 14px; }
+        .total-value { color: var(--text-main); font-weight: 800; font-size: 22px; }
+
+        .qr-area { display: flex; flex-direction: column; align-items: center; margin-bottom: 24px; }
+        #qrcode { 
+            padding: 12px; background: white; border-radius: 18px; 
+            border: 2px solid #f1f5f9; margin-bottom: 10px;
+        }
+        .qr-hint { font-size: 11px; color: var(--text-sub); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+
+        .btn-group { display: flex; flex-direction: column; gap: 12px; }
+        .checkout-btn {
+            width: 100%; border: none; padding: 18px; border-radius: 16px; 
+            font-size: 15px; font-weight: 700; cursor: pointer; 
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: transform 0.2s;
+        }
+        .checkout-btn:active { transform: scale(0.98); }
+        .upi-btn { background: var(--primary); color: white; box-shadow: 0 8px 20px rgba(0, 119, 182, 0.25); }
+        .wa-btn { background: #e8fbf0; color: #1eb853; }
+
+        /* --- Bottom Nav --- */
         .bottom {
             height: 75px; position: fixed; bottom: 0; left: 0; right: 0; 
             display: flex; justify-content: space-around; align-items: center; 
             background: var(--glass); backdrop-filter: blur(12px);
-            border-top: 1px solid var(--border); z-index: 100; 
-            padding-bottom: env(safe-area-inset-bottom);
+            border-top: 1px solid var(--border); z-index: 100; padding-bottom: env(safe-area-inset-bottom);
         }
         .bottom button {
             background: none; border: none; font-size: 11px; font-weight: 600;
@@ -85,56 +149,8 @@
         .bottom button.active { color: var(--primary); }
         .bottom .icon { font-size: 22px; margin-bottom: 4px; }
 
-        .main { padding: 90px 20px 140px 20px; max-width: 600px; margin: 0 auto; }
-
-        .cart-item {
-            background: var(--card); border-radius: 15px; padding: 15px;
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 12px; border: 1px solid var(--border);
-        }
-        .item-info { display: flex; align-items: center; gap: 15px; flex: 1; }
-        .cart-img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
-
-        .qty-controls { display: flex; align-items: center; gap: 10px; background: #f1f5f9; padding: 5px 10px; border-radius: 10px; margin-right: 10px; }
-        .qty-btn { 
-            background: white; border: 1px solid var(--border); width: 28px; height: 28px; 
-            border-radius: 6px; font-weight: bold; cursor: pointer; color: var(--primary);
-            display: flex; align-items: center; justify-content: center;
-        }
-        .qty-num { font-weight: 700; min-width: 20px; text-align: center; }
-
-        .total-card {
-            background: linear-gradient(135deg, var(--primary), #023e8a);
-            color: white; border-radius: 20px; padding: 20px; margin-top: 20px; text-align: center;
-        }
-
-        .qr-container {
-            background: white; padding: 20px; border-radius: 20px;
-            margin-top: 15px; display: flex; flex-direction: column; align-items: center;
-            border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-
-        #qrcode {
-            padding: 10px;
-            border: 3px dashed var(--primary);
-            border-radius: 15px;
-            background: #fff;
-        }
-
-        #qrcode img { margin: 0 auto; border-radius: 5px; }
-        .qr-text { font-size: 12px; color: var(--text-sub); margin-top: 10px; font-weight: 600; }
-
-        .checkout-btn {
-            width: 100%; border: none; padding: 16px; border-radius: 18px; font-size: 16px; font-weight: 700;
-            margin-top: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            transition: 0.3s; color: white; text-decoration: none;
-        }
-        .upi-btn { background: #0077b6; box-shadow: 0 5px 15px rgba(0, 119, 182, 0.3); }
-        .wa-btn { background: #25d366; box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3); }
-        .remove-btn { background: #fee2e2; color: var(--danger); border: none; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: 600; }
-
-        .spinner-container { display: flex; flex-direction: column; align-items: center; padding: 50px 0; }
-        .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        .spinner-container { display: flex; flex-direction: column; align-items: center; padding: 100px 0; }
+        .spinner { width: 35px; height: 35px; border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -142,7 +158,7 @@
 
 <header>
     <button class="menu-btn" id="menuBtn">☰</button>
-    <div class="header-title">My Cart 🛒</div>
+    <div class="header-title">My Cart</div>
 </header>
 
 <div id="sidebar" class="sidebar">
@@ -161,24 +177,30 @@
 
     <div id="cartList"></div>
 
-    <div id="emptyMsg" style="text-align: center; display:none; padding: 50px 0;">
-        <h3>Your cart is empty!</h3>
-        <a href="store.html" style="color: var(--primary); text-decoration: none;">Go to Store</a>
+    <div id="emptyMsg" style="text-align: center; display:none; padding: 100px 20px;">
+        <div style="font-size: 50px; margin-bottom: 15px;">🛒</div>
+        <h3 style="margin-bottom: 10px;">Your cart is empty!</h3>
+        <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 25px;">Looks like you haven't added anything yet.</p>
+        <a href="store.html" style="background: var(--primary); color:white; padding: 12px 25px; border-radius: 12px; text-decoration: none; font-weight: 700;">Browse Store</a>
     </div>
 
     <div id="summary" style="display:none;">
-        <div class="qr-container" id="qrContainer">
-            <div id="qrcode"></div>
-            <p class="qr-text">Scan & Pay Now ⚡</p>
-        </div>
+        <div class="checkout-section">
+            <div class="qr-area">
+                <div id="qrcode"></div>
+                <span class="qr-hint">Scan to Pay Fast ⚡</span>
+            </div>
 
-        <div class="total-card">
-            <p style="margin:0; font-size: 14px; opacity: 0.9;">Total Amount</p>
-            <h2 id="totalPrice" style="margin: 5px 0 0 0;">₹0</h2>
-        </div>
+            <div class="total-row">
+                <span class="total-label">Total Payable Amount</span>
+                <span id="totalPrice" class="total-value">₹0</span>
+            </div>
 
-        <button class="checkout-btn upi-btn" id="payBtn">Pay Total via UPI 💳</button>
-        <button class="checkout-btn wa-btn" id="whatsappBtn">Send Payment Screenshot ✅</button>
+            <div class="btn-group">
+                <button class="checkout-btn upi-btn" id="payBtn">Pay via Any UPI App 💳</button>
+                <button class="checkout-btn wa-btn" id="whatsappBtn">WhatsApp Payment Proof ✅</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -205,7 +227,6 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-
     const currentUser = localStorage.getItem("aquaUser") || "Guest";
 
     const cartList = document.getElementById("cartList");
@@ -217,12 +238,9 @@
 
     let dynamicUPI = "mm05270331-1@okaxis"; 
 
-    const adminUpiRef = ref(db, 'admin_settings/upi_config');
-    onValue(adminUpiRef, (snapshot) => {
-        if(snapshot.exists()){
-            dynamicUPI = snapshot.val().upiId;
-            fetchCart(); 
-        }
+    onValue(ref(db, 'admin_settings/upi_config'), (snapshot) => {
+        if(snapshot.exists()) dynamicUPI = snapshot.val().upiId;
+        fetchCart(); 
     });
 
     window.toggleMenu = () => {
@@ -233,7 +251,7 @@
     document.getElementById("overlay").onclick = window.toggleMenu;
 
     window.deleteItem = (key) => {
-        if(confirm("Are you sure you want to remove this item?")) {
+        if(confirm("Remove this item from cart?")) {
             remove(ref(db, `carts/${currentUser}/${key}`));
         }
     };
@@ -241,24 +259,14 @@
     window.updateQty = (key, currentQty, change) => {
         const newQty = currentQty + change;
         if (newQty >= 1) {
-            update(ref(db, `carts/${currentUser}/${key}`), {
-                quantity: newQty
-            });
+            update(ref(db, `carts/${currentUser}/${key}`), { quantity: newQty });
         }
     };
 
     function generateQR(amount) {
         qrcodeDiv.innerHTML = ""; 
         const upiData = `upi://pay?pa=${dynamicUPI}&pn=Meadi Aqua Tech&am=${amount}&cu=INR`;
-
-        new QRCode(qrcodeDiv, {
-            text: upiData,
-            width: 150,
-            height: 150,
-            colorDark : "#000000",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.H
-        });
+        new QRCode(qrcodeDiv, { text: upiData, width: 140, height: 140 });
     }
 
     function fetchCart() {
@@ -268,13 +276,11 @@
             return;
         }
 
-        const cartRef = ref(db, 'carts/' + currentUser);
-        onValue(cartRef, (snapshot) => {
+        onValue(ref(db, 'carts/' + currentUser), (snapshot) => {
             const data = snapshot.val();
             loader.style.display = "none";
             cartList.innerHTML = "";
-            let total = 0;
-            let itemList = [];
+            let total = 0, itemList = [];
 
             if (!data) {
                 emptyMsg.style.display = "block";
@@ -290,23 +296,22 @@
                 const qty = item.quantity || 1;
                 const itemTotal = parseInt(item.price) * qty;
                 total += itemTotal;
-                
                 itemList.push(`• ${item.productName} (x${qty}) - ₹${itemTotal}`);
 
                 cartList.innerHTML += `
                     <div class="cart-item">
-                        <div class="item-info">
-                            <img src="${item.image || 'https://via.placeholder.com/50'}" class="cart-img">
-                            <div>
-                                <h4 style="margin:0; font-size:14px;">${item.productName}</h4>
-                                <p style="color:var(--primary); font-weight:700; margin:2px 0;">₹${item.price}</p>
-                                <button class="remove-btn" onclick="deleteItem('${key}')" style="padding: 4px 8px; font-size: 10px; margin-top:5px;">Remove</button>
+                        <img src="${item.image || 'https://via.placeholder.com/80'}" class="cart-img">
+                        <div class="item-details">
+                            <h4>${item.productName}</h4>
+                            <div class="item-price">₹${item.price}</div>
+                            <div class="item-actions">
+                                <div class="qty-controls">
+                                    <button class="qty-btn" onclick="updateQty('${key}', ${qty}, -1)">-</button>
+                                    <span class="qty-num">${qty}</span>
+                                    <button class="qty-btn" onclick="updateQty('${key}', ${qty}, 1)">+</button>
+                                </div>
+                                <button class="remove-link" onclick="deleteItem('${key}')">Remove</button>
                             </div>
-                        </div>
-                        <div class="qty-controls">
-                            <button class="qty-btn" onclick="updateQty('${key}', ${qty}, -1)">-</button>
-                            <span class="qty-num">${qty}</span>
-                            <button class="qty-btn" onclick="updateQty('${key}', ${qty}, 1)">+</button>
                         </div>
                     </div>`;
             });
@@ -315,30 +320,19 @@
             generateQR(total);
 
             document.getElementById("payBtn").onclick = () => {
-                const upiUrl = `upi://pay?pa=${dynamicUPI}&pn=Meadi Aqua Tech&am=${total}&cu=INR`;
-                window.location.href = upiUrl;
+                window.location.href = `upi://pay?pa=${dynamicUPI}&pn=Meadi Aqua Tech&am=${total}&cu=INR`;
             };
 
             document.getElementById("whatsappBtn").onclick = () => {
-                const msg = `*New Order - Meadi Aqua Tech*%0A%0A*Items:*%0A${itemList.join('%0A')}%0A%0A*Total: ₹${total}*%0A%0A_I have paid via UPI. Here is my payment screenshot._`;
+                const msg = `*Order from Meadi Aqua Tech*%0A%0A${itemList.join('%0A')}%0A%0A*Total: ₹${total}*%0A%0A_Sent via My Cart._`;
                 window.open(`https://wa.me/919344165879?text=${msg}`);
             };
         });
     }
 
-    fetchCart(); 
-
-    // --- Strict Prevention of Right Click & Selection ---
-    document.addEventListener('contextmenu', (e) => {
-        if (!e.target.closest('button') && !e.target.closest('a')) e.preventDefault();
-    });
-
-    document.addEventListener('keydown', (e) => {
-        // Prevent Ctrl+C, Ctrl+V, Ctrl+U, etc.
-        if (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'u' || e.key === 's' || e.key === 'p')) {
-            e.preventDefault();
-        }
-    });
+    // --- Prevent Selection/Context ---
+    document.addEventListener('contextmenu', e => !e.target.closest('button','a') && e.preventDefault());
+    document.addEventListener('keydown', e => e.ctrlKey && ['c','v','u','s','p'].includes(e.key) && e.preventDefault());
 
 </script>
 </body>
