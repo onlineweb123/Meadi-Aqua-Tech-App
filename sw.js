@@ -33,19 +33,17 @@ const ASSETS = [
   'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap'
 ];
 
-// இன்ஸ்டால் செய்யும்போது ஃபைல்களை சேமித்தல்
+// --- EXISTING LOGIC: Install ---
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log('Caching all assets');
-      // இதில் ஒரு ஃபைல் இல்லை என்றாலும் மொத்த கேச்சும் ஃபெயில் ஆகிவிடும்.
-      // எனவே கவனமாக சரிபார்க்கவும்.
       return cache.addAll(ASSETS).catch(err => console.error("Cache addAll error:", err));
     })
   );
 });
 
-// பழைய கேச் (Cache) கோப்புகளை நீக்குதல்
+// --- EXISTING LOGIC: Activate ---
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -57,11 +55,48 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// நெட் இல்லாத போது சேமித்த ஃபைல்களைக் காட்டுதல்
+// --- EXISTING LOGIC: Fetch ---
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
       return response || fetch(event.request);
     })
   );
+});
+
+// --- NEW LOGIC: Push Notification Handling ---
+
+// பேக்கிரவுண்டில் இருக்கும்போது மெசேஜ் வந்தால் இதோ இந்த ஈவன்ட் வேலை செய்யும்
+self.addEventListener('push', (event) => {
+    let data = { title: 'Meadi Aqua Tech', body: 'உங்களுக்கு ஒரு புதிய அறிவிப்பு உள்ளது!' };
+
+    if (event.data) {
+        try {
+            data = event.data.json();
+        } catch (e) {
+            data = { title: 'Meadi Aqua Tech', body: event.data.text() };
+        }
+    }
+
+    const options = {
+        body: data.body,
+        icon: 'icon-192x192.png', // உங்கள் ஐகான் ஃபைல் பெயர்
+        badge: 'icon-192x192.png',
+        vibrate: [100, 50, 100],
+        data: {
+            url: '/' // நோட்டிபிகேஷனை கிளிக் செய்தால் எங்கு போக வேண்டும்
+        }
+    };
+
+    event.waitUntil(
+        self.registration.showNotification(data.title, options)
+    );
+});
+
+// நோட்டிபிகேஷனை கிளிக் செய்யும் போது நடக்கும் செயல்
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    event.waitUntil(
+        clients.openWindow(event.notification.data.url)
+    );
 });
