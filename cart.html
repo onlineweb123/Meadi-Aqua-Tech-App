@@ -26,7 +26,22 @@
             --glass: rgba(255, 255, 255, 0.8);
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        /* --- Updated: No Selection & Copy Logic --- */
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            user-select: none; /* Disables text selection */
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            -moz-user-select: none;
+        }
+        
+        /* Re-enabling selection only for buttons/inputs if needed, though buttons don't usually need it */
+        button, a, input { 
+            user-select: auto; 
+            -webkit-user-select: auto;
+        }
+
         body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); }
 
         header { 
@@ -77,15 +92,22 @@
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 12px; border: 1px solid var(--border);
         }
-        .item-info { display: flex; align-items: center; gap: 15px; }
-        .cart-img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; }
+        .item-info { display: flex; align-items: center; gap: 15px; flex: 1; }
+        .cart-img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
+
+        .qty-controls { display: flex; align-items: center; gap: 10px; background: #f1f5f9; padding: 5px 10px; border-radius: 10px; margin-right: 10px; }
+        .qty-btn { 
+            background: white; border: 1px solid var(--border); width: 28px; height: 28px; 
+            border-radius: 6px; font-weight: bold; cursor: pointer; color: var(--primary);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .qty-num { font-weight: 700; min-width: 20px; text-align: center; }
 
         .total-card {
             background: linear-gradient(135deg, var(--primary), #023e8a);
             color: white; border-radius: 20px; padding: 20px; margin-top: 20px; text-align: center;
         }
 
-        /* --- Updated QR Styles with Border --- */
         .qr-container {
             background: white; padding: 20px; border-radius: 20px;
             margin-top: 15px; display: flex; flex-direction: column; align-items: center;
@@ -94,7 +116,7 @@
 
         #qrcode {
             padding: 10px;
-            border: 3px dashed var(--primary); /* dashed border for a professional look */
+            border: 3px dashed var(--primary);
             border-radius: 15px;
             background: #fff;
         }
@@ -116,7 +138,7 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body>
+<body oncopy="return false" oncut="return false" onpaste="return false">
 
 <header>
     <button class="menu-btn" id="menuBtn">☰</button>
@@ -145,7 +167,6 @@
     </div>
 
     <div id="summary" style="display:none;">
-
         <div class="qr-container" id="qrContainer">
             <div id="qrcode"></div>
             <p class="qr-text">Scan & Pay Now ⚡</p>
@@ -170,7 +191,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, serverTimestamp, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, update, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
@@ -212,8 +233,17 @@
     document.getElementById("overlay").onclick = window.toggleMenu;
 
     window.deleteItem = (key) => {
-        if(confirm("Are you sure you want to remove this item ?")) {
+        if(confirm("Are you sure you want to remove this item?")) {
             remove(ref(db, `carts/${currentUser}/${key}`));
+        }
+    };
+
+    window.updateQty = (key, currentQty, change) => {
+        const newQty = currentQty + change;
+        if (newQty >= 1) {
+            update(ref(db, `carts/${currentUser}/${key}`), {
+                quantity: newQty
+            });
         }
     };
 
@@ -257,19 +287,27 @@
 
             Object.keys(data).forEach((key) => {
                 const item = data[key];
-                total += parseInt(item.price);
-                itemList.push(`• ${item.productName} (₹${item.price})`);
+                const qty = item.quantity || 1;
+                const itemTotal = parseInt(item.price) * qty;
+                total += itemTotal;
+                
+                itemList.push(`• ${item.productName} (x${qty}) - ₹${itemTotal}`);
 
                 cartList.innerHTML += `
                     <div class="cart-item">
                         <div class="item-info">
                             <img src="${item.image || 'https://via.placeholder.com/50'}" class="cart-img">
                             <div>
-                                <h4 style="margin:0;">${item.productName}</h4>
-                                <p style="color:var(--primary); font-weight:700; margin:0;">₹${item.price}</p>
+                                <h4 style="margin:0; font-size:14px;">${item.productName}</h4>
+                                <p style="color:var(--primary); font-weight:700; margin:2px 0;">₹${item.price}</p>
+                                <button class="remove-btn" onclick="deleteItem('${key}')" style="padding: 4px 8px; font-size: 10px; margin-top:5px;">Remove</button>
                             </div>
                         </div>
-                        <button class="remove-btn" onclick="deleteItem('${key}')">Remove</button>
+                        <div class="qty-controls">
+                            <button class="qty-btn" onclick="updateQty('${key}', ${qty}, -1)">-</button>
+                            <span class="qty-num">${qty}</span>
+                            <button class="qty-btn" onclick="updateQty('${key}', ${qty}, 1)">+</button>
+                        </div>
                     </div>`;
             });
 
@@ -290,22 +328,17 @@
 
     fetchCart(); 
 
-    document.addEventListener('selectstart', (e) => {
-        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('button') || e.target.closest('a')) return true;
-        e.preventDefault();
-    });
-    document.addEventListener('copy', (e) => {
-        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('button') || e.target.closest('a')) return true;
-        e.preventDefault();
-    });
+    // --- Strict Prevention of Right Click & Selection ---
     document.addEventListener('contextmenu', (e) => {
-        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('button') || e.target.closest('a')) return true;
-        e.preventDefault();
+        if (!e.target.closest('button') && !e.target.closest('a')) e.preventDefault();
     });
 
-    const cartStyle = document.createElement('style');
-    cartStyle.innerHTML = `body { -webkit-user-select: none; user-select: none; } button, a { -webkit-user-select: auto; user-select: auto; }`;
-    document.head.appendChild(cartStyle);
+    document.addEventListener('keydown', (e) => {
+        // Prevent Ctrl+C, Ctrl+V, Ctrl+U, etc.
+        if (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'u' || e.key === 's' || e.key === 'p')) {
+            e.preventDefault();
+        }
+    });
 
 </script>
 </body>
