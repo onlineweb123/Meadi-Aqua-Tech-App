@@ -25,6 +25,7 @@
             --text-sub: #718096;
             --glass: rgba(255, 255, 255, 0.9);
             --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            --success: #1eb853; /* Added for coupon success state */
         }
 
         /* --- Prevent Copy & Selection --- */
@@ -123,6 +124,91 @@
         }
         .qr-hint { font-size: 11px; color: var(--text-sub); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
 
+
+        /* --- Coupon Section Mobile Friendly & Solid Border --- */
+        .coupon-container {
+            background: #f8fafc; 
+            border: 1px solid var(--border); /* விட்டு விட்டு இல்லாமல் ஒரே லைனாக மாற்றப்பட்டுள்ளது */
+            border-radius: 16px; 
+            padding: 14px; 
+            margin-bottom: 20px;
+            width: 100%; /* மொபைல் திரைக்கு ஏற்றவாறு */
+            box-sizing: border-box;
+        }
+        .coupon-title { 
+            font-size: 12px; 
+            font-weight: 700; 
+            color: var(--primary); 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+            margin-bottom: 8px; 
+            display: block;
+        }
+        .coupon-form { 
+            display: flex; 
+            gap: 8px; 
+            width: 100%;
+        }
+        .coupon-input {
+            flex: 1; 
+            border: 1px solid var(--border); 
+            padding: 12px 14px;
+            border-radius: 12px; 
+            font-size: 14px; 
+            font-weight: 600;
+            text-transform: uppercase; 
+            outline: none; 
+            background: #fff;
+            min-width: 0; /* மொபைலில் பாக்ஸ் வெளியே நீட்டாமல் தடுக்கிறது */
+            transition: border 0.2s;
+        }
+        .coupon-input:focus { 
+            border-color: var(--primary); 
+        }
+        .coupon-btn {
+            background: var(--primary); 
+            color: white; 
+            border: none;
+            padding: 0 20px; 
+            border-radius: 12px; 
+            font-size: 14px;
+            font-weight: 700; 
+            cursor: pointer; 
+            white-space: nowrap; /* மொபைலில் பட்டன் எழுத்து உடையாமல் இருக்க */
+            transition: background 0.2s;
+        }
+        .coupon-btn:hover { 
+            background: var(--accent); 
+        }
+        .coupon-msg { 
+            font-size: 12px; 
+            font-weight: 600; 
+            margin-top: 8px; 
+            display: none; 
+            word-break: break-word; /* நீண்ட மெசேஜ் இருந்தாலும் மொபைலில் மடியும் */
+        }
+        .coupon-msg.success { 
+            color: var(--success); 
+        }
+        .coupon-msg.error { 
+            color: var(--danger); 
+        }
+        .discount-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 12px; 
+            font-size: 14px; 
+            color: var(--success); 
+            font-weight: 600; 
+            display: none; 
+        }
+
+
+
+        /* --- Coupon Section Added END --- */
+ 
+
         .btn-group { display: flex; flex-direction: column; gap: 12px; }
         .checkout-btn {
             width: 100%; border: none; padding: 18px; border-radius: 16px; 
@@ -191,6 +277,20 @@
                 <span class="qr-hint">Scan to Pay Fast ⚡</span>
             </div>
 
+            <div class="coupon-container">
+                <span class="coupon-title">🏷️ Apply Coupon Code</span>
+                <div class="coupon-form">
+                    <input type="text" id="couponInput" class="coupon-input" placeholder="Enter Code">
+                    <button type="button" id="applyCouponBtn" class="coupon-btn">Apply</button>
+                </div>
+                <div id="couponMsg" class="coupon-msg"></div>
+            </div>
+
+            <div class="discount-row" id="discountRow">
+                <span>Coupon Discount</span>
+                <span id="discountValue">-₹0</span>
+            </div>
+
             <div class="total-row">
                 <span class="total-label">Total Payable Amount</span>
                 <span id="totalPrice" class="total-value">₹0</span>
@@ -213,7 +313,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, update, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, update, onValue, remove, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
@@ -235,6 +335,11 @@
     const loader = document.getElementById("loader");
     const emptyMsg = document.getElementById("emptyMsg");
     const qrcodeDiv = document.getElementById("qrcode");
+
+    // Coupon related state tracking variables
+    let baseTotal = 0;
+    let appliedCouponData = null;
+    let currentItemsSummary = [];
 
     let dynamicUPI = "mm05270331-1@okaxis"; 
 
@@ -269,6 +374,79 @@
         new QRCode(qrcodeDiv, { text: upiData, width: 140, height: 140 });
     }
 
+    // New Safe Functionality: Dynamic database validation for coupons
+    function handleCouponApplication() {
+        const inputCode = document.getElementById("couponInput").value.trim().toUpperCase();
+        const msgEl = document.getElementById("couponMsg");
+        const discountRow = document.getElementById("discountRow");
+        const discountValEl = document.getElementById("discountValue");
+
+        if (!inputCode) {
+            msgEl.innerText = "Please enter a coupon code.";
+            msgEl.className = "coupon-msg error";
+            msgEl.style.display = "block";
+            return;
+        }
+
+        // Fetch specified dynamic code from admin panel location inside database
+        get(ref(db, 'coupons/' + inputCode)).then((snapshot) => {
+            if (snapshot.exists()) {
+                const couponData = snapshot.val();
+                appliedCouponData = couponData; // Save reference for whatsapp workflow
+
+                const percent = couponData.discountPercentage;
+                const discountAmount = Math.round(baseTotal * (percent / 100));
+                const finalTotal = baseTotal - discountAmount;
+
+                msgEl.innerText = `Coupon applied! Code by ${couponData.influencerName} (${percent}% OFF) 🎉`;
+                msgEl.className = "coupon-msg success";
+                msgEl.style.display = "block";
+
+                discountValEl.innerText = "-₹" + discountAmount;
+                discountRow.style.display = "flex";
+
+                totalPriceEl.innerText = "₹" + finalTotal;
+                generateQR(finalTotal);
+                attachPaymentActions(finalTotal);
+            } else {
+                msgEl.innerText = "Invalid coupon code. Please try again!";
+                msgEl.className = "coupon-msg error";
+                msgEl.style.display = "block";
+                resetCouponState();
+            }
+        }).catch((err) => {
+            msgEl.innerText = "Error verifying coupon.";
+            msgEl.className = "coupon-msg error";
+            msgEl.style.display = "block";
+        });
+    }
+
+    function resetCouponState() {
+        appliedCouponData = null;
+        document.getElementById("discountRow").style.display = "none";
+        totalPriceEl.innerText = "₹" + baseTotal;
+        generateQR(baseTotal);
+        attachPaymentActions(baseTotal);
+    }
+
+    // Handles original redirection & message payload builders without mutating old feature scope
+    function attachPaymentActions(finalAmount) {
+        document.getElementById("payBtn").onclick = () => {
+            window.location.href = `upi://pay?pa=${dynamicUPI}&pn=Meadi Aqua Tech&am=${finalAmount}&cu=INR`;
+        };
+
+        document.getElementById("whatsappBtn").onclick = () => {
+            let couponString = "";
+            if (appliedCouponData) {
+                const discountAmt = Math.round(baseTotal * (appliedCouponData.discountPercentage / 100));
+                couponString = `%0A*Coupon Applied:* ${appliedCouponData.couponCode} (${appliedCouponData.discountPercentage}%25 OFF)%0A*Influencer Name:* ${appliedCouponData.influencerName}%0A*Discount Amount:* -₹${discountAmt}`;
+            }
+
+            const msg = `*New Order from Meadi Aqua Tech*%0A%0A${currentItemsSummary.join('%0A')}${couponString}%0A%0A*Total Payable: ₹${finalAmount}*%0A%0A_I have paid via UPI. Here is my payment screenshot._`;
+            window.open(`https://wa.me/919344165879?text=${msg}`);
+        };
+    }
+
     function fetchCart() {
         if (currentUser === "Guest") {
             loader.style.display = "none";
@@ -280,7 +458,8 @@
             const data = snapshot.val();
             loader.style.display = "none";
             cartList.innerHTML = "";
-            let total = 0, itemList = [];
+            baseTotal = 0;
+            currentItemsSummary = [];
 
             if (!data) {
                 emptyMsg.style.display = "block";
@@ -295,8 +474,8 @@
                 const item = data[key];
                 const qty = item.quantity || 1;
                 const itemTotal = parseInt(item.price) * qty;
-                total += itemTotal;
-                itemList.push(`• ${item.productName} (x${qty}) - ₹${itemTotal}`);
+                baseTotal += itemTotal;
+                currentItemsSummary.push(`• ${item.productName} (x${qty}) - ₹${itemTotal}`);
 
                 cartList.innerHTML += `
                     <div class="cart-item">
@@ -316,19 +495,25 @@
                     </div>`;
             });
 
-            totalPriceEl.innerText = "₹" + total;
-            generateQR(total);
-
-            document.getElementById("payBtn").onclick = () => {
-                window.location.href = `upi://pay?pa=${dynamicUPI}&pn=Meadi Aqua Tech&am=${total}&cu=INR`;
-            };
-
-            document.getElementById("whatsappBtn").onclick = () => {
-                const msg = `*New Order from Meadi Aqua Tech*%0A%0A${itemList.join('%0A')}%0A%0A*Total: ₹${total}*%0A%0A_I have paid via UPI. Here is my payment screenshot._`;
-                window.open(`https://wa.me/919344165879?text=${msg}`);
-            };
+            // Maintain active coupon percentage calculation dynamically across item updates / deletions
+            if (appliedCouponData) {
+                const percent = appliedCouponData.discountPercentage;
+                const discountAmount = Math.round(baseTotal * (percent / 100));
+                const finalTotal = baseTotal - discountAmount;
+                document.getElementById("discountValue").innerText = "-₹" + discountAmount;
+                totalPriceEl.innerText = "₹" + finalTotal;
+                generateQR(finalTotal);
+                attachPaymentActions(finalTotal);
+            } else {
+                totalPriceEl.innerText = "₹" + baseTotal;
+                generateQR(baseTotal);
+                attachPaymentActions(baseTotal);
+            }
         });
     }
+
+    // Attach listeners safely
+    document.getElementById("applyCouponBtn").onclick = handleCouponApplication;
 
     // --- Prevent Selection/Context ---
     document.addEventListener('contextmenu', e => !e.target.closest('button','a') && e.preventDefault());
