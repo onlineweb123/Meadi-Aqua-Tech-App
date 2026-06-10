@@ -72,7 +72,7 @@
         .bottom button.active { color: var(--primary); }
         .bottom .icon { font-size: 22px; margin-bottom: 4px; }
 
-        /* மேம்படுத்தப்பட்ட இமேஜ் வியூவர் ஸ்டைல் (பட்டன் நீக்கப்பட்டது) */
+        /* மேம்படுத்தப்பட்ட இமேஜ் வியூவர் ஸ்டைல் */
         .image-viewer { 
             display: none; position: fixed; z-index: 999; inset: 0; 
             background: rgba(0,0,0,0.95); justify-content: center; align-items: center; 
@@ -112,7 +112,7 @@
     <div id="noResult" style="display:none; text-align:center; padding: 20px;">No products found!</div>
 </div>
 
-<div id="imageViewer" class="image-viewer" onclick="handleViewerClick(event)">
+<div id="imageViewer" class="image-viewer" onclick="closeView()">
     <img id="fullImage" src="" alt="Product Image">
 </div>
 
@@ -182,6 +182,7 @@
         } finally {
             btn.disabled = false;
             text.style.display = "block";
+            spinner.style.none;
             spinner.style.display = "none";
         }
     };
@@ -203,14 +204,6 @@
     window.closeView = () => {
         viewer.style.display = 'none';
         document.body.style.overflow = ''; 
-    };
-
-    // எங்கு தொட்டாலும் க்ளோஸ் ஆகும் புது லாஜிக்
-    window.handleViewerClick = (e) => {
-        // படம் ஜூம் செய்யப்படாத நிலையில் (scale 1 ஆக இருக்கும்போது) மட்டும் தொட்டால் க்ளோஸ் ஆகும்
-        if (scale <= 1) {
-            closeView();
-        }
     };
 
     // டச் ஈவென்ட்டுகள் மூலம் போட்டோவை மட்டும் ஜூம் செய்தல்
