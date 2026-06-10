@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Meadi Aqua Tech | Shop</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <script>
@@ -17,7 +17,7 @@
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); user-select: none; }
-        
+
         header { height: 70px; display: flex; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; right: 0; background: var(--glass); backdrop-filter: blur(12px); z-index: 100; border-bottom: 1px solid var(--border); }
         .header-title { font-size: 18px; font-weight: 700; color: var(--primary); }
         .menu-btn { position: absolute; left: 20px; font-size: 24px; background: #f1f5f9; border: none; color: var(--text-main); cursor: pointer; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
@@ -37,7 +37,7 @@
         .product-card { background: white; border-radius: 20px; padding: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; }
         .product-image { width: 100%; aspect-ratio: 1/1; background: #f1f5f9; border-radius: 15px; margin-bottom: 10px; overflow: hidden; cursor: zoom-in; }
         .product-image img { width: 100%; height: 100%; object-fit: cover; }
-        
+
         .product-name { font-size: 14px; font-weight: 700; color: var(--text-main); margin: 5px 0; }
         .product-desc { font-size: 11px; color: var(--text-sub); margin-bottom: 12px; flex-grow: 1; }
         .product-price { font-size: 16px; font-weight: 800; color: var(--primary); margin-bottom: 8px; }
@@ -72,8 +72,23 @@
         .bottom button.active { color: var(--primary); }
         .bottom .icon { font-size: 22px; margin-bottom: 4px; }
 
-        .image-viewer { display: none; position: fixed; z-index: 999; inset: 0; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; }
-        .image-viewer img { max-width: 90%; border-radius: 15px; }
+        /* மேம்படுத்தப்பட்ட இமேஜ் வியூவர் ஸ்டைல் */
+        .image-viewer { 
+            display: none; position: fixed; z-index: 999; inset: 0; 
+            background: rgba(0,0,0,0.95); justify-content: center; align-items: center; 
+            overflow: hidden; touch-action: none;
+        }
+        .image-viewer img { 
+            max-width: 95%; max-height: 85%; border-radius: 10px; 
+            transform-origin: center center; transition: transform 0.1s ease-out;
+            user-select: none; -webkit-user-drag: none;
+        }
+        .close-viewer-btn {
+            position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2);
+            color: white; border: none; font-size: 24px; width: 45px; height: 45px;
+            border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            z-index: 1000; font-family: sans-serif;
+        }
     </style>
 </head>
 <body>
@@ -103,8 +118,9 @@
     <div id="noResult" style="display:none; text-align:center; padding: 20px;">No products found!</div>
 </div>
 
-<div id="imageViewer" class="image-viewer" onclick="this.style.display='none'">
-    <img id="fullImage" src="">
+<div id="imageViewer" class="image-viewer">
+    <button class="close-viewer-btn" onclick="closeView()">✕</button>
+    <img id="fullImage" src="" alt="Product Image">
 </div>
 
 <div class="bottom">
@@ -156,7 +172,6 @@
         const spinner = btn.querySelector('.spinner');
         const user = localStorage.getItem("aquaUser") || "Guest";
 
-        // Start Loading
         btn.disabled = true;
         text.style.display = "none";
         spinner.style.display = "block";
@@ -168,23 +183,64 @@
                 image: img, 
                 addedAt: serverTimestamp() 
             });
-            
-            // Success Feedback (Optional: change text color/bg)
             alert(name + " added to cart!");
         } catch (error) {
             alert("Error adding to cart. Try again!");
         } finally {
-            // Stop Loading
             btn.disabled = false;
             text.style.display = "block";
             spinner.style.display = "none";
         }
     };
 
+    // பிரத்யேக ஜூமிங் லாஜிக் (Pinch to Zoom & Pan)
+    let scale = 1, pStart = { x: 0, y: 0 }, pCurrent = { x: 0, y: 0 }, startDist = 0;
+    const viewer = document.getElementById('imageViewer');
+    const img = document.getElementById('fullImage');
+
     window.openView = (url) => {
-        document.getElementById('fullImage').src = url;
-        document.getElementById('imageViewer').style.display = 'flex';
+        img.src = url;
+        scale = 1;
+        pStart = { x: 0, y: 0 }; pCurrent = { x: 0, y: 0 };
+        img.style.transform = `translate(0px, 0px) scale(1)`;
+        viewer.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // பின்புறம் ஸ்க்ரோல் ஆவதை தடுக்கும்
     };
+
+    window.closeView = () => {
+        viewer.style.display = 'none';
+        document.body.style.overflow = ''; // ஸ்க்ரோலை மீண்டும் அனுமதிக்கும்
+    };
+
+    // டச் ஈவென்ட்டுகள் மூலம் போட்டோவை மட்டும் ஜூம் செய்தல்
+    viewer.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+            startDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+        } else if (e.touches.length === 1 && scale > 1) {
+            pStart.x = e.touches[0].clientX - pCurrent.x;
+            pStart.y = e.touches[0].clientY - pCurrent.y;
+        }
+    }, { passive: true });
+
+    viewer.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2) {
+            const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+            scale = Math.min(Math.max(1, (dist / startDist) * scale), 4);
+            startDist = dist;
+            img.style.transform = `translate(${pCurrent.x}px, ${pCurrent.y}px) scale(${scale})`;
+        } else if (e.touches.length === 1 && scale > 1) {
+            pCurrent.x = e.touches[0].clientX - pStart.x;
+            pCurrent.y = e.touches[0].clientY - pStart.y;
+            img.style.transform = `translate(${pCurrent.x}px, ${pCurrent.y}px) scale(${scale})`;
+        }
+    }, { passive: true });
+
+    viewer.addEventListener('touchend', (e) => {
+        if (e.touches.length < 2 && scale <= 1) {
+            scale = 1; pCurrent = { x: 0, y: 0 }; pStart = { x: 0, y: 0 };
+            img.style.transform = `translate(0px, 0px) scale(1)`;
+        }
+    }, { passive: true });
 </script>
 
 <script>
