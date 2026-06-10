@@ -72,7 +72,7 @@
         .bottom button.active { color: var(--primary); }
         .bottom .icon { font-size: 22px; margin-bottom: 4px; }
 
-        /* மேம்படுத்தப்பட்ட இமேஜ் வியூவர் ஸ்டைல் */
+        /* மேம்படுத்தப்பட்ட இமேஜ் வியூவர் ஸ்டைல் (பட்டன் நீக்கப்பட்டது) */
         .image-viewer { 
             display: none; position: fixed; z-index: 999; inset: 0; 
             background: rgba(0,0,0,0.95); justify-content: center; align-items: center; 
@@ -82,12 +82,6 @@
             max-width: 95%; max-height: 85%; border-radius: 10px; 
             transform-origin: center center; transition: transform 0.1s ease-out;
             user-select: none; -webkit-user-drag: none;
-        }
-        .close-viewer-btn {
-            position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2);
-            color: white; border: none; font-size: 24px; width: 45px; height: 45px;
-            border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            z-index: 1000; font-family: sans-serif;
         }
     </style>
 </head>
@@ -118,8 +112,7 @@
     <div id="noResult" style="display:none; text-align:center; padding: 20px;">No products found!</div>
 </div>
 
-<div id="imageViewer" class="image-viewer">
-    <button class="close-viewer-btn" onclick="closeView()">✕</button>
+<div id="imageViewer" class="image-viewer" onclick="handleViewerClick(event)">
     <img id="fullImage" src="" alt="Product Image">
 </div>
 
@@ -204,12 +197,20 @@
         pStart = { x: 0, y: 0 }; pCurrent = { x: 0, y: 0 };
         img.style.transform = `translate(0px, 0px) scale(1)`;
         viewer.style.display = 'flex';
-        document.body.style.overflow = 'hidden'; // பின்புறம் ஸ்க்ரோல் ஆவதை தடுக்கும்
+        document.body.style.overflow = 'hidden'; 
     };
 
     window.closeView = () => {
         viewer.style.display = 'none';
-        document.body.style.overflow = ''; // ஸ்க்ரோலை மீண்டும் அனுமதிக்கும்
+        document.body.style.overflow = ''; 
+    };
+
+    // எங்கு தொட்டாலும் க்ளோஸ் ஆகும் புது லாஜிக்
+    window.handleViewerClick = (e) => {
+        // படம் ஜூம் செய்யப்படாத நிலையில் (scale 1 ஆக இருக்கும்போது) மட்டும் தொட்டால் க்ளோஸ் ஆகும்
+        if (scale <= 1) {
+            closeView();
+        }
     };
 
     // டச் ஈவென்ட்டுகள் மூலம் போட்டோவை மட்டும் ஜூம் செய்தல்
