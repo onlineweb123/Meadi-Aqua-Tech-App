@@ -6,9 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <script>
-        if (localStorage.getItem("isLoggedIn") !== "true") { window.location.href = "login.html"; }
-    </script>
+   
 
     <style>
         :root { 
@@ -161,6 +159,13 @@
     });
 
     window.addToCart = async function(btn, name, price, img) {
+        // உங்களுக்காக சேர்க்கப்பட்ட புதிய லாகின் செக் லாஜிக்
+        if (localStorage.getItem("isLoggedIn") !== "true") {
+            alert("Please login first!");
+            window.location.href = "login.html";
+            return; 
+        }
+
         const text = btn.querySelector('.btn-text');
         const spinner = btn.querySelector('.spinner');
         const user = localStorage.getItem("aquaUser") || "Guest";
