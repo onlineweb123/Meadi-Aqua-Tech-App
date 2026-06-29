@@ -6,8 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-   
-
     <style>
         :root { 
             --bg: #f8fbff; --card: #ffffff; --border: #e2e8f0; --primary: #0077b6; 
@@ -125,6 +123,8 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, onValue, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+    
+
     const firebaseConfig = {
         apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
         authDomain: "meadi-aqua-tech.firebaseapp.com",
@@ -132,12 +132,44 @@
         projectId: "meadi-aqua-tech",
         storageBucket: "meadi-aqua-tech.firebasestorage.app",
         messagingSenderId: "531151217708",
-        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89"
+        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89",
+        measurementId: "G-QW495L6JVE"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
+    // --- 1. MONITOR SECTION (ANALYTICS) ---
+    const userLocal = localStorage.getItem("aquaUser") || "Guest";
+    const currentPage = window.location.pathname.split("/").pop() || "store.html";
+    const startTime = Date.now();
+
+    // விசிட் பதிவு
+    try {
+        const visitRef = ref(db, 'analytics/visits');
+        push(visitRef, {
+            username: userLocal,
+            page: currentPage,
+            time: serverTimestamp(),
+            device: navigator.userAgent
+        });
+    } catch(e) { console.log("Monitor error"); }
+
+    // வெளியேறும் நேரப் பதிவு
+    window.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === 'hidden') {
+            const duration = (Date.now() - startTime) / 1000;
+            const exitRef = ref(db, 'analytics/exits');
+            push(exitRef, {
+                username: userLocal,
+                page: currentPage,
+                duration: duration + "s",
+                time: serverTimestamp()
+            });
+        }
+    });
+
+    // --- PRODUCTS LOAD & OTHER FUNCTIONS ---
     const grid = document.getElementById('productGrid');
     onValue(ref(db, 'products'), (snapshot) => {
         grid.innerHTML = "";
@@ -159,7 +191,6 @@
     });
 
     window.addToCart = async function(btn, name, price, img) {
-        // உங்களுக்காக சேர்க்கப்பட்ட புதிய லாகின் செக் லாஜிக்
         if (localStorage.getItem("isLoggedIn") !== "true") {
             alert("Please login first!");
             window.location.href = "login.html";
@@ -187,7 +218,6 @@
         } finally {
             btn.disabled = false;
             text.style.display = "block";
-            spinner.style.none;
             spinner.style.display = "none";
         }
     };
@@ -211,7 +241,6 @@
         document.body.style.overflow = ''; 
     };
 
-    // டச் ஈவென்ட்டுகள் மூலம் போட்டோவை மட்டும் ஜூம் செய்தல்
     viewer.addEventListener('touchstart', (e) => {
         if (e.touches.length === 2) {
             startDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
