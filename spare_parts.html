@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Meadi Aqua Tech | Spare Parts</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg: #f8fbff; --card: #ffffff; --border: #e2e8f0; --primary: #0077b6; 
+            --accent: #00b4d8; --text-main: #1e293b; --text-sub: #64748b; --glass: rgba(255, 255, 255, 0.8);
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); user-select: none; }
+
+        header { height: 70px; display: flex; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; right: 0; background: var(--glass); backdrop-filter: blur(12px); z-index: 100; border-bottom: 1px solid var(--border); }
+        .header-title { font-size: 18px; font-weight: 700; color: var(--primary); }
+        .menu-btn { position: absolute; left: 20px; font-size: 24px; background: #f1f5f9; border: none; color: var(--text-main); cursor: pointer; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+
+        .sidebar { width: 280px; background: var(--card); position: fixed; top: 0; bottom: 0; left: -300px; padding-top: 80px; transition: 0.4s; z-index: 110; box-shadow: 20px 0 50px rgba(0,0,0,0.05); }
+        .sidebar.open { left: 0; }
+        .sidebar a { display: flex; align-items: center; padding: 16px 24px; text-decoration: none; color: var(--text-main); font-weight: 500; }
+
+        .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); display: none; z-index: 105; backdrop-filter: blur(4px); }
+        .overlay.show { display: block; }
+
+        .main { padding: 90px 15px 110px 15px; max-width: 600px; margin: 0 auto; }
+        .search-box { background: white; border: 1px solid var(--border); padding: 12px 20px; border-radius: 15px; margin-bottom: 20px; display: flex; align-items: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        .search-box input { border: none; outline: none; width: 100%; font-size: 14px; }
+
+        .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .product-card { background: white; border-radius: 20px; padding: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; }
+        .product-image { width: 100%; aspect-ratio: 1/1; background: #f1f5f9; border-radius: 15px; margin-bottom: 10px; overflow: hidden; cursor: zoom-in; }
+        .product-image img { width: 100%; height: 100%; object-fit: cover; }
+
+        .product-name { font-size: 14px; font-weight: 700; color: var(--text-main); margin: 5px 0; }
+        .product-desc { font-size: 11px; color: var(--text-sub); margin-bottom: 12px; flex-grow: 1; }
+        .product-price { font-size: 16px; font-weight: 800; color: var(--primary); margin-bottom: 8px; }
+
+        .add-btn { 
+            width: 100%; padding: 10px; background: #f1f5f9; border: none; 
+            border-radius: 10px; font-weight: 700; color: var(--primary); 
+            cursor: pointer; height: 40px; display: flex; align-items: center; justify-content: center;
+            transition: 0.2s;
+        }
+        .add-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        .spinner {
+            width: 18px; height: 18px; border: 3px solid rgba(0,119,182,0.2);
+            border-top: 3px solid var(--primary); border-radius: 50%;
+            animation: spin 0.8s linear infinite; display: none;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .bottom {
+            height: 75px; position: fixed; bottom: 0; left: 0; right: 0; 
+            display: flex; justify-content: space-around; align-items: center; 
+            background: var(--glass); backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border); z-index: 100; padding-bottom: env(safe-area-inset-bottom);
+        }
+        .bottom button {
+            background: none; border: none; font-size: 11px; font-weight: 600;
+            display: flex; flex-direction: column; align-items: center; color: var(--text-sub);
+            cursor: pointer;
+        }
+        .bottom button.active { color: var(--primary); }
+        .bottom .icon { font-size: 22px; margin-bottom: 4px; }
+
+        .image-viewer { 
+            display: none; position: fixed; z-index: 999; inset: 0; 
+            background: rgba(0,0,0,0.95); justify-content: center; align-items: center; 
+            overflow: hidden; touch-action: none;
+        }
+        .image-viewer img { 
+            max-width: 95%; max-height: 85%; border-radius: 10px; 
+            transform-origin: center center; transition: transform 0.05s ease-out;
+            user-select: none; -webkit-user-drag: none; touch-action: none;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    <div class="header-title">Spare Parts</div>
+</header>
+
+<div id="sidebar" class="sidebar">
+  <a href="index.html">🏠 Dashboard</a>
+  <a href="service.html">🛠 Service</a>
+  <a href="store.html">🛒 Store </a>
+  <a href="spares.html" style="color: var(--primary); font-weight: 700;">🪛 Spare Parts</a>
+  <a href="profile.html">👤 Profile</a>
+  <a href="cart.html">🛒 My Cart</a>
+</div>
+
+<div id="overlay" class="overlay" onclick="toggleMenu()"></div>
+
+<div class="main">
+    <div class="search-box">
+        <input type="text" id="searchInput" onkeyup="searchProduct()" placeholder="Search spares...">
+    </div>
+
+    <div class="product-grid" id="productGrid"></div>
+
+    <div id="noResult" style="display:none; text-align:center; padding: 20px;">No spares found!</div>
+</div>
+
+<div id="imageViewer" class="image-viewer">
+    <img id="fullImage" src="" alt="Spare Image">
+</div>
+
+<div class="bottom">
+    <button onclick="location.href='index.html'"><span class="icon">🏠</span>Home</button>
+    <button onclick="location.href='service.html'"><span class="icon">⚒️</span>Service</button>
+    <button onclick="location.href='store.html'"><span class="icon">🛒</span>Store</button>
+    
+    <button onclick="location.href='profile.html'"><span class="icon">👤</span>Profile</button>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
+        authDomain: "meadi-aqua-tech.firebaseapp.com",
+        databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
+        projectId: "meadi-aqua-tech",
+        storageBucket: "meadi-aqua-tech.firebasestorage.app",
+        messagingSenderId: "531151217708",
+        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89",
+        measurementId: "G-QW495L6JVE"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // --- SPARE PARTS LOAD ---
+    const grid = document.getElementById('productGrid');
+    onValue(ref(db, 'spare_parts'), (snapshot) => {
+        grid.innerHTML = "";
+        snapshot.forEach((child) => {
+            const data = child.val();
+            grid.innerHTML += `
+                <div class="product-card">
+                    <div class="product-image" onclick="openView('${data.img}')"><img src="${data.img}"></div>
+                    <span class="product-name">${data.name}</span>
+                    <p class="product-desc">${data.desc}</p>
+                    <span class="product-price">₹${data.price}</span>
+                    <button class="add-btn" onclick="addToCart(this, '${data.name}', ${data.price}, '${data.img}')">
+                        <span class="btn-text">Add to Cart</span>
+                        <div class="spinner"></div>
+                    </button>
+                </div>
+            `;
+        });
+    });
+
+    window.addToCart = async function(btn, name, price, img) {
+        if (localStorage.getItem("isLoggedIn") !== "true") {
+            alert("Please login first!");
+            window.location.href = "login.html";
+            return; 
+        }
+
+        const text = btn.querySelector('.btn-text');
+        const spinner = btn.querySelector('.spinner');
+        const user = localStorage.getItem("aquaUser") || "Guest";
+
+        btn.disabled = true;
+        text.style.display = "none";
+        spinner.style.display = "block";
+
+        try {
+            await push(ref(db, 'carts/' + user), { 
+                productName: name, 
+                price: price, 
+                image: img, 
+                type: 'spare_part',
+                addedAt: serverTimestamp() 
+            });
+            alert(name + " added to cart!");
+        } catch (error) {
+            alert("Error adding to cart!");
+        } finally {
+            btn.disabled = false;
+            text.style.display = "block";
+            spinner.style.display = "none";
+        }
+    };
+
+    // Zoom & Tap Anywhere to Close Functions
+    let scale = 1, currentX = 0, currentY = 0;
+    let startDist = 0, startScale = 1;
+    let isDragging = false, startX = 0, startY = 0;
+    let hasMoved = false;
+
+    const viewer = document.getElementById('imageViewer');
+    const img = document.getElementById('fullImage');
+
+    function updateTransform() {
+        img.style.transform = `translate(${currentX}px, ${currentY}px) scale(${scale})`;
+    }
+
+    window.openView = (url) => {
+        img.src = url;
+        scale = 1; currentX = 0; currentY = 0;
+        updateTransform();
+        viewer.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; 
+    };
+
+    window.closeView = () => {
+        viewer.style.display = 'none';
+        document.body.style.overflow = ''; 
+    };
+
+    viewer.addEventListener('touchstart', (e) => {
+        hasMoved = false; // Reset gesture track
+        if (e.touches.length === 2) {
+            startDist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            startScale = scale;
+        } else if (e.touches.length === 1) {
+            isDragging = true;
+            startX = e.touches[0].clientX - currentX;
+            startY = e.touches[0].clientY - currentY;
+        }
+    }, { passive: false });
+
+    viewer.addEventListener('touchmove', (e) => {
+        hasMoved = true; // User is active dragging or pinching
+        if (e.touches.length === 2) {
+            e.preventDefault();
+            const dist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            if (startDist > 0) {
+                scale = Math.min(Math.max(1, startScale * (dist / startDist)), 4);
+                if (scale === 1) { currentX = 0; currentY = 0; }
+                updateTransform();
+            }
+        } else if (e.touches.length === 1 && isDragging && scale > 1) {
+            e.preventDefault();
+            currentX = e.touches[0].clientX - startX;
+            currentY = e.touches[0].clientY - startY;
+            updateTransform();
+        }
+    }, { passive: false });
+
+    viewer.addEventListener('touchend', (e) => {
+        if (e.touches.length < 2) startDist = 0;
+        if (e.touches.length === 0) isDragging = false;
+        
+        // Tap Action: Closes image even if zoomed in, provided user simply tapped without dragging
+        if (!hasMoved) {
+            closeView();
+        }
+    });
+</script>
+
+<script>
+    function toggleMenu(){
+        document.getElementById("sidebar").classList.toggle("open");
+        document.getElementById("overlay").classList.toggle("show");
+    }
+    function searchProduct() {
+        let input = document.getElementById('searchInput').value.toLowerCase();
+        let cards = document.getElementsByClassName('product-card');
+        let visible = 0;
+        for (let i = 0; i < cards.length; i++) {
+            let name = cards[i].innerText.toLowerCase();
+            cards[i].style.display = name.includes(input) ? "flex" : "none";
+            if(name.includes(input)) visible++;
+        }
+        document.getElementById('noResult').style.display = visible === 0 ? "block" : "none";
+    }
+</script>
+</body>
+</html>
