@@ -297,15 +297,6 @@
             </div>
 
             <div class="btn-group">
-                
- 
-                
-                
-                <button class="checkout-btn upi-btn" id="payBtn">Pay via Any UPI App 💳</button>
-                
-            
-                
-                
                 <button class="checkout-btn wa-btn" id="whatsappBtn">WhatsApp Payment Proof ✅</button>
             </div>
         </div>
@@ -439,10 +430,6 @@
 
     // Handles original redirection & message payload builders without mutating old feature scope
     function attachPaymentActions(finalAmount) {
-        document.getElementById("payBtn").onclick = () => {
-            window.location.href = `upi://pay?pa=${dynamicUPI}&pn=Meadi Aqua Tech&am=${finalAmount}&cu=INR`;
-        };
-
         document.getElementById("whatsappBtn").onclick = () => {
             let couponString = "";
             if (appliedCouponData) {
