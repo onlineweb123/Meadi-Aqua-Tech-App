@@ -58,7 +58,7 @@
         }
         .header-title { font-size: 18px; font-weight: 700; color: var(--primary); letter-spacing: -0.5px; }
 
-          .menu-btn { 
+        .menu-btn { 
             position: absolute; left: 20px; font-size: 24px; 
             background: #f1f5f9; border: none; color: var(--text-main); 
             cursor: pointer; width: 40px; height: 40px; border-radius: 10px;
@@ -124,15 +124,14 @@
         }
         .qr-hint { font-size: 11px; color: var(--text-sub); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
 
-
         /* --- Coupon Section Mobile Friendly & Solid Border --- */
         .coupon-container {
             background: #f8fafc; 
-            border: 1px solid var(--border); /* விட்டு விட்டு இல்லாமல் ஒரே லைனாக மாற்றப்பட்டுள்ளது */
+            border: 1px solid var(--border);
             border-radius: 16px; 
             padding: 14px; 
             margin-bottom: 20px;
-            width: 100%; /* மொபைல் திரைக்கு ஏற்றவாறு */
+            width: 100%;
             box-sizing: border-box;
         }
         .coupon-title { 
@@ -159,7 +158,7 @@
             text-transform: uppercase; 
             outline: none; 
             background: #fff;
-            min-width: 0; /* மொபைலில் பாக்ஸ் வெளியே நீட்டாமல் தடுக்கிறது */
+            min-width: 0;
             transition: border 0.2s;
         }
         .coupon-input:focus { 
@@ -174,7 +173,7 @@
             font-size: 14px;
             font-weight: 700; 
             cursor: pointer; 
-            white-space: nowrap; /* மொபைலில் பட்டன் எழுத்து உடையாமல் இருக்க */
+            white-space: nowrap;
             transition: background 0.2s;
         }
         .coupon-btn:hover { 
@@ -185,7 +184,7 @@
             font-weight: 600; 
             margin-top: 8px; 
             display: none; 
-            word-break: break-word; /* நீண்ட மெசேஜ் இருந்தாலும் மொபைலில் மடியும் */
+            word-break: break-word;
         }
         .coupon-msg.success { 
             color: var(--success); 
@@ -203,11 +202,6 @@
             font-weight: 600; 
             display: none; 
         }
-
-
-
-        /* --- Coupon Section Added END --- */
-
 
         .btn-group { display: flex; flex-direction: column; gap: 12px; }
         .checkout-btn {
@@ -335,8 +329,9 @@
     const emptyMsg = document.getElementById("emptyMsg");
     const qrcodeDiv = document.getElementById("qrcode");
 
-    // Coupon related state tracking variables
+    // State variables
     let baseTotal = 0;
+    let couponEligibleTotal = 0; // அக்வா ஸ்டோர் பொருட்களின் தொகையை மட்டும் கணக்கிட
     let appliedCouponData = null;
     let currentItemsSummary = [];
 
@@ -373,12 +368,9 @@
         new QRCode(qrcodeDiv, { text: upiData, width: 140, height: 140 });
     }
 
-    // New Safe Functionality: Dynamic database validation for coupons
     function handleCouponApplication() {
         const inputCode = document.getElementById("couponInput").value.trim().toUpperCase();
         const msgEl = document.getElementById("couponMsg");
-        const discountRow = document.getElementById("discountRow");
-        const discountValEl = document.getElementById("discountValue");
 
         if (!inputCode) {
             msgEl.innerText = "Please enter a coupon code.";
@@ -387,26 +379,24 @@
             return;
         }
 
-        // Fetch specified dynamic code from admin panel location inside database
+        if (couponEligibleTotal <= 0) {
+            msgEl.innerText = "Coupons are valid only for Aqua Store products (not applicable for spare parts).";
+            msgEl.className = "coupon-msg error";
+            msgEl.style.display = "block";
+            resetCouponState();
+            return;
+        }
+
         get(ref(db, 'coupons/' + inputCode)).then((snapshot) => {
             if (snapshot.exists()) {
                 const couponData = snapshot.val();
-                appliedCouponData = couponData; // Save reference for whatsapp workflow
+                appliedCouponData = couponData;
 
-                const percent = couponData.discountPercentage;
-                const discountAmount = Math.round(baseTotal * (percent / 100));
-                const finalTotal = baseTotal - discountAmount;
+                recalculateAndUpdateTotal();
 
-                msgEl.innerText = `Coupon applied! Code by ${couponData.influencerName} (${percent}% OFF) 🎉`;
+                msgEl.innerText = `Coupon applied! Code by ${couponData.influencerName} (${couponData.discountPercentage}% OFF on Store products) 🎉`;
                 msgEl.className = "coupon-msg success";
                 msgEl.style.display = "block";
-
-                discountValEl.innerText = "-₹" + discountAmount;
-                discountRow.style.display = "flex";
-
-                totalPriceEl.innerText = "₹" + finalTotal;
-                generateQR(finalTotal);
-                attachPaymentActions(finalTotal);
             } else {
                 msgEl.innerText = "Invalid coupon code. Please try again!";
                 msgEl.className = "coupon-msg error";
@@ -428,12 +418,28 @@
         attachPaymentActions(baseTotal);
     }
 
-    // Handles original redirection & message payload builders without mutating old feature scope
+    function recalculateAndUpdateTotal() {
+        if (appliedCouponData && couponEligibleTotal > 0) {
+            const percent = appliedCouponData.discountPercentage;
+            const discountAmount = Math.round(couponEligibleTotal * (percent / 100));
+            const finalTotal = baseTotal - discountAmount;
+
+            document.getElementById("discountValue").innerText = "-₹" + discountAmount;
+            document.getElementById("discountRow").style.display = "flex";
+
+            totalPriceEl.innerText = "₹" + finalTotal;
+            generateQR(finalTotal);
+            attachPaymentActions(finalTotal);
+        } else {
+            resetCouponState();
+        }
+    }
+
     function attachPaymentActions(finalAmount) {
         document.getElementById("whatsappBtn").onclick = () => {
             let couponString = "";
-            if (appliedCouponData) {
-                const discountAmt = Math.round(baseTotal * (appliedCouponData.discountPercentage / 100));
+            if (appliedCouponData && couponEligibleTotal > 0) {
+                const discountAmt = Math.round(couponEligibleTotal * (appliedCouponData.discountPercentage / 100));
                 couponString = `%0A*Coupon Applied:* ${appliedCouponData.couponCode} (${appliedCouponData.discountPercentage}%25 OFF)%0A*Influencer Name:* ${appliedCouponData.influencerName}%0A*Discount Amount:* -₹${discountAmt}`;
             }
 
@@ -454,6 +460,7 @@
             loader.style.display = "none";
             cartList.innerHTML = "";
             baseTotal = 0;
+            couponEligibleTotal = 0;
             currentItemsSummary = [];
 
             if (!data) {
@@ -470,6 +477,11 @@
                 const qty = item.quantity || 1;
                 const itemTotal = parseInt(item.price) * qty;
                 baseTotal += itemTotal;
+
+                if (item.type !== 'spare_part') {
+                    couponEligibleTotal += itemTotal;
+                }
+
                 currentItemsSummary.push(`• ${item.productName} (x${qty}) - ₹${itemTotal}`);
 
                 cartList.innerHTML += `
@@ -490,30 +502,14 @@
                     </div>`;
             });
 
-            // Maintain active coupon percentage calculation dynamically across item updates / deletions
-            if (appliedCouponData) {
-                const percent = appliedCouponData.discountPercentage;
-                const discountAmount = Math.round(baseTotal * (percent / 100));
-                const finalTotal = baseTotal - discountAmount;
-                document.getElementById("discountValue").innerText = "-₹" + discountAmount;
-                totalPriceEl.innerText = "₹" + finalTotal;
-                generateQR(finalTotal);
-                attachPaymentActions(finalTotal);
-            } else {
-                totalPriceEl.innerText = "₹" + baseTotal;
-                generateQR(baseTotal);
-                attachPaymentActions(baseTotal);
-            }
+            recalculateAndUpdateTotal();
         });
     }
 
-    // Attach listeners safely
     document.getElementById("applyCouponBtn").onclick = handleCouponApplication;
 
-    // --- Prevent Selection/Context ---
     document.addEventListener('contextmenu', e => !e.target.closest('button','a') && e.preventDefault());
     document.addEventListener('keydown', e => e.ctrlKey && ['c','v','u','s','p'].includes(e.key) && e.preventDefault());
-
 </script>
 </body>
 </html>
