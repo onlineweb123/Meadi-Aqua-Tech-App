@@ -106,7 +106,7 @@
     <div id="noResult" style="display:none; text-align:center; padding: 20px;">No spares found!</div>
 </div>
 
-<div id="imageViewer" class="image-viewer">
+<div id="imageViewer" class="image-viewer" onclick="closeView()">
     <img id="fullImage" src="" alt="Spare Image">
 </div>
 
@@ -114,7 +114,7 @@
     <button onclick="location.href='index.html'"><span class="icon">🏠</span>Home</button>
     <button onclick="location.href='service.html'"><span class="icon">⚒️</span>Service</button>
     <button onclick="location.href='store.html'"><span class="icon">🛒</span>Store</button>
-    
+
     <button onclick="location.href='profile.html'"><span class="icon">👤</span>Profile</button>
 </div>
 
@@ -255,9 +255,10 @@
     viewer.addEventListener('touchend', (e) => {
         if (e.touches.length < 2) startDist = 0;
         if (e.touches.length === 0) isDragging = false;
-        
+
         // Tap Action: Closes image even if zoomed in, provided user simply tapped without dragging
         if (!hasMoved) {
+            e.preventDefault(); // Prevents background click events from firing
             closeView();
         }
     });
