@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My EMI & Installments - Meadi Aqua Tech</title>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <!-- QR Code Generator -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-color: #f8fbff;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 90px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 20px rgba(79, 70, 229, 0.2);
+        }
+
+        header h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px 16px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-color);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .summary-box {
+            background: #f8fafc;
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            min-width: 0;
+        }
+
+        .summary-box span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            display: block;
+            text-transform: uppercase;
+        }
+
+        .summary-box h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-top: 6px;
+            overflow-wrap: anywhere;
+        }
+
+        .due-box {
+            grid-column: span 2;
+            background: #fee2e2;
+            border-color: #fecaca;
+        }
+
+        .due-box h3 {
+            color: var(--danger);
+            font-size: 1.6rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        .badge-active {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .badge-finished {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        /* Force Close Button */
+
+        .force-close-btn {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+            transition: transform 0.2s;
+        }
+
+        .force-close-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* QR Section */
+
+        .qr-section {
+            text-align: center;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .qr-section h4 {
+            font-size: 1rem;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+
+        .qr-section p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        #qrcode {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 16px;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        #qrcode img,
+        #qrcode canvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .qr-amount {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 16px;
+            overflow-wrap: anywhere;
+        }
+
+        .upi-warning {
+            background: #fffbeb;
+            color: #92400e;
+            border: 1px solid #fde68a;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 0.8rem;
+            line-height: 1.6;
+            margin-bottom: 14px;
+        }
+
+        /* WhatsApp Button */
+
+        .whatsapp-btn {
+            background: #25d366;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+            transition: transform 0.2s;
+        }
+
+        .whatsapp-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Payment History */
+
+        .history-box {
+            margin-top: 16px;
+        }
+
+        .history-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            margin-bottom: 12px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            background: #f8fafc;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid #f1f5f9;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .history-amount {
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .history-date {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-align: right;
+        }
+
+        /* Loading */
+
+        .loading-container {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--text-muted);
+        }
+
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin: 0 auto 12px auto;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error-message {
+            color: var(--danger);
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin-top: 10px;
+        }
+
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-top: 12px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 360px) {
+            header {
+                padding: 16px 12px;
+            }
+
+            header h1 {
+                font-size: 1rem;
+            }
+
+            .container {
+                padding: 16px 10px;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            .summary-box {
+                padding: 10px;
+            }
+
+            .summary-box h3 {
+                font-size: 1.05rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>My EMI Details</h1>
+        <a href="index.html" class="back-btn">← Back</a>
+    </header>
+
+    <div class="container">
+
+        <!-- Loading View -->
+
+        <div id="loadingView" class="loading-container">
+            <div class="spinner"></div>
+            <p>Loading your EMI details...</p>
+        </div>
+
+        <!-- Main Content -->
+
+        <div id="contentView" class="hidden">
+
+            <!-- EMI Summary -->
+
+            <div class="card" style="text-align:center;">
+
+                <span id="statusBadge" class="status-badge badge-active">
+                    Active EMI Plan
+                </span>
+
+                <h2 id="customerName" style="font-size:1.3rem; margin-bottom:16px;">
+                    --
+                </h2>
+
+                <div class="summary-grid">
+
+                    <div class="summary-box due-box">
+                        <span>Balance Due</span>
+                        <h3 id="balanceDue">₹0</h3>
+                    </div>
+
+                    <div class="summary-box">
+                        <span>Total EMI Amount</span>
+                        <h3 id="totalAmount">₹0</h3>
+                    </div>
+
+                    <div class="summary-box">
+                        <span>Total Paid</span>
+                        <h3 id="totalPaid" style="color:var(--success);">
+                            ₹0
+                        </h3>
+                    </div>
+
+                </div>
+
+                <button
+                    class="force-close-btn"
+                    id="forceCloseBtn"
+                    type="button"
+                    onclick="toggleForceClose()"
+                >
+                    ⚡ Pay Full Balance (Force Close)
+                </button>
+
+                <div id="completedMessage" class="success-message hidden">
+                    ✅ Congratulations! Your EMI payment is completed.
+                </div>
+
+            </div>
+
+            <!-- QR Code Payment Section -->
+
+            <div class="card qr-section">
+
+                <h4 id="qrTitle">Scan to Pay Monthly EMI</h4>
+
+                <p id="qrSubtitle">
+                    Scan using GPay, PhonePe, Paytm or any supported UPI App.
+                </p>
+
+                <div id="qrcode"></div>
+
+                <div id="qrAmountDisplay" class="qr-amount">
+                    Amount: ₹0
+                </div>
+
+                <div id="upiWarning" class="upi-warning hidden"></div>
+
+                <a
+                    id="whatsappBtn"
+                    href="#"
+                    class="whatsapp-btn"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    💬 Send Payment Screenshot to WhatsApp
+                </a>
+
+                <p style="font-size:0.75rem; margin-top:10px; margin-bottom:0;">
+                    After payment, send your screenshot to the admin.
+                    Your EMI balance will update after the payment is
+                    confirmed and recorded by the admin.
+                </p>
+
+            </div>
+
+            <!-- Payment History -->
+
+            <div class="card">
+
+                <div class="history-title">
+                    Payment History
+                </div>
+
+                <div id="historyList">
+                    <p style="color:var(--text-muted); font-size:0.9rem;">
+                        No payments made yet.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Error View -->
+
+        <div id="errorView" class="card hidden" style="text-align:center; padding:40px 24px;">
+
+            <p style="font-size:2rem; margin-bottom:10px;">
+                🔍
+            </p>
+
+            <h3 style="color:var(--text-main); margin-bottom:8px;">
+                No EMI Record Found
+            </h3>
+
+            <p id="errorMessage" class="error-message">
+                No EMI record is linked with your account username.
+            </p>
+
+        </div>
+
+    </div>
+
+    <script>
+        // ==========================================
+        // CONFIGURATION
+        // ==========================================
+
+        const ADMIN_WHATSAPP = "9344165879";
+
+        // Fallback UPI ID. Replace with your actual UPI ID
+        // if the Firebase Admin Settings value is unavailable.
+        let upiId = "9344165879@paytm";
+
+        let currentRecord = null;
+        let isForceCloseActive = false;
+
+        let emiListener = null;
+        let settingsListener = null;
+
+        const firebaseConfig = {
+            databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com/"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const db = firebase.database();
+
+        // Logged-in username from existing customer login system
+        const loggedInUser = (
+            localStorage.getItem("aquaUser") || ""
+        ).trim();
+
+        // ==========================================
+        // DOM HELPERS
+        // ==========================================
+
+        function showLoading() {
+            document.getElementById("loadingView").classList.remove("hidden");
+            document.getElementById("contentView").classList.add("hidden");
+            document.getElementById("errorView").classList.add("hidden");
+        }
+
+        function showError(message) {
+            document.getElementById("loadingView").classList.add("hidden");
+            document.getElementById("contentView").classList.add("hidden");
+            document.getElementById("errorView").classList.remove("hidden");
+
+            document.getElementById("errorMessage").textContent = message;
+        }
+
+        function formatMoney(amount) {
+            return Number(amount || 0).toLocaleString("en-IN", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function formatDate(dateValue) {
+            if (!dateValue) {
+                return "-";
+            }
+
+            const date = new Date(dateValue);
+
+            if (isNaN(date.getTime())) {
+                return "-";
+            }
+
+            return date.toLocaleDateString("en-GB");
+        }
+
+        function getTotalPaid(record) {
+            let paid = 0;
+
+            if (record && record.payments) {
+                Object.values(record.payments).forEach(function(payment) {
+                    paid += Math.max(0, Number(payment.amount) || 0);
+                });
+            }
+
+            return paid;
+        }
+
+        function getBalance(record) {
+            const total = Math.max(
+                0,
+                Number(record && record.totalAmount) || 0
+            );
+
+            const paid = getTotalPaid(record);
+
+            return Math.max(0, total - paid);
+        }
+
+        // ==========================================
+        // LOGIN CHECK
+        // ==========================================
+
+        if (!loggedInUser) {
+
+            showError(
+                "You are not logged in. Please log in to your Meadi Aqua Tech account and open this page again."
+            );
+
+        } else {
+
+            startFirebaseListeners();
+
+        }
+
+        // ==========================================
+        // FIREBASE LISTENERS
+        // ==========================================
+
+        function startFirebaseListeners() {
+
+            // Fetch Admin UPI Settings
+
+            settingsListener = db.ref(
+                "admin_settings/upi_config/upiId"
+            );
+
+            settingsListener.on("value", function(snapshot) {
+
+                if (snapshot.exists()) {
+
+                    const savedUpiId = String(snapshot.val() || "").trim();
+
+                    if (savedUpiId) {
+                        upiId = savedUpiId;
+                    }
+
+                }
+
+                if (currentRecord) {
+                    generateQRCode();
+                }
+
+            }, function(error) {
+
+                console.error("UPI Settings Error:", error);
+
+                if (currentRecord) {
+                    generateQRCode();
+                }
+
+            });
+
+            // Fetch EMI records
+
+            emiListener = db.ref("emi_list");
+
+            emiListener.on("value", function(snapshot) {
+
+                let foundRecord = null;
+
+                if (snapshot.exists()) {
+
+                    snapshot.forEach(function(child) {
+
+                        const data = child.val() || {};
+
+                        const savedUsername = String(
+                            data.username || ""
+                        ).trim();
+
+                        if (
+                            savedUsername.toLowerCase() ===
+                            loggedInUser.toLowerCase()
+                        ) {
+
+                            foundRecord = {
+                                key: child.key,
+                                ...data
+                            };
+
+                        }
+
+                    });
+
+                }
+
+                document.getElementById("loadingView").classList.add("hidden");
+
+                if (foundRecord) {
+
+                    currentRecord = foundRecord;
+
+                    document.getElementById("contentView").classList.remove("hidden");
+
+                    document.getElementById("errorView").classList.add("hidden");
+
+                    updateUI();
+
+                } else {
+
+                    currentRecord = null;
+
+                    document.getElementById("contentView").classList.add("hidden");
+
+                    showError(
+                        "No EMI record is linked with username: " +
+                        loggedInUser +
+                        ". Please contact Meadi Aqua Tech admin."
+                    );
+
+                }
+
+            }, function(error) {
+
+                console.error("EMI Database Error:", error);
+
+                showError(
+                    "Unable to load your EMI details. Please check your internet connection and try again."
+                );
+
+            });
+
+        }
+
+        // ==========================================
+        // UPDATE CUSTOMER UI
+        // ==========================================
+
+        function updateUI() {
+
+            if (!currentRecord) {
+                return;
+            }
+
+            const total = Math.max(
+                0,
+                Number(currentRecord.totalAmount) || 0
+            );
+
+            const paidSum = getTotalPaid(currentRecord);
+
+            const balance = getBalance(currentRecord);
+
+            const isFinished = balance <= 0;
+
+            document.getElementById("customerName").textContent =
+                currentRecord.name || "Customer";
+
+            document.getElementById("totalAmount").textContent =
+                "₹" + formatMoney(total);
+
+            document.getElementById("totalPaid").textContent =
+                "₹" + formatMoney(paidSum);
+
+            document.getElementById("balanceDue").textContent =
+                "₹" + formatMoney(balance);
+
+            const badge = document.getElementById("statusBadge");
+
+            const forceCloseBtn = document.getElementById("forceCloseBtn");
+
+            const completedMessage = document.getElementById(
+                "completedMessage"
+            );
+
+            if (isFinished) {
+
+                badge.className = "status-badge badge-finished";
+                badge.textContent = "EMI Completed";
+
+                forceCloseBtn.classList.add("hidden");
+
+                completedMessage.classList.remove("hidden");
+
+                isForceCloseActive = false;
+
+            } else {
+
+                badge.className = "status-badge badge-active";
+                badge.textContent = "Active EMI Plan";
+
+                forceCloseBtn.classList.remove("hidden");
+
+                completedMessage.classList.add("hidden");
+
+                updateForceCloseButton();
+
+            }
+
+            renderPaymentHistory();
+
+            generateQRCode();
+
+        }
+
+        // ==========================================
+        // PAYMENT HISTORY
+        // ==========================================
+
+        function renderPaymentHistory() {
+
+            if (!currentRecord) {
+                return;
+            }
+
+            const historyList = document.getElementById("historyList");
+
+            historyList.innerHTML = "";
+
+            const payments = currentRecord.payments || {};
+
+            const paymentEntries = Object.entries(payments).sort(
+                function(a, b) {
+
+                    const dateA = new Date(
+                        a[1].date || 0
+                    ).getTime();
+
+                    const dateB = new Date(
+                        b[1].date || 0
+                    ).getTime();
+
+                    return dateB - dateA;
+
+                }
+            );
+
+            if (paymentEntries.length === 0) {
+
+                const emptyMessage = document.createElement("p");
+
+                emptyMessage.style.color = "var(--text-muted)";
+                emptyMessage.style.fontSize = "0.9rem";
+                emptyMessage.textContent = "No payments made yet.";
+
+                historyList.appendChild(emptyMessage);
+
+                return;
+
+            }
+
+            paymentEntries.forEach(function(entry) {
+
+                const payment = entry[1] || {};
+
+                const item = document.createElement("div");
+                item.className = "history-item";
+
+                const amount = document.createElement("span");
+                amount.className = "history-amount";
+
+                amount.textContent =
+                    "₹" + formatMoney(payment.amount);
+
+                const date = document.createElement("span");
+                date.className = "history-date";
+
+                date.textContent = formatDate(payment.date);
+
+                item.appendChild(amount);
+                item.appendChild(date);
+
+                historyList.appendChild(item);
+
+            });
+
+        }
+
+        // ==========================================
+        // FORCE CLOSE TOGGLE
+        // ==========================================
+
+        function toggleForceClose() {
+
+            if (!currentRecord) {
+                return;
+            }
+
+            if (getBalance(currentRecord) <= 0) {
+                return;
+            }
+
+            isForceCloseActive = !isForceCloseActive;
+
+            updateForceCloseButton();
+
+            generateQRCode();
+
+        }
+
+        function updateForceCloseButton() {
+
+            const btn = document.getElementById("forceCloseBtn");
+
+            if (isForceCloseActive) {
+
+                btn.style.background =
+                    "linear-gradient(135deg, #ef4444, #dc2626)";
+
+                btn.textContent =
+                    "🔄 Switch to Monthly EMI Payment";
+
+            } else {
+
+                btn.style.background =
+                    "linear-gradient(135deg, #f59e0b, #d97706)";
+
+                btn.textContent =
+                    "⚡ Pay Full Balance (Force Close)";
+
+            }
+
+        }
+
+        // ==========================================
+        // QR CODE GENERATION
+        // ==========================================
+
+        function generateQRCode() {
+
+            if (!currentRecord) {
+                return;
+            }
+
+            const total = Math.max(
+                0,
+                Number(currentRecord.totalAmount) || 0
+            );
+
+            const paidSum = getTotalPaid(currentRecord);
+
+            const balance = Math.max(0, total - paidSum);
+
+            const monthlyAmount = Math.max(
+                0,
+                Number(currentRecord.monthlyAmount) || 0
+            );
+
+            const qrContainer = document.getElementById("qrcode");
+
+            const qrTitle = document.getElementById("qrTitle");
+
+            const qrSubtitle = document.getElementById("qrSubtitle");
+
+            const qrAmountDisplay = document.getElementById(
+                "qrAmountDisplay"
+            );
+
+            const upiWarning = document.getElementById("upiWarning");
+
+            // Clear previous QR code
+
+            qrContainer.innerHTML = "";
+
+            upiWarning.classList.add("hidden");
+            upiWarning.textContent = "";
+
+            // If EMI completed
+
+            if (balance <= 0) {
+
+                qrTitle.textContent = "EMI Payment Completed";
+
+                qrSubtitle.textContent =
+                    "There is no remaining balance to pay.";
+
+                qrAmountDisplay.textContent = "Amount: ₹0";
+
+                qrContainer.innerHTML =
+                    '<p style="color:#10b981;font-weight:700;">✓ Fully Paid</p>';
+
+                updateWhatsAppLink(0);
+
+                return;
+
+            }
+
+            // Monthly installment amount is taken from Admin's record.
+            // If it exceeds the remaining balance, use the remaining balance.
+
+            let payableAmount;
+
+            if (isForceCloseActive) {
+
+                payableAmount = balance;
+
+                qrTitle.textContent =
+                    "Force Close - Full Balance Payment";
+
+                qrSubtitle.textContent =
+                    "Scan to pay your entire remaining EMI balance.";
+
+            } else {
+
+                payableAmount = monthlyAmount > 0
+                    ? Math.min(monthlyAmount, balance)
+                    : balance;
+
+                qrTitle.textContent =
+                    "Scan to Pay Monthly EMI";
+
+                qrSubtitle.textContent =
+                    monthlyAmount > 0
+                    ? "Pay the installment amount set by Meadi Aqua Tech admin."
+                    : "Monthly installment is not configured. The remaining balance is shown.";
+
+            }
+
+            // Keep the UPI amount to two decimal places.
+
+            payableAmount = Math.round(
+                payableAmount * 100
+            ) / 100;
+
+            qrAmountDisplay.textContent =
+                "Amount: ₹" + formatMoney(payableAmount);
+
+            // Validate UPI ID before generating QR.
+
+            if (
+                !upiId ||
+                !/^[^@\s]+@[^@\s]+$/.test(upiId)
+            ) {
+
+                upiWarning.textContent =
+                    "A valid UPI ID is not configured. Please contact the admin.";
+
+                upiWarning.classList.remove("hidden");
+
+                qrContainer.innerHTML =
+                    '<p style="color:#ef4444;font-size:0.85rem;">QR Code unavailable</p>';
+
+                updateWhatsAppLink(payableAmount);
+
+                return;
+
+            }
+
+            // UPI payment URI
+
+            const upiParams = new URLSearchParams();
+
+            upiParams.set("pa", upiId);
+            upiParams.set("pn", "Meadi Aqua Tech");
+            upiParams.set("am", payableAmount.toFixed(2));
+            upiParams.set("cu", "INR");
+
+            upiParams.set(
+                "tn",
+                isForceCloseActive
+                    ? "EMI Full Balance Payment"
+                    : "EMI Monthly Installment"
+            );
+
+            const upiUrl = "upi://pay?" + upiParams.toString();
+
+            try {
+
+                new QRCode(qrContainer, {
+                    text: upiUrl,
+                    width: 180,
+                    height: 180,
+                    colorDark: "#1e293b",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+
+            } catch (error) {
+
+                console.error("QR Generation Error:", error);
+
+                qrContainer.innerHTML =
+                    '<p style="color:#ef4444;font-size:0.85rem;">Unable to generate QR Code.</p>';
+
+            }
+
+            updateWhatsAppLink(payableAmount);
+
+        }
+
+        // ==========================================
+        // WHATSAPP PAYMENT CONFIRMATION
+        // ==========================================
+
+        function updateWhatsAppLink(amount) {
+
+            const whatsappBtn = document.getElementById("whatsappBtn");
+
+            const customerName = currentRecord
+                ? currentRecord.name || "Customer"
+                : "Customer";
+
+            const username = loggedInUser || "Unknown";
+
+            const paymentType = isForceCloseActive
+                ? "Full Balance / Force Close"
+                : "Monthly EMI";
+
+            const message =
+                "Hi Meadi Aqua Tech,\n\n" +
+                "Customer Name: " + customerName + "\n" +
+                "Username: " + username + "\n" +
+                "Payment Type: " + paymentType + "\n" +
+                "Payment Amount: Rs " + formatMoney(amount) + "\n\n" +
+                "I am sending my UPI payment screenshot for confirmation.\n" +
+                "Please verify the payment and update my EMI record.";
+
+            const encodedMessage = encodeURIComponent(message);
+
+            whatsappBtn.href =
+                "https://wa.me/91" +
+                ADMIN_WHATSAPP +
+                "?text=" +
+                encodedMessage;
+
+        }
+
+    </script>
+
+</body>
+</html>
