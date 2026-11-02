@@ -131,6 +131,64 @@
             justify-content: center; align-items: center; box-shadow: 0 8px 20px rgba(37, 211, 102, 0.3);
             z-index: 90; text-decoration: none; font-size: 24px;
         }
+        
+        
+        /* EMI CUSTOMER BUTTON */
+.emi-button-box {
+    margin-bottom: 20px;
+}
+
+.emi-button {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px;
+    background: linear-gradient(#ff0049);
+    color: #ffffff;
+    border-radius: 18px;
+    text-decoration: none;
+    box-shadow: 0 6px 18px rgba(79, 70, 229, 0.20);
+    transition: transform 0.2s;
+}
+
+.emi-button:active {
+    transform: scale(0.98);
+}
+
+.emi-icon {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 14px;
+    font-size: 25px;
+}
+
+.emi-details {
+    flex: 1;
+}
+
+.emi-details h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.emi-details p {
+    margin: 5px 0 0;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.emi-arrow {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ffffff;
+}
     </style>
 </head>
 <body>
@@ -156,6 +214,18 @@
         <h2>Hello, <span id="userNameDisplay">User</span>!</h2>
         <p>Your water quality is our top priority.</p>
     </div>
+    
+    <!-- EMI BUTTON -->
+<div id="emiButtonBox" class="emi-button-box" style="display: none;">
+    <a href="emi_customer.html" class="emi-button">
+        <div class="emi-icon">💳</div>
+        <div class="emi-details">
+            <h3>My EMI Details</h3>
+            <p>View Installments & Payment</p>
+        </div>
+        <div class="emi-arrow">→</div>
+    </a>
+</div>
 
     <div class="card" id="filterCard">
         <h3>📊 Filter Maintenance</h3>
@@ -211,6 +281,64 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    
+    
+    // ==========================================
+// EMI BUTTON VISIBILITY CHECK
+// ==========================================
+
+async function checkCustomerEMI() {
+
+    const emiButtonBox = document.getElementById("emiButtonBox");
+
+    // Default-ஆக Button மறைக்கப்படும்
+    emiButtonBox.style.display = "none";
+
+    const username = (
+        localStorage.getItem("aquaUser") || ""
+    ).trim();
+
+    if (!username) return;
+
+    try {
+
+        const emiSnapshot = await get(ref(db, "emi_list"));
+
+        if (!emiSnapshot.exists()) return;
+
+        let emiFound = false;
+
+        emiSnapshot.forEach((childSnapshot) => {
+
+            const emiData = childSnapshot.val() || {};
+
+            const savedUsername = String(
+                emiData.username || ""
+            ).trim();
+
+            if (
+                savedUsername.toLowerCase() ===
+                username.toLowerCase()
+            ) {
+                emiFound = true;
+            }
+
+        });
+
+        if (emiFound) {
+            emiButtonBox.style.display = "block";
+        }
+
+    } catch (error) {
+
+        console.error("EMI Check Error:", error);
+
+        emiButtonBox.style.display = "none";
+    }
+}
+
+checkCustomerEMI();
+    
 
     // --- 1. MONITOR SECTION ---
     const userLocal = localStorage.getItem("aquaUser") || "Guest";
@@ -319,7 +447,7 @@
     }
 
     loadDashboard(); 
-    
+
         // Text copy செய்வதை தடுப்பதற்கான code
     document.addEventListener('copy', (e) => {
         e.preventDefault();
@@ -331,6 +459,12 @@
     document.body.style.webkitUserSelect = "none";
     document.body.style.msUserSelect = "none";
     document.body.style.mozUserSelect = "none";
+
+
+
+
+
+
 
 </script>
 </body>
