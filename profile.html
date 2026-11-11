@@ -209,7 +209,21 @@
     // --- DATE FORMAT HELPER ---
     function formatDate(dateStr) {
         if (!dateStr || dateStr === "Not Updated") return dateStr;
-        const d = new Date(dateStr);
+        
+        let d;
+        // DD/MM/YYYY வடிவத்தை கையாளும் பகுதி
+        if (typeof dateStr === 'string' && dateStr.includes('/')) {
+            const parts = dateStr.split('/');
+            if (parts.length === 3) {
+                // DD, MM, YYYY -> YYYY-MM-DD
+                d = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+            } else {
+                d = new Date(dateStr);
+            }
+        } else {
+            d = new Date(dateStr);
+        }
+
         if (isNaN(d.getTime())) return dateStr;
         const day = String(d.getDate()).padStart(2, '0');
         const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -283,11 +297,41 @@
                 document.getElementById("profilePhone").innerText = userData.phone || "Not Set";
                 document.getElementById("profileCity").innerText = userData.city || "Not Set";
                 document.getElementById("dispModel").innerText = userData.model || "Not Updated";
-                
-                // Installed Date-ஐ DD/MM/YYYY என மாற்றுதல்
-                document.getElementById("dispInstalled").innerText = formatDate(userData.installed || "Not Updated");
-                
-                document.getElementById("dispWarranty").innerText = userData.warranty || "Not Updated";
+
+                // Installed Date-ஐ காண்பித்தல்
+                const installedRaw = userData.installed || "Not Updated";
+                document.getElementById("dispInstalled").innerText = formatDate(installedRaw);
+
+                // --- AUTOMATIC WARRANTY STATUS LOGIC ---
+                const warrantyElem = document.getElementById("dispWarranty");
+                if (installedRaw && installedRaw !== "Not Updated") {
+                    let installDate;
+                    if (typeof installedRaw === 'string' && installedRaw.includes('/')) {
+                        const p = installedRaw.split('/');
+                        installDate = new Date(`${p[2]}-${p[1]}-${p[0]}`);
+                    } else {
+                        installDate = new Date(installedRaw);
+                    }
+
+                    if (!isNaN(installDate.getTime())) {
+                        const now = new Date();
+                        // நிறுவிய தேதியில் இருந்து 1 வருடம் (365 நாட்கள்) கணக்கீடு
+                        const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
+                        const isExpired = (now - installDate) > oneYearInMs;
+
+                        if (isExpired) {
+                            warrantyElem.innerText = "Expired";
+                            warrantyElem.style.color = "var(--danger)"; // சிவப்பு நிறம்
+                        } else {
+                            warrantyElem.innerText = "Active";
+                            warrantyElem.style.color = "var(--primary)"; // ப்ளூ / பச்சை நிறம்
+                        }
+                    } else {
+                        warrantyElem.innerText = userData.warranty || "Not Updated";
+                    }
+                } else {
+                    warrantyElem.innerText = userData.warranty || "Not Updated";
+                }
 
                 const historyContainer = document.getElementById("serviceHistoryList");
                 if (userData.history) {
@@ -331,4 +375,4 @@
 
 </script>
 </body>
-</html>```
+</html>
