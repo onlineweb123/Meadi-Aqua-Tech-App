@@ -3,7 +3,8 @@
     <meta charset="UTF-8">  
     <title>Meadi Aqua Tech | My Profile</title>  
     <meta name="viewport" content="width=device-width, initial-scale=1.0">  
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">  <script>  
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">  
+<script>  
     if (localStorage.getItem("isLoggedIn") !== "true") {  
         window.location.href = "login.html";  
     }  
@@ -177,7 +178,7 @@
 </div>  <script type="module">  
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";  
     import { getDatabase, ref, push, serverTimestamp, set, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";  
-  
+
     const firebaseConfig = {  
         apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",  
         authDomain: "meadi-aqua-tech.firebaseapp.com",  
@@ -187,26 +188,39 @@
         messagingSenderId: "531151217708",  
         appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89"  
     };  
-  
+
     const app = initializeApp(firebaseConfig);  
     const db = getDatabase(app);  
-  
-    // --- DATE FORMAT HELPER ---  
+
+    // --- DATE FORMAT HELPER (DD/MM/YYYY வடிவத்தை சரியாகக் கையாளும் மாற்றம்) ---  
     function formatDate(dateStr) {  
         if (!dateStr || dateStr === "Not Updated") return dateStr;  
-        const d = new Date(dateStr);  
+        
+        let d;
+        if (typeof dateStr === 'string' && dateStr.includes('/')) {
+            const parts = dateStr.split('/');
+            if (parts.length === 3) {
+                // DD/MM/YYYY என பிரிக்கப்பட்டு சரியாக DD/MM/YYYY ஆகக் காட்டப்படும்
+                const day = parts[0].padStart(2, '0');
+                const month = parts[1].padStart(2, '0');
+                const year = parts[2];
+                return `${day}/${month}/${year}`;
+            }
+        }
+        
+        d = new Date(dateStr);  
         if (isNaN(d.getTime())) return dateStr;  
         const day = String(d.getDate()).padStart(2, '0');  
         const month = String(d.getMonth() + 1).padStart(2, '0');  
         const year = d.getFullYear();  
         return `${day}/${month}/${year}`;  
     }  
-  
+
     // --- 1. MONITOR SECTION ---  
     const userLocal = localStorage.getItem("aquaUser") || "Guest";  
     const currentPage = window.location.pathname.split("/").pop() || "profile.html";  
     const startTime = Date.now();  
-  
+
     try {  
         const visitRef = ref(db, 'analytics/visits');  
         push(visitRef, {  
@@ -216,7 +230,7 @@
             device: navigator.userAgent  
         });  
     } catch(e) {}  
-  
+
     window.addEventListener("visibilitychange", () => {  
         if (document.visibilityState === 'hidden') {  
             const duration = (Date.now() - startTime) / 1000;  
@@ -229,60 +243,60 @@
             });  
         }  
     });  
-  
+
     // --- 2. SIDEBAR & UI SECTION ---  
     const menuBtn = document.getElementById("menuBtn");  
     const sidebar = document.getElementById("sidebar");  
     const overlay = document.getElementById("overlay");  
-  
+
     const toggleMenu = () => {  
         sidebar.classList.toggle("open");  
         overlay.classList.toggle("show");  
     };  
     menuBtn.onclick = toggleMenu;  
     overlay.onclick = toggleMenu;  
-  
+
     document.getElementById("logoutBtn").onclick = () => {  
         if(confirm("Are you sure you want to sign out?")) {  
             localStorage.clear();  
             window.location.href = "login.html";  
         }  
     };  
-  
+
     // --- 3. PROFILE DATA SECTION ---  
     async function loadProfile() {  
         if(userLocal === "Guest") {  
             window.location.href = "login.html";  
             return;  
         }  
-  
+
         try {  
             const snapshot = await get(child(ref(db), `users/${userLocal}`));  
-  
+
             if (snapshot.exists()) {  
                 const userData = snapshot.val();  
-  
+
                 document.getElementById("profileName").innerText = userData.name || "User";  
                 document.getElementById("profileID").innerText = "@" + userLocal;  
                 document.getElementById("avatarLetter").innerText = (userData.name || "U").charAt(0).toUpperCase();  
                 document.getElementById("profilePhone").innerText = userData.phone || "Not Set";  
                 document.getElementById("profileCity").innerText = userData.city || "Not Set";  
                 document.getElementById("dispModel").innerText = userData.model || "Not Updated";  
-  
+
                 // Installed Date-ஐ DD/MM/YYYY என மாற்றுதல்  
                 document.getElementById("dispInstalled").innerText = formatDate(userData.installed || "Not Updated");  
-  
+
                 document.getElementById("dispWarranty").innerText = userData.warranty || "Not Updated";  
-  
+
                 const historyContainer = document.getElementById("serviceHistoryList");  
                 if (userData.history) {  
                     historyContainer.innerHTML = "";  
                     let historyArray = Array.isArray(userData.history) ?   
                         [...userData.history] :   
                         Object.keys(userData.history).map(key => ({ id: key, ...userData.history[key] }));  
-  
+
                     historyArray.sort((a, b) => new Date(b.date) - new Date(a.date));  
-  
+
                     historyArray.slice(0, 5).forEach(item => {  
                         historyContainer.innerHTML += `  
                             <div class="history-item">  
@@ -302,17 +316,17 @@
             console.error("Error loading profile:", error);  
         }  
     }  
-  
+
     loadProfile();  
-  
+
     // Copy protection  
     document.addEventListener('copy', (e) => { e.preventDefault(); });  
     document.addEventListener('contextmenu', (e) => { e.preventDefault(); });  
     document.addEventListener('selectstart', (e) => { e.preventDefault(); });  
-  
+
     const styleBlock = document.createElement('style');  
     styleBlock.innerHTML = `* { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }`;  
     document.head.appendChild(styleBlock);  
-  
+
 </script>  </body>  
 </html>
