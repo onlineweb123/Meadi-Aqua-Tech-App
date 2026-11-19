@@ -306,7 +306,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, update, onValue, remove, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, update, onValue, remove, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
@@ -342,6 +342,28 @@
         fetchCart(); 
     });
 
+    // Firebase-ல் ஏற்கனவே சேமிக்கப்பட்ட கூப்பன் இருந்தால் தானாக லோட் செய்ய
+    if (currentUser !== "Guest") {
+        onValue(ref(db, 'applied_coupons/' + currentUser), (snapshot) => {
+            const msgEl = document.getElementById("couponMsg");
+            if (snapshot.exists()) {
+                const savedCoupon = snapshot.val();
+                appliedCouponData = savedCoupon;
+                document.getElementById("couponInput").value = savedCoupon.couponCode || "";
+                if (couponEligibleTotal > 0) {
+                    msgEl.innerText = `Coupon applied! Code by ${savedCoupon.influencerName} (${savedCoupon.discountPercentage}% OFF on Store products) 🎉`;
+                    msgEl.className = "coupon-msg success";
+                    msgEl.style.display = "block";
+                }
+            } else {
+                appliedCouponData = null;
+            }
+            if (baseTotal > 0) {
+                recalculateAndUpdateTotal();
+            }
+        });
+    }
+
     window.toggleMenu = () => {
         document.getElementById("sidebar").classList.toggle("open");
         document.getElementById("overlay").classList.toggle("show");
@@ -368,6 +390,24 @@
         new QRCode(qrcodeDiv, { text: upiData, width: 140, height: 140 });
     }
 
+    function saveAppliedCouponToFirebase(couponData, discountAmount, finalTotal) {
+        if (currentUser === "Guest") return;
+        set(ref(db, 'applied_coupons/' + currentUser), {
+            username: currentUser,
+            couponCode: couponData.couponCode || document.getElementById("couponInput").value.trim().toUpperCase(),
+            influencerName: couponData.influencerName || "",
+            discountPercentage: Number(couponData.discountPercentage) || 0,
+            discountAmount: discountAmount,
+            finalTotal: finalTotal,
+            appliedAt: Date.now()
+        });
+    }
+
+    function removeAppliedCouponFromFirebase() {
+        if (currentUser === "Guest") return;
+        remove(ref(db, 'applied_coupons/' + currentUser));
+    }
+
     function handleCouponApplication() {
         const inputCode = document.getElementById("couponInput").value.trim().toUpperCase();
         const msgEl = document.getElementById("couponMsg");
@@ -383,16 +423,17 @@
             msgEl.innerText = "Coupons are valid only for Aqua Store products (not applicable for spare parts).";
             msgEl.className = "coupon-msg error";
             msgEl.style.display = "block";
-            resetCouponState();
+            resetCouponState(true);
             return;
         }
 
         get(ref(db, 'coupons/' + inputCode)).then((snapshot) => {
             if (snapshot.exists()) {
                 const couponData = snapshot.val();
+                couponData.couponCode = couponData.couponCode || inputCode;
                 appliedCouponData = couponData;
 
-                recalculateAndUpdateTotal();
+                recalculateAndUpdateTotal(true);
 
                 msgEl.innerText = `Coupon applied! Code by ${couponData.influencerName} (${couponData.discountPercentage}% OFF on Store products) 🎉`;
                 msgEl.className = "coupon-msg success";
@@ -401,7 +442,7 @@
                 msgEl.innerText = "Invalid coupon code. Please try again!";
                 msgEl.className = "coupon-msg error";
                 msgEl.style.display = "block";
-                resetCouponState();
+                resetCouponState(true);
             }
         }).catch((err) => {
             msgEl.innerText = "Error verifying coupon.";
@@ -410,15 +451,18 @@
         });
     }
 
-    function resetCouponState() {
+    function resetCouponState(clearFirebase = false) {
         appliedCouponData = null;
+        if (clearFirebase) {
+            removeAppliedCouponFromFirebase();
+        }
         document.getElementById("discountRow").style.display = "none";
         totalPriceEl.innerText = "₹" + baseTotal;
         generateQR(baseTotal);
         attachPaymentActions(baseTotal);
     }
 
-    function recalculateAndUpdateTotal() {
+    function recalculateAndUpdateTotal(syncFirebase = false) {
         if (appliedCouponData && couponEligibleTotal > 0) {
             const percent = appliedCouponData.discountPercentage;
             const discountAmount = Math.round(couponEligibleTotal * (percent / 100));
@@ -430,8 +474,12 @@
             totalPriceEl.innerText = "₹" + finalTotal;
             generateQR(finalTotal);
             attachPaymentActions(finalTotal);
+
+            if (syncFirebase) {
+                saveAppliedCouponToFirebase(appliedCouponData, discountAmount, finalTotal);
+            }
         } else {
-            resetCouponState();
+            resetCouponState(syncFirebase);
         }
     }
 
@@ -502,7 +550,7 @@
                     </div>`;
             });
 
-            recalculateAndUpdateTotal();
+            recalculateAndUpdateTotal(Boolean(appliedCouponData));
         });
     }
 
