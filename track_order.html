@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tracking Order | Meadi Aqua Tech</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --primary: #0077b6;
+      --primary-dark: #025888;
+      --success: #16a34a;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 36px; }
+
+    header {
+      height: 62px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .header-title { font-size: 18px; font-weight: 800; color: var(--primary); }
+
+    .container { max-width: 520px; margin: 0 auto; padding: 16px; }
+
+    .hero {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 14px;
+    }
+    .order-id { font-size: 12px; opacity: 0.9; font-weight: 700; }
+    .status-title { font-size: 21px; font-weight: 800; margin-top: 4px; }
+    .eta { font-size: 13px; margin-top: 6px; opacity: 0.95; }
+    .now-badge {
+      display: inline-block;
+      margin-top: 12px;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .card-title { font-size: 14px; font-weight: 800; margin-bottom: 12px; color: var(--text); }
+
+    .route-list { display: flex; flex-direction: column; gap: 12px; }
+    .route-row { display: flex; gap: 10px; align-items: flex-start; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+    .dot-from { background: var(--primary); }
+    .dot-now { background: #f59e0b; }
+    .dot-next { background: var(--success); }
+    .r-lbl { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+    .r-val { font-size: 14px; font-weight: 700; color: var(--text); }
+
+    .item-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--border);
+    }
+    .item-row:last-child { border-bottom: none; }
+    .item-row img {
+      width: 58px;
+      height: 58px;
+      border-radius: 10px;
+      object-fit: cover;
+      background: #f1f5f9;
+      flex-shrink: 0;
+    }
+    .item-info { flex: 1; }
+    .item-name { font-size: 14px; font-weight: 700; }
+    .item-qty { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .item-price { font-size: 14px; font-weight: 800; color: var(--primary); }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .timeline { position: relative; padding-left: 24px; }
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 7px;
+      top: 5px;
+      bottom: 5px;
+      width: 2px;
+      background: var(--border);
+    }
+    .step { position: relative; margin-bottom: 16px; }
+    .step:last-child { margin-bottom: 0; }
+    .step-dot {
+      position: absolute;
+      left: -24px;
+      top: 2px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #cbd5e1;
+      border: 3px solid #fff;
+    }
+    .step.done .step-dot { background: var(--primary); }
+    .step.active .step-dot { background: var(--success); }
+    .step-title { font-size: 14px; font-weight: 700; color: var(--muted); }
+    .step.done .step-title, .step.active .step-title { color: var(--text); }
+    .step-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .center-msg { text-align: center; padding: 48px 16px; color: var(--muted); font-size: 14px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-title">Tracking Order</div>
+  </header>
+
+  <div class="container">
+    <div id="loadingBox" class="center-msg">Loading order tracking...</div>
+
+    <div id="orderView" style="display: none;">
+      <div class="hero">
+        <div class="order-id" id="orderIdText">Order ID: --</div>
+        <div class="status-title" id="statusTitle">Order Confirmed</div>
+        <div class="eta">Expected Delivery: <b id="etaText">--</b></div>
+        <div class="now-badge" id="nowBadge">📍 --</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🚚 Route Details</div>
+        <div class="route-list">
+          <div class="route-row">
+            <span class="dot dot-from"></span>
+            <div>
+              <div class="r-lbl">From</div>
+              <div class="r-val" id="fromText">--</div>
+            </div>
+          </div>
+          <div class="route-row">
+            <span class="dot dot-now"></span>
+            <div>
+              <div class="r-lbl">Current Location</div>
+              <div class="r-val" id="currentText">--</div>
+            </div>
+          </div>
+          <div class="route-row">
+            <span class="dot dot-next"></span>
+            <div>
+              <div class="r-lbl">Next / Delivery To</div>
+              <div class="r-val" id="nextText">--</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🛍️ Ordered Items</div>
+        <div id="itemsList"></div>
+        <div class="total-row">
+          <span>Total Amount</span>
+          <span id="totalText" style="color: var(--primary);">₹0</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📦 Delivery Status</div>
+        <div class="timeline">
+          <div class="step" id="st1">
+            <span class="step-dot"></span>
+            <div class="step-title">1. Order Confirmed</div>
+            <div class="step-desc">Order received & booked</div>
+          </div>
+          <div class="step" id="st2">
+            <span class="step-dot"></span>
+            <div class="step-title">2. Packed & Dispatched</div>
+            <div class="step-desc">Dispatched from store/hub</div>
+          </div>
+          <div class="step" id="st3">
+            <span class="step-dot"></span>
+            <div class="step-title">3. Out for Delivery</div>
+            <div class="step-desc">On the way to customer</div>
+          </div>
+          <div class="step" id="st4">
+            <span class="step-dot"></span>
+            <div class="step-title">4. Delivered & Installed</div>
+            <div class="step-desc">Delivered at customer location</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="emptyView" class="card center-msg" style="display: none;">
+      No active tracking order found.
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
+      authDomain: "meadi-aqua-tech.firebaseapp.com",
+      databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
+      projectId: "meadi-aqua-tech",
+      storageBucket: "meadi-aqua-tech.firebasestorage.app",
+      messagingSenderId: "531151217708",
+      appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const userKey = localStorage.getItem("aquaUser") || localStorage.getItem("loggedInUser") || "Mathavan";
+    const trackRef = ref(db, `tracking_order/${userKey}`);
+
+    const stepTitles = {
+      1: "Order Confirmed",
+      2: "Packed & Dispatched",
+      3: "Out for Delivery",
+      4: "Delivered & Installed"
+    };
+
+    onValue(trackRef, (snap) => {
+      document.getElementById("loadingBox").style.display = "none";
+
+      if (!snap.exists()) {
+        document.getElementById("orderView").style.display = "none";
+        document.getElementById("emptyView").style.display = "block";
+        return;
+      }
+
+      const d = snap.val();
+      document.getElementById("emptyView").style.display = "none";
+      document.getElementById("orderView").style.display = "block";
+
+      const step = Number(d.statusStep) || 1;
+      document.getElementById("orderIdText").textContent = `Order ID: ${d.orderId || "--"}`;
+      document.getElementById("statusTitle").textContent = stepTitles[step] || "Order Tracking";
+      document.getElementById("etaText").textContent = d.expectedDelivery || "Soon";
+      document.getElementById("nowBadge").textContent = `📍 ${d.currentLocation || "Processing"}`;
+
+      document.getElementById("fromText").textContent = d.fromLocation || "Meadi Aqua Tech, Cuddalore";
+      document.getElementById("currentText").textContent = d.currentLocation || "Processing";
+      document.getElementById("nextText").textContent = d.nextLocation || d.toLocation || "Customer Address";
+
+      const items = Array.isArray(d.items) ? d.items : [];
+      const listEl = document.getElementById("itemsList");
+      let computedTotal = 0;
+
+      if (!items.length) {
+        listEl.innerHTML = `<div style="font-size:13px; color:var(--muted);">No items in order snapshot.</div>`;
+      } else {
+        listEl.innerHTML = items.map((it) => {
+          const qty = Number(it.quantity) || 1;
+          const price = Number(it.price) || 0;
+          const lineTotal = qty * price;
+          computedTotal += lineTotal;
+          return `
+            <div class="item-row">
+              <img src="${it.image || 'https://via.placeholder.com/80'}" alt="${it.productName}" />
+              <div class="item-info">
+                <div class="item-name">${it.productName}</div>
+                <div class="item-qty">Qty: ${qty} × ₹${price}</div>
+              </div>
+              <div class="item-price">₹${lineTotal}</div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      const finalTotal = (d.totalAmount !== undefined && d.totalAmount !== null)
+        ? Number(d.totalAmount)
+        : computedTotal;
+      document.getElementById("totalText").textContent = `₹${finalTotal}`;
+
+      for (let i = 1; i <= 4; i++) {
+        const el = document.getElementById(`st${i}`);
+        el.classList.remove("done", "active");
+        if (i < step) el.classList.add("done");
+        else if (i === step) el.classList.add("active");
+      }
+    });
+  </script>
+</body>
+</html>
