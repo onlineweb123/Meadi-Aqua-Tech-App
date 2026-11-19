@@ -67,7 +67,6 @@
     .route-row { display: flex; gap: 10px; align-items: flex-start; }
     .dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
     .dot-from { background: var(--primary); }
-    .dot-now { background: #f59e0b; }
     .dot-next { background: var(--success); }
     .r-lbl { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
     .r-val { font-size: 14px; font-weight: 700; color: var(--text); }
@@ -92,6 +91,27 @@
     .item-name { font-size: 14px; font-weight: 700; }
     .item-qty { font-size: 12px; color: var(--muted); margin-top: 2px; }
     .item-price { font-size: 14px; font-weight: 800; color: var(--primary); }
+
+    .sub-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .discount-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #ea580c;
+    }
 
     .total-row {
       display: flex;
@@ -162,13 +182,6 @@
             </div>
           </div>
           <div class="route-row">
-            <span class="dot dot-now"></span>
-            <div>
-              <div class="r-lbl">Current Location</div>
-              <div class="r-val" id="currentText">--</div>
-            </div>
-          </div>
-          <div class="route-row">
             <span class="dot dot-next"></span>
             <div>
               <div class="r-lbl">Next / Delivery To</div>
@@ -181,6 +194,16 @@
       <div class="card">
         <div class="card-title">🛍️ Ordered Items</div>
         <div id="itemsList"></div>
+
+        <div class="sub-row" id="subRow" style="display: none;">
+          <span>Subtotal</span>
+          <span id="subText">₹0</span>
+        </div>
+        <div class="discount-row" id="discountRow" style="display: none;">
+          <span id="discountLabel">🏷️ Coupon Discount</span>
+          <span id="discountText">-₹0</span>
+        </div>
+
         <div class="total-row">
           <span>Total Amount</span>
           <span id="totalText" style="color: var(--primary);">₹0</span>
@@ -266,7 +289,6 @@
       document.getElementById("nowBadge").textContent = `📍 ${d.currentLocation || "Processing"}`;
 
       document.getElementById("fromText").textContent = d.fromLocation || "Meadi Aqua Tech, Cuddalore";
-      document.getElementById("currentText").textContent = d.currentLocation || "Processing";
       document.getElementById("nextText").textContent = d.nextLocation || d.toLocation || "Customer Address";
 
       const items = Array.isArray(d.items) ? d.items : [];
@@ -294,9 +316,30 @@
         }).join("");
       }
 
+      const discountAmt = Number(d.discountAmount) || 0;
+      const couponCode = d.couponCode || "";
+      const discountPct = Number(d.discountPercentage) || 0;
       const finalTotal = (d.totalAmount !== undefined && d.totalAmount !== null)
         ? Number(d.totalAmount)
         : computedTotal;
+      const baseAmt = Number(d.baseAmount) || (finalTotal + discountAmt);
+
+      const subRow = document.getElementById("subRow");
+      const discountRow = document.getElementById("discountRow");
+
+      if (couponCode && discountAmt > 0) {
+        subRow.style.display = "flex";
+        discountRow.style.display = "flex";
+        document.getElementById("subText").textContent = `₹${baseAmt}`;
+        document.getElementById("discountLabel").textContent = discountPct > 0
+          ? `🏷️ Coupon (${couponCode} • ${discountPct}% OFF)`
+          : `🏷️ Coupon (${couponCode})`;
+        document.getElementById("discountText").textContent = `-₹${discountAmt}`;
+      } else {
+        subRow.style.display = "none";
+        discountRow.style.display = "none";
+      }
+
       document.getElementById("totalText").textContent = `₹${finalTotal}`;
 
       for (let i = 1; i <= 4; i++) {
