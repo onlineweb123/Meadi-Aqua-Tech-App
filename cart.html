@@ -214,6 +214,27 @@
         .upi-btn { background: var(--primary); color: white; box-shadow: 0 8px 20px rgba(0, 119, 182, 0.25); }
         .wa-btn { background: #e8fbf0; color: #1eb853; }
 
+        /* --- Separate Track Order Section --- */
+        .track-section {
+            margin-top: 20px; background: white; border-radius: 24px; padding: 24px;
+            border: 1px solid var(--border); box-shadow: var(--shadow);
+            text-align: center;
+        }
+        .track-btn {
+            width: 100%; border: none; padding: 16px; border-radius: 16px;
+            font-size: 15px; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            background: var(--primary); color: white;
+            box-shadow: 0 8px 20px rgba(0, 119, 182, 0.2);
+            text-decoration: none;
+            transition: transform 0.2s;
+        }
+        .track-btn:active { transform: scale(0.98); }
+        .track-note {
+            font-size: 12px; color: var(--text-sub); font-weight: 500;
+            margin-top: 12px; line-height: 1.5;
+        }
+
         /* --- Bottom Nav --- */
         .bottom {
             height: 75px; position: fixed; bottom: 0; left: 0; right: 0; 
@@ -295,6 +316,11 @@
             <div class="btn-group">
                 <button class="checkout-btn wa-btn" id="whatsappBtn">WhatsApp Payment Proof ✅</button>
             </div>
+        </div>
+
+        <div class="track-section">
+            <a href="track_order.html" class="track-btn">🚚 Track My Order</a>
+            <div class="track-note">After payment, please wait 10 to 15 minutes for your order details to update.</div>
         </div>
     </div>
 </div>
