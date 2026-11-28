@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer Feedback | Meadi Aqua Tech</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0077b6">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f8fbff;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --primary: #0077b6;
+            --primary-dark: #023e8a;
+            --accent: #00b4d8;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --glass: rgba(255, 255, 255, 0.85);
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        header {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .menu-btn {
+            font-size: 24px;
+            background: #f1f5f9;
+            border: none;
+            color: var(--text-main);
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.3px;
+        }
+
+        .spacer {
+            width: 40px;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--card);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: -300px;
+            padding-top: 80px;
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 110;
+            box-shadow: 20px 0 50px rgba(0,0,0,0.05);
+        }
+        .sidebar.open { left: 0; }
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            padding: 16px 24px;
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 500;
+            font-size: 15px;
+            transition: 0.2s;
+        }
+        .sidebar a:hover { background: #f8fafc; color: var(--primary); padding-left: 30px; }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            display: none;
+            z-index: 105;
+            backdrop-filter: blur(4px);
+        }
+        .overlay.show { display: block; }
+
+        .main {
+            padding: 90px 20px 100px 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 24px 20px;
+            border-radius: 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 25px rgba(0, 119, 182, 0.18);
+        }
+        .hero h2 {
+            margin: 0;
+            font-size: 21px;
+            font-weight: 700;
+        }
+        .hero p {
+            margin: 6px 0 0;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 22px 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            margin-bottom: 20px;
+        }
+
+        .user-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #f0f9ff;
+            color: var(--primary);
+            border: 1px solid #bae6fd;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 18px;
+        }
+
+        .label {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+
+        .stars {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 22px;
+        }
+
+        .star-btn {
+            flex: 1;
+            height: 52px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: #f8fafc;
+            font-size: 24px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .star-btn.active {
+            background: #fef9c3;
+            border-color: #facc15;
+            transform: scale(1.04);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            padding: 14px;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--text-main);
+            background: #f8fafc;
+            resize: vertical;
+            outline: none;
+            user-select: text;
+            -webkit-user-select: text;
+        }
+
+        textarea:focus {
+            border-color: var(--primary);
+            background: #ffffff;
+        }
+
+        .msg {
+            margin-top: 14px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .msg.success {
+            display: block;
+            background: #dcfce7;
+            color: var(--success);
+        }
+
+        .msg.error {
+            display: block;
+            background: #fee2e2;
+            color: var(--danger);
+        }
+
+        .submit-btn {
+            width: 100%;
+            margin-top: 16px;
+            height: 50px;
+            border: none;
+            border-radius: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0, 119, 182, 0.22);
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.85;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        .submit-btn.loading .spinner {
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .bottom {
+            height: 75px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border);
+            z-index: 100;
+        }
+
+        .bottom button {
+            background: none;
+            border: none;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-sub);
+            cursor: pointer;
+        }
+
+        .bottom button.active { color: var(--primary); }
+        .bottom .icon { font-size: 22px; margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <button class="menu-btn" id="menuBtn">☰</button>
+    <div class="header-title">Customer Feedback</div>
+    <div class="spacer"></div>
+</header>
+
+<div id="sidebar" class="sidebar">
+  <a href="index.html">🏠 Dashboard</a>
+  <a href="service.html">🛠 Service</a>
+  <a href="store.html">🛒 Store </a>
+  <a href="profile.html">👤 Profile</a>
+  <a href="ro_specialist.html">👨‍🔧 RO Specialist</a>
+  <a href="spare_parts.html">🪛 Spare Parts</a>
+  <a href="cart.html">🛍️ My Cart</a>
+  <a href="track_order.html">🚚 Track My Order</a>
+</div>
+
+<div id="overlay" class="overlay"></div>
+
+<div class="main">
+    <div class="hero">
+        <h2>Your Feedback Matters!</h2>
+        <p>Share your experience with our services and water purifier quality.</p>
+    </div>
+
+    <div class="card">
+        <div class="user-pill">
+            <span>👤</span>
+            <span id="loggedUserLabel">Loading user...</span>
+        </div>
+
+        <label class="label">Rating</label>
+        <div class="stars" id="starGroup">
+            <button type="button" class="star-btn active" data-val="1">⭐</button>
+            <button type="button" class="star-btn active" data-val="2">⭐</button>
+            <button type="button" class="star-btn active" data-val="3">⭐</button>
+            <button type="button" class="star-btn active" data-val="4">⭐</button>
+            <button type="button" class="star-btn active" data-val="5">⭐</button>
+        </div>
+
+        <label class="label" for="feedbackComment">Your Comments</label>
+        <textarea id="feedbackComment" placeholder="Write your feedback here..."></textarea>
+
+        <!-- Warning / Success Message directly above Submit button -->
+        <div id="statusMsg" class="msg"></div>
+
+        <button type="button" id="submitFeedbackBtn" class="submit-btn">
+            <span class="spinner"></span>
+            <span class="btn-text">Submit Feedback</span>
+        </button>
+    </div>
+</div>
+
+<div class="bottom">
+    <button onclick="location.href='index.html'"><span class="icon">🏠</span>Home</button>
+    <button onclick="location.href='service.html'"><span class="icon">⚒️</span>Service</button>
+    <button onclick="location.href='store.html'"><span class="icon">🛒</span>Store</button>
+    <button onclick="location.href='profile.html'"><span class="icon">👤</span>Profile</button>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push, get, child, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    if (localStorage.getItem("isLoggedIn") !== "true") {
+        window.location.href = "login.html";
+    }
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAqyyGJt_t0ztknMudFVLmo6relkEa284g",
+        authDomain: "meadi-aqua-tech.firebaseapp.com",
+        databaseURL: "https://meadi-aqua-tech-default-rtdb.firebaseio.com",
+        projectId: "meadi-aqua-tech",
+        storageBucket: "meadi-aqua-tech.firebasestorage.app",
+        messagingSenderId: "531151217708",
+        appId: "1:531151217708:web:b30b6e1a0bf7fa60f29d89",
+        measurementId: "G-QW495L6JVE"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const username = (localStorage.getItem("aquaUser") || "").trim();
+    if (!username) {
+        window.location.href = "login.html";
+    }
+
+    let currentUserProfile = {
+        username: username,
+        name: username,
+        phone: "",
+        city: ""
+    };
+
+    async function loadLoggedUser() {
+        const label = document.getElementById("loggedUserLabel");
+        label.innerText = `@${username}`;
+        try {
+            const snap = await get(child(ref(db), `users/${username}`));
+            if (snap.exists()) {
+                const data = snap.val() || {};
+                currentUserProfile = {
+                    username: username,
+                    name: data.name || username,
+                    phone: data.phone || "",
+                    city: data.city || ""
+                };
+                label.innerText = `${currentUserProfile.name} (@${username})`;
+            }
+        } catch (err) {
+            console.error("User profile fetch error:", err);
+        }
+    }
+
+    loadLoggedUser();
+
+    // Sidebar Logic
+    window.toggleMenu = () => {
+        document.getElementById("sidebar").classList.toggle("open");
+        document.getElementById("overlay").classList.toggle("show");
+    };
+
+    document.getElementById("menuBtn").onclick = window.toggleMenu;
+    document.getElementById("overlay").onclick = window.toggleMenu;
+
+    // Default 5 Stars
+    let selectedRating = 5;
+    const starButtons = document.querySelectorAll(".star-btn");
+
+    function updateStars(val) {
+        selectedRating = val;
+        starButtons.forEach(btn => {
+            const btnVal = Number(btn.getAttribute("data-val"));
+            btn.classList.toggle("active", btnVal <= val);
+        });
+    }
+
+    starButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            updateStars(Number(btn.getAttribute("data-val")));
+        });
+    });
+
+    updateStars(5);
+
+    function showMessage(text, type) {
+        const box = document.getElementById("statusMsg");
+        box.className = `msg ${type}`;
+        box.innerText = text;
+    }
+
+    const submitBtn = document.getElementById("submitFeedbackBtn");
+    const commentInput = document.getElementById("feedbackComment");
+    const btnText = submitBtn.querySelector(".btn-text");
+
+    submitBtn.addEventListener("click", async () => {
+        const comment = commentInput.value.trim();
+        if (!comment) {
+            showMessage("Please enter your comments.", "error");
+            return;
+        }
+
+        // Hide previous message & start button spinner
+        document.getElementById("statusMsg").style.display = "none";
+        submitBtn.disabled = true;
+        submitBtn.classList.add("loading");
+        btnText.innerText = "Submitting...";
+
+        try {
+            await push(ref(db, "customer_feedback"), {
+                username: currentUserProfile.username,
+                name: currentUserProfile.name,
+                phone: currentUserProfile.phone,
+                city: currentUserProfile.city,
+                rating: selectedRating,
+                comment: comment,
+                status: "new",
+                createdAt: serverTimestamp()
+            });
+
+            commentInput.value = "";
+            updateStars(5);
+            document.getElementById("statusMsg").style.display = "";
+            showMessage("Thank you! Your feedback has been successfully submitted.", "success");
+        } catch (err) {
+            console.error("Feedback save error:", err);
+            document.getElementById("statusMsg").style.display = "";
+            showMessage("Error saving feedback. Please try again.", "error");
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove("loading");
+            btnText.innerText = "Submit Feedback";
+        }
+    });
+</script>
+</body>
+</html>
